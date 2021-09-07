@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Java类加载机制 | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="JVM的类加载器包括3种　　1）Bootstrap ClassLoader（引导类加载器）
+　　C/C++代码实现的加载器，用于加载指定的JDK的核心类库，比如java.lang.、java.uti.等这些系统类。Java虚拟机的启动就是通过Bootstrap ，该Classloader在java里">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Java类加载机制"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Java类加载机制</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="JVM的类加载器包括3种"><a href="#JVM的类加载器包括3种" class="headerlink" title="JVM的类加载器包括3种"></a>JVM的类加载器包括3种</h2><p>　　1）Bootstrap ClassLoader（引导类加载器）</p>
+<p>　　C/C++代码实现的加载器，用于加载指定的JDK的核心类库，比如java.lang.、java.uti.等这些系统类。Java虚拟机的启动就是通过Bootstrap ，该Classloader在java里无法获取，负责加载/lib下的类。<br>　　2）Extensions ClassLoader（拓展类加载器）</p>
+<p>　　Java中的实现类为ExtClassLoader，提供了除了系统类之外的额外功能，可以在java里获取，负责加载/lib/ext下的类。<br>　　3）Application ClassLoader（应用程序类加载器）</p>
+<p>　　Java中的实现类为AppClassLoader，是与我们接触对多的类加载器，开发人员写的代码默认就是由它来加载，ClassLoader.getSystemClassLoader返回的就是它。</p>
+<p>也可以自定义类加载器，只需要通过继承java.lang.ClassLoader类的方式来实现自己的类加载器即可。</p>
+<p>加载顺序：</p>
+<ol>
+<li>Bootstrap CLassloder</li>
+<li>Extention ClassLoader</li>
+<li>AppClassLoader</li>
+</ol>
+<p>双亲委派机制：</p>
+<p>双亲委派模式的工作原理的是;如果一个类加载器收到了类加载请求，它并不会自己先去加载，而是把这个请求委托给父类的加载器去执行，如果父类加载器还存在其父类加载器，则进一步向上委托，依次递归，请求最终将到达顶层的启动类加载器，如果父类加载器可以完成类加载任务，就成功返回，倘若父类加载器无法完成此加载任务，子加载器才会尝试自己去加载，这就是双亲委派模式，即每个儿子都不愿意干活，每次有活就丢给父亲去干，直到父亲说这件事我也干不了时，儿子自己想办法去完成，这个就是双亲委派。</p>
+<p>1）避免重复加载，如果已经加载过一次Class，可以直接读取已经加载的Class<br>2）更加安全，无法自定义类来替代系统的类，可以防止核心API库被随意篡改</p>
+<p>类加载：</p>
+<p>类加载的时机：<br>1、隐式加载：<br>创建类的实例<br>访问类的静态变量，或者为静态变量赋值<br>调用类的静态方法<br>使用反射方式来强制创建某个类或接口对应的java.lang.Class对象<br>初始化某个类的子类<br>2、显示加载：两者又有所区别<br>使用LoadClass（）加载<br>使用forName（）加载<br>通过源码分析Android下类加载的流程</p>
+<p>1、装载：查找和导入Class文件<br>2、链接：其中解析步骤是可以选择的<br>（a）检查：检查载入的class文件数据的正确性<br>（b）准备：给类的静态变量分配存储空间<br>（c）解析：将符号引用转成直接引用<br>3、初始化：即调用&lt;clinit&gt;函数，对静态变量，静态代码块执行初始化工作</p>
+<h2 id="Android的类加载器"><a href="#Android的类加载器" class="headerlink" title="Android的类加载器"></a>Android的类加载器</h2><p>Android系统中与ClassLoader相关的一共有8个：</p>
+<p>ClassLoader为抽象类；</p>
+<p>BootClassLoader预加载常用类，单例模式。与Java中的BootClassLoader不同，它并不是由C/C++代码实现，而是由Java实现的；</p>
+<p>BaseDexClassLoader是PathClassLoader、DexClassLoader、InMemoryDexClassLoader的父类，类加载的主要逻辑都是在BaseDexClassLoader完成的。</p>
+<p>SecureClassLoader继承了抽象类ClassLoader，拓展了ClassLoader类加入了权限方面的功能，加强了安全性，其子类URLClassLoader是用URL路径从jar文件中加载类和资源。</p>
+<p>其中重点关注的是PathClassLoader和DexClassLoader。</p>
+<p>PathClassLoader是Android默认使用的类加载器，一个apk中的Activity等类便是在其中加载。</p>
+<p>DexClassLoader可以加载任意目录下的dex/jar/apk/zip文件，比PathClassLoader更灵活，是实现插件化、热修复以及dex加壳的重点。</p>
+<p>Android8.0新引入InMemoryDexClassLoader，从名字便可看出是用于直接从内存中加载dex。</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2021/08/20/Android-Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" class="leancloud-visitors view" data-flag-title="Java类加载机制">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2021/08/30/守护进程/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2021/08/17/CVE-2019-6250/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-08-20 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/Android/">Android<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

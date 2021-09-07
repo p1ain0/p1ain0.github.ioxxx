@@ -1,0 +1,457 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Windows内核对象 | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="Windows内核对象管理Windows对象管理器的基本设计意图是：
+-​ 为执行体的数据结构提供一种统一而又可扩展的定义和控制机制。
+​- 提供统一的安全访问机制。
+​- 在无须修改已有系统代码的情况下，加入新的对象类型。
+​- 提供一组标准的API来对对象执行各种操作。
+​- 提供一种命名机制，">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Windows内核对象"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Windows内核对象</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="Windows内核对象管理"><a href="#Windows内核对象管理" class="headerlink" title="Windows内核对象管理"></a>Windows内核对象管理</h2><p><strong>Windows对象管理器的基本设计意图是：</strong></p>
+<p>-​ 为执行体的数据结构提供一种统一而又可扩展的定义和控制机制。</p>
+<p>​- 提供统一的安全访问机制。</p>
+<p>​- 在无须修改已有系统代码的情况下，加入新的对象类型。</p>
+<p>​- 提供一组标准的API来对对象执行各种操作。</p>
+<p>​- 提供一种命名机制，与文件系统的命名机制集成在一起。</p>
+<p>每一个对象由两部分构成：对象头和对象体。所有对象的对象头都具有统一的格式，其定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_CREATE_INFORMATION</span> *<span class="title">POBJECT_CREATE_INFORMATION</span>;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_HEADER</span> &#123;</span></span><br><span class="line">    LONG_PTR PointerCount;                        <span class="comment">//引用计数</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        LONG_PTR HandleCount;                    <span class="comment">//指向该对象的句柄数</span></span><br><span class="line">        PVOID NextToFree;                        <span class="comment">//对象被延迟删除时加入到一条链中</span></span><br><span class="line">    &#125;;</span><br><span class="line">    POBJECT_TYPE Type;                            <span class="comment">//指向对象的类型对象</span></span><br><span class="line">    UCHAR NameInfoOffset;                        <span class="comment">//名称信息的内存偏移</span></span><br><span class="line">    UCHAR HandleInfoOffset;                        <span class="comment">//句柄信息的内存偏移</span></span><br><span class="line">    UCHAR QuotaInfoOffset;                        <span class="comment">//配额信息的内存偏移</span></span><br><span class="line">    UCHAR Flags;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        POBJECT_CREATE_INFORMATION ObjectCreateInfo;</span><br><span class="line">        PVOID QuotaBlockCharged;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    PSECURITY_DESCRIPTOR SecurityDescriptor;    <span class="comment">//安全描述符</span></span><br><span class="line">    QUAD Body;                                    <span class="comment">//对象体开始</span></span><br><span class="line">&#125; OBJECT_HEADER, *POBJECT_HEADER;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dt _OBJECT_HEADER</span><br><span class="line">nt!_OBJECT_HEADER</span><br><span class="line">   +<span class="number">0x000</span> PointerCount     : Int4B</span><br><span class="line">   +<span class="number">0x004</span> HandleCount      : Int4B</span><br><span class="line">   +<span class="number">0x004</span> NextToFree       : Ptr32 Void</span><br><span class="line">   +<span class="number">0x008</span> Type             : Ptr32 _OBJECT_TYPE</span><br><span class="line">   +<span class="number">0x00c</span> NameInfoOffset   : UChar</span><br><span class="line">   +<span class="number">0x00d</span> HandleInfoOffset : UChar</span><br><span class="line">   +<span class="number">0x00e</span> QuotaInfoOffset  : UChar</span><br><span class="line">   +<span class="number">0x00f</span> Flags            : UChar</span><br><span class="line">   +<span class="number">0x010</span> ObjectCreateInfo : Ptr32 _OBJECT_CREATE_INFORMATION</span><br><span class="line">   +<span class="number">0x010</span> QuotaBlockCharged : Ptr32 Void</span><br><span class="line">   +<span class="number">0x014</span> SecurityDescriptor : Ptr32 Void</span><br><span class="line">   +<span class="number">0x018</span> Body             : _QUAD</span><br></pre></td></tr></table></figure>
+
+<p><strong>对象头包含了对象管理所需的基本信息，在Windows中，每一种对象都需要有一个对应的类型对象（OBJECT_TYPE对象），其定义为：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJECT_LOCK_COUNT 4</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_TYPE</span> &#123;</span></span><br><span class="line">    ERESOURCE Mutex;</span><br><span class="line">    LIST_ENTRY TypeList;</span><br><span class="line">    UNICODE_STRING Name;            <span class="comment">// Copy from object header for convenience</span></span><br><span class="line">    PVOID DefaultObject;</span><br><span class="line">    ULONG Index;                    <span class="comment">// 此类型对象在全局数组中的索引</span></span><br><span class="line">    ULONG TotalNumberOfObjects;</span><br><span class="line">    ULONG TotalNumberOfHandles;</span><br><span class="line">    ULONG HighWaterNumberOfObjects;</span><br><span class="line">    ULONG HighWaterNumberOfHandles;</span><br><span class="line">    OBJECT_TYPE_INITIALIZER TypeInfo;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> POOL_TAGGING</span></span><br><span class="line">    ULONG Key;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span>                                 <span class="comment">//POOL_TAGGING</span></span></span><br><span class="line">    ERESOURCE ObjectLocks[ OBJECT_LOCK_COUNT ];</span><br><span class="line">&#125; OBJECT_TYPE, *POBJECT_TYPE;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dt _OBJECT_TYPE</span><br><span class="line">ntdll!_OBJECT_TYPE</span><br><span class="line">   +<span class="number">0x000</span> Mutex            : _ERESOURCE</span><br><span class="line">   +<span class="number">0x038</span> TypeList         : _LIST_ENTRY</span><br><span class="line">   +<span class="number">0x040</span> Name             : _UNICODE_STRING</span><br><span class="line">   +<span class="number">0x048</span> DefaultObject    : Ptr32 Void</span><br><span class="line">   +<span class="number">0x04c</span> Index            : Uint4B</span><br><span class="line">   +<span class="number">0x050</span> TotalNumberOfObjects : Uint4B</span><br><span class="line">   +<span class="number">0x054</span> TotalNumberOfHandles : Uint4B</span><br><span class="line">   +<span class="number">0x058</span> HighWaterNumberOfObjects : Uint4B</span><br><span class="line">   +<span class="number">0x05c</span> HighWaterNumberOfHandles : Uint4B</span><br><span class="line">   +<span class="number">0x060</span> TypeInfo         : _OBJECT_TYPE_INITIALIZER</span><br><span class="line">   +<span class="number">0x0ac</span> Key              : Uint4B</span><br><span class="line">   +<span class="number">0x0b0</span> ObjectLocks      : [<span class="number">4</span>] _ERESOURCE</span><br></pre></td></tr></table></figure>
+
+<p><strong>系统定义的对象种类有限，WRK支持的31种对象，各有哟个全局的POBJECT_TYPE变量指向其类型对象：</strong></p>
+<table>
+<thead>
+<tr>
+<th>ObjectType:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CmpKeyObjectType</td>
+</tr>
+<tr>
+<td>DbgkDebugObjectType</td>
+</tr>
+<tr>
+<td>ExCallbackobjectType</td>
+</tr>
+<tr>
+<td>ExDesktopObjectType</td>
+</tr>
+<tr>
+<td>ExEventobjectType</td>
+</tr>
+<tr>
+<td>ExEventPairObjectType</td>
+</tr>
+<tr>
+<td>ExMutantObjectType</td>
+</tr>
+<tr>
+<td>ExpKeyedEventObjectType</td>
+</tr>
+<tr>
+<td>ExProfileObjectType</td>
+</tr>
+<tr>
+<td>ExSemaphoreObjectType</td>
+</tr>
+<tr>
+<td>ExTimerObjectType</td>
+</tr>
+<tr>
+<td>ExWindowStationObjecType</td>
+</tr>
+<tr>
+<td>IoAdapterObjectType</td>
+</tr>
+<tr>
+<td>IoCompletionObjectType</td>
+</tr>
+<tr>
+<td>IoControllerObjectType</td>
+</tr>
+<tr>
+<td>IoDeviceHandlerObjectType</td>
+</tr>
+<tr>
+<td>IoDeviveObjectType</td>
+</tr>
+<tr>
+<td>IoDriverObjectType</td>
+</tr>
+<tr>
+<td>LpcPortObjectType</td>
+</tr>
+<tr>
+<td>LpcWaitablePortObjectType</td>
+</tr>
+<tr>
+<td>MmSectionObjectType</td>
+</tr>
+<tr>
+<td>ObpDeviceMapObjectType</td>
+</tr>
+<tr>
+<td>ObpDirectoryObjectType</td>
+</tr>
+<tr>
+<td>ObpSymbolicLinkObjectType</td>
+</tr>
+<tr>
+<td>ObpTypeobjectType</td>
+</tr>
+<tr>
+<td>PsJobType</td>
+</tr>
+<tr>
+<td>PsProcessType</td>
+</tr>
+<tr>
+<td>PsThreadType</td>
+</tr>
+<tr>
+<td>SeTokenObjectType</td>
+</tr>
+<tr>
+<td>WmipGuidObjectType</td>
+</tr>
+</tbody></table>
+<p><strong>系统在初始化过程中会调用ObCreateObjectType()函数构建起这种对象类型，以完成相应全局变量的初始化。</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NTSTATS</span></span><br><span class="line"><span class="function"><span class="title">ObCreateObjectType</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    __in PUNICODE_STRING Typename,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in POBJECT_TYPE_INITIALIZER ObjectTypeInitializer,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt PSECURITY_DESRIPTOR SecurityDescriptor,</span></span></span><br><span class="line"><span class="params"><span class="function">    __out POBJECT_TYPE *ObjectType</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_TYPE_INITIALIZER</span> &#123;</span></span><br><span class="line">    USHORT Length;</span><br><span class="line">    BOOLEAN UseDefaultObject;</span><br><span class="line">    BOOLEAN CaseInsensitive;</span><br><span class="line">    ULONG InvalidAttributes;</span><br><span class="line">    GENERIC_MAPPING GenericMapping;</span><br><span class="line">    ULONG ValidAccessMask;</span><br><span class="line">    BOOLEAN SecurityRequired;</span><br><span class="line">    BOOLEAN MaintainHandleCount;</span><br><span class="line">    BOOLEAN MaintainTypeList;</span><br><span class="line">    POOL_TYPE PoolType;</span><br><span class="line">    ULONG DefaultPagedPoolCharge;</span><br><span class="line">    ULONG DefaultNonPagedPoolCharge;</span><br><span class="line">    OB_DUMP_METHOD DumpProcedure;</span><br><span class="line">    OB_OPEN_METHOD OpenProcedure;</span><br><span class="line">    OB_CLOSE_METHOD CloseProcedure;</span><br><span class="line">    OB_DELETE_METHOD DeleteProcedure;</span><br><span class="line">    OB_PARSE_METHOD ParseProcedure;</span><br><span class="line">    OB_SECURITY_METHOD SecurityProcedure;</span><br><span class="line">    OB_QUERYNAME_METHOD QueryNameProcedure;</span><br><span class="line">    OB_OKAYTOCLOSE_METHOD OkayToCloseProcedure;</span><br><span class="line">&#125; OBJECT_TYPE_INITIALIZER, *POBJECT_TYPE_INITIALIZER;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dt _OBJECT_TYPE_INITIALIZER</span><br><span class="line">ntdll!_OBJECT_TYPE_INITIALIZER</span><br><span class="line">   +<span class="number">0x000</span> Length           : Uint2B</span><br><span class="line">   +<span class="number">0x002</span> UseDefaultObject : UChar</span><br><span class="line">   +<span class="number">0x003</span> CaseInsensitive  : UChar</span><br><span class="line">   +<span class="number">0x004</span> InvalidAttributes : Uint4B</span><br><span class="line">   +<span class="number">0x008</span> GenericMapping   : _GENERIC_MAPPING</span><br><span class="line">   +<span class="number">0x018</span> ValidAccessMask  : Uint4B</span><br><span class="line">   +<span class="number">0x01c</span> SecurityRequired : UChar</span><br><span class="line">   +<span class="number">0x01d</span> MaintainHandleCount : UChar</span><br><span class="line">   +<span class="number">0x01e</span> MaintainTypeList : UChar</span><br><span class="line">   +<span class="number">0x020</span> PoolType         : _POOL_TYPE</span><br><span class="line">   +<span class="number">0x024</span> DefaultPagedPoolCharge : Uint4B</span><br><span class="line">   +<span class="number">0x028</span> DefaultNonPagedPoolCharge : Uint4B</span><br><span class="line">   +<span class="number">0x02c</span> DumpProcedure    : Ptr32     <span class="keyword">void</span> </span><br><span class="line">   +<span class="number">0x030</span> OpenProcedure    : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x034</span> CloseProcedure   : Ptr32     <span class="keyword">void</span> </span><br><span class="line">   +<span class="number">0x038</span> DeleteProcedure  : Ptr32     <span class="keyword">void</span> </span><br><span class="line">   +<span class="number">0x03c</span> ParseProcedure   : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x040</span> SecurityProcedure : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x044</span> QueryNameProcedure : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x048</span> OkayToCloseProcedure : Ptr32     <span class="keyword">unsigned</span> <span class="keyword">char</span> </span><br></pre></td></tr></table></figure>
+
+<p>调用ObCreateObjectType函数来构建一种新的对象类型时，调用者除了可以指定此种类型对象的一些数据特性外，还可以指定该类型对象的一些基本操作方法。</p>
+<p>​系统有一个全局变量ObpObjectTypes数组记录所有已创建的类型，这是个静态数组。一旦对象类型被创建，以后内核代码就可以调用ObCreateObject来创建此种类型的对象了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NTSTATUS</span></span><br><span class="line"><span class="function"><span class="title">ObCreateObject</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    __in KPROCESSOR_MODE ProbeMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in POBJECT_TYPE ObjectType,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in KPROCESSOR_MODE OwnershipMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    __inout_opt PVOID ParseContext,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG ObjectBodySize,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG PagedPoolCharge,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG NonPagedPoolCharge,</span></span></span><br><span class="line"><span class="params"><span class="function">    __out PVOID *Object</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>该函数返回时，Object输出参数指向对象体起始位置。对象体的格式是特定于某种对象类型的，由相应类型对象的诸多过程来维护。</p>
+<p>​对象管理器使用对象头中包含的信息来管理这些对象，在对象头中，除了对象名称和对象类型，另有两个重要的信息：指针计数，它记录了内核引用该对象的次数；句柄计数，它记录了有多少个句柄引用此对象，这些句柄可能出现在不同进程中。</p>
+<p>​类型对象并不需要为此种的对象提供所有在OBJECT_TYPE_INITIALIZER定义中出现的方法。对象管理器提供了一些通用的服务，这些通用服务可以应用在任何类型的对象上。</p>
+<p>​对象的构造是由两部分来完成的：1.调用ObCreateObject，根据指定的类型对象来完成对象头的初始化，并且按照指定的大小分配对象体的内存；2.完成对象体的初始化。前者可以统一完成，后者不可以，因为各种类型的对象体有自己不同的初始化逻辑。</p>
+<p>​    Windows也允许使用名称的方式来管理对象。为了做到这一点，Windows必须维护一套全局的名称查询机制。ObpDirectoryObjectType  类型对像是实现这一机制的关键。</p>
+<p>​    Windwos内部维护了一个对象层级目录（即系统全局名字空间），其根目录对象是由全局变量ObpRootDirectoryObject来定义的。在根目录之下，系统内置了一些子目录。在WRK中，通过查询NtCreateDirectoryObject函数被调用的情况，可以看到Callback、ArcName、Device、Driver、FileSystem、KernelObjects、ObjectTypes、GLOBAL??和Security子目录的创建过程。</p>
+<p>​    对象管理器提供了一些基本的操作用于在名字空间中插入、查询和删除目录或目录项。例如，</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>操作（以下三个函数都直接在一个子目录中进行操作）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ObpLookupDirectoryEntry</td>
+<td>在一个指定的目录中查找一个名称</td>
+</tr>
+<tr>
+<td>ObpInsertDirectoryEntry</td>
+<td>把一个对象插入到一个目录中</td>
+</tr>
+<tr>
+<td>ObpDeleteDirectoryEntry</td>
+<td>删除刚刚找到的那一项</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ObpLookupObjectName</td>
+<td>可以从指定的目录或根目录，递归地根据名称来找到一个对象。</td>
+</tr>
+</tbody></table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NTSTATUS</span></span><br><span class="line"><span class="function"><span class="title">ObpLookupObjectName</span> <span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    IN HANDLE RootDirectoryHandle,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PUNICODE_STRING ObjectName,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN ULONG Attributes,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN POBJECT_TYPE ObjectType,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN KPROCESSOR_MODE AccessMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PVOID ParseContext OPTIONAL,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PSECURITY_QUALITY_OF_SERVICE SecurityQos OPTIONAL,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PVOID InsertObject OPTIONAL,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN OUT PACCESS_STATE AccessState,</span></span></span><br><span class="line"><span class="params"><span class="function">    OUT POBP_LOOKUP_CONTEXT LookupContext,</span></span></span><br><span class="line"><span class="params"><span class="function">    OUT PVOID *FoundObject</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>其基本的执行逻辑：</strong></p>
+<p>​    参数检查。</p>
+<p>​    如果调用者指定了RootDirectoryHandle参数，则利用此RootDirectory的Parse方法来解析对象名称，直到解析成功或者不成功，或者指示从头解析</p>
+<p>​    如果调用者没有指定RootDirectoryHandle参数，则系统从全局的根目录ObpRootDirectoryObject开始解析。在这种情况下，传递进来的对象名称必须以“\”开始。如果待查找的名称仅仅是“\”，则执行特殊处理。否则，执行：    </p>
+<p>​        1.首先判断名称是否以“??\”打头，如果是的话，就需要拿到当前进程的DeviceMap（设备表），以进一步查询。</p>
+<p>​        2.如果名称正好是”??”，则直接返回当前进程的DeviceMap作为结果。（DeviceMap定义了一个DOS设备的名字空间，比如驱动器字母C: D:）和一些外设（如COM1）。当对象管理器看到一个以“??\”打头的名称或者像“??”这样的名称，它会利用进程的DeviceMap来获得相应的对象目录，然后进一步解析剩余的名称字符串。）</p>
+<p>​        3.调用ObpLookupDirectoryEntry函数，层层递进，或者碰到具有Parse方法的对象，由它来解析余下的名称字符串，或者碰到子目录对象，从而可以在子目录对象中进一步查询下一级名称。</p>
+<p>​    对象管理器的两个接口函数：ObOpenObjectByName和ObReferenceObjectByName，正是通过ObpLookupObjectName来完成其打开对象或引用对象的功能的。ObInsertObject，它的作用是把一个对象插入到一个进程的句柄表中，也通过ObpLookupObjectName函数来验证待插入的对象是否在全局名字空间中</p>
+<p>​    对象管理器中的对象是执行体对象，他们位于系统地址空间中，因而所有的进程都可以访问这些对象。但是用户模式的代码只能通过系统调用和句柄表来引用执行体对象。内核中将一个句柄转化为相应的对象，可以通过ObReferenceObjectByHandle函数来完成。该函数负责从当前进程环境或内核环境的句柄表中获得指定的对象引用。</p>
+<p>​    对象是通过引用计数来管理其生命周期的，一旦引用计数为0，则对象生命周期结束，它所占用的内存也可以被回收。</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2020/03/30/Windows%E5%86%85%E6%A0%B8%E5%AF%B9%E8%B1%A1/" class="leancloud-visitors view" data-flag-title="Windows内核对象">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2020/04/06/Python核心技术（二）/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2020/03/21/Writeup-of-pwnable-tw之orw/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2020-03-30 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/windows内核/">windows内核<span>4</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

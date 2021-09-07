@@ -1,0 +1,376 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>CPU实模式和保护模式 | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="实模式实模式又称实地址模式，对内存不加以任何的限制。
+实模式的寄存器x86CPU在实模式下的寄存器都是16位的。
+
+
+
+寄存器
+描述
+
+
+
+AX、BX、CX、DX、DI、SI、BP
+通用寄存器，里面可以存放数据、地址、参与运算
+
+
+IP
+程序指针寄存器，始终指向下一条指令的地址
+
+
+SP
+栈指针寄存">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="CPU实模式和保护模式"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> CPU实模式和保护模式</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="实模式"><a href="#实模式" class="headerlink" title="实模式"></a>实模式</h2><p>实模式又称实地址模式，对内存不加以任何的限制。</p>
+<h3 id="实模式的寄存器"><a href="#实模式的寄存器" class="headerlink" title="实模式的寄存器"></a>实模式的寄存器</h3><p>x86CPU在实模式下的寄存器都是16位的。</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AX、BX、CX、DX、DI、SI、BP</td>
+<td>通用寄存器，里面可以存放数据、地址、参与运算</td>
+</tr>
+<tr>
+<td>IP</td>
+<td>程序指针寄存器，始终指向下一条指令的地址</td>
+</tr>
+<tr>
+<td>SP</td>
+<td>栈指针寄存器，始终指向当前栈顶</td>
+</tr>
+<tr>
+<td>CS、DS、ES、SS</td>
+<td>段寄存器，里面存放一个内存段的基地址</td>
+</tr>
+<tr>
+<td>FLAGS</td>
+<td>标志寄存器</td>
+</tr>
+</tbody></table>
+<h3 id="实模式下访问内存"><a href="#实模式下访问内存" class="headerlink" title="实模式下访问内存"></a>实模式下访问内存</h3><p>实模式下所有的内存地址都是由段寄存器左移 4 位，再加上一个通用寄存器中的值或者常数形成地址，然后由这个地址去访问内存。</p>
+<h3 id="实模式中断"><a href="#实模式中断" class="headerlink" title="实模式中断"></a>实模式中断</h3><p>中断即中止执行当前程序，转而跳转到另一个特定的地址上，去运行特定的代码。在实模式下它的实现过程是先保存 CS 和 IP 寄存器，然后装载新的 CS 和 IP 寄存器。</p>
+<p>通过IDTR查找中断向量表，根据中断号索引中断处理的地址。</p>
+<h2 id="保护模式"><a href="#保护模式" class="headerlink" title="保护模式"></a>保护模式</h2><h3 id="保护模式寄存器"><a href="#保护模式寄存器" class="headerlink" title="保护模式寄存器"></a>保护模式寄存器</h3><p>保护模式相比于实模式，增加了一些控制寄存器和段寄存器，扩展通用寄存器的位宽，所有的通用寄存器都是 32 位的，还可以单独使用低 16 位，这个低 16 位又可以拆分成两个 8 位寄存器，</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EAX、EBX、ECX、EDX、EDI、ESI、EBP</td>
+<td>通用寄存器，里面可以存放数据、地址、参与运算</td>
+</tr>
+<tr>
+<td>EIP</td>
+<td>程序指针寄存器，始终指向下一条指令的地址</td>
+</tr>
+<tr>
+<td>ESP</td>
+<td>栈指针寄存器，始终指向当前栈顶</td>
+</tr>
+<tr>
+<td>CS、DS、ES、SS、FS、GS</td>
+<td>段寄存器，里面存放一个内存段的基地址</td>
+</tr>
+<tr>
+<td>EFLAGS</td>
+<td>标志寄存器</td>
+</tr>
+<tr>
+<td>CRO、CR1、CR2、CR3</td>
+<td>CPU控制寄存器，控制CPU的功能特性</td>
+</tr>
+</tbody></table>
+<h3 id="保护模式特权级"><a href="#保护模式特权级" class="headerlink" title="保护模式特权级"></a>保护模式特权级</h3><p>特权级分为4级R0～R3</p>
+<h3 id="切换到保护模式"><a href="#切换到保护模式" class="headerlink" title="切换到保护模式"></a>切换到保护模式</h3><p>段描述符：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">GDT_START:</span><br><span class="line">knull_dsc: dq 0</span><br><span class="line">;第一个段描述符CPU硬件规定必须为0</span><br><span class="line">kcode_dsc: dq 0x00cf9e000000ffff</span><br><span class="line">;段基地址=0，段长度=0xfffff</span><br><span class="line">;G=1,D/B=1,L=0,AVL=0 </span><br><span class="line">;P=1,DPL=0,S=1</span><br><span class="line">;T=1,C=1,R=1,A=0</span><br><span class="line">kdata_dsc: dq 0x00cf92000000ffff</span><br><span class="line">;段基地址=0，段长度=0xfffff</span><br><span class="line">;G=1,D/B=1,L=0,AVL=0 </span><br><span class="line">;P=1,DPL=0,S=1</span><br><span class="line">;T=0,C=0,R=1,A=0</span><br><span class="line">GDT_END:</span><br><span class="line"></span><br><span class="line">GDT_PTR:</span><br><span class="line">GDTLEN  dw GDT_END-GDT_START-1</span><br><span class="line">GDTBASE  dd GDT_START</span><br></pre></td></tr></table></figure>
+
+<p>1、准备全局段描述符</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GDT_START:knull_dsc: dq 0kcode_dsc: dq 0x00cf9e000000ffffkdata_dsc: dq 0x00cf92000000ffffGDT_END:GDT_PTR:GDTLEN  dw GDT_END-GDT_START-1GDTBASE  dd GDT_START</span><br></pre></td></tr></table></figure>
+
+<p>2、加载gdtr寄存器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lgdt [GDT_PTR]</span><br></pre></td></tr></table></figure>
+
+<p>3、设置 CR0 寄存器，开启保护模式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">;开启 PE</span><br><span class="line">mov eax, cr0</span><br><span class="line">bts eax, 0                      ; CR0.PE =1</span><br><span class="line">mov cr0, eax         </span><br></pre></td></tr></table></figure>
+
+<p>4、进行长跳转，加载 CS 段寄存器，即段选择子。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmp dword 0x8 :_32bits_mode ;_32bits_mode为32位代码标号即段偏移</span><br></pre></td></tr></table></figure>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2021/07/04/CPU%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" class="leancloud-visitors view" data-flag-title="CPU实模式和保护模式">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2021/07/05/CPU缓存/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2021/07/03/Firefox漏洞研究/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-07-04 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/CPU/">CPU<span>3</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

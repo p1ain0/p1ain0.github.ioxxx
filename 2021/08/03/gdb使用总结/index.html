@@ -1,0 +1,377 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>gdb使用总结 | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="gdb使用总结一、编译测试程序1gcc test.c -o test
+
+二、从磁盘中加载二进制文件方法1:
+1gdb --quite ./test
+
+方法2:
+12gdb -q(gdb) file ./test
+
+三、运行程序1(gdb) r
+
+带CLI参数：
+1(gdb) r argv[0] ar">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="gdb使用总结"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> gdb使用总结</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h1 id="gdb使用总结"><a href="#gdb使用总结" class="headerlink" title="gdb使用总结"></a>gdb使用总结</h1><h2 id="一、编译测试程序"><a href="#一、编译测试程序" class="headerlink" title="一、编译测试程序"></a>一、编译测试程序</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc test.c -o test</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、从磁盘中加载二进制文件"><a href="#二、从磁盘中加载二进制文件" class="headerlink" title="二、从磁盘中加载二进制文件"></a>二、从磁盘中加载二进制文件</h2><p>方法1:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb --quite ./test</span><br></pre></td></tr></table></figure>
+
+<p>方法2:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gdb -q</span><br><span class="line">(gdb) file ./test</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、运行程序"><a href="#三、运行程序" class="headerlink" title="三、运行程序"></a>三、运行程序</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r</span><br></pre></td></tr></table></figure>
+
+<p>带CLI参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r argv[0] argv[1] ...</span><br></pre></td></tr></table></figure>
+
+<p>运行程序并断在入口点处：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) start</span><br></pre></td></tr></table></figure>
+
+<p>带CLI参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) start argv[0] ...</span><br></pre></td></tr></table></figure>
+
+<p>断点之后继续运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb)c</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、断点操作"><a href="#四、断点操作" class="headerlink" title="四、断点操作"></a>四、断点操作</h2><h3 id="设置断点"><a href="#设置断点" class="headerlink" title="设置断点"></a>设置断点</h3><p>有符号：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) break main</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b main</span><br></pre></td></tr></table></figure>
+
+<p>设置地址：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) break *addr</span><br></pre></td></tr></table></figure>
+
+<h3 id="检查断点"><a href="#检查断点" class="headerlink" title="检查断点"></a>检查断点</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info breakpoints</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info b</span><br></pre></td></tr></table></figure>
+
+<h3 id="禁用启用断点"><a href="#禁用启用断点" class="headerlink" title="禁用启用断点"></a>禁用启用断点</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disable num</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) enable num</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除断点"><a href="#删除断点" class="headerlink" title="删除断点"></a>删除断点</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) clear *addr</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) clear main</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<p>“delete &lt;breakpoint number from info breakpoints&gt;“ (short form: d)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) delete 3</span><br></pre></td></tr></table></figure>
+
+<h3 id="检查汇编代码"><a href="#检查汇编代码" class="headerlink" title="检查汇编代码"></a>检查汇编代码</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disassemble &lt;address or symbol name&gt; /r</span><br><span class="line"><span class="meta">#</span><span class="bash">/r显示16进制的数据</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) x/10i &lt;addr&gt;</span><br><span class="line"><span class="meta">#</span><span class="bash">显示10条汇编</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) display/10i &lt;instruction pointer / program counter&gt;</span><br><span class="line"><span class="meta">#</span><span class="bash">On x86 systems &lt;instruction pointer / program counter&gt; would be <span class="variable">$rip</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash">On ARM systems &lt;instruction pointer / program counter&gt; would be <span class="variable">$pc</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="监视断点"><a href="#监视断点" class="headerlink" title="监视断点"></a>监视断点</h3><h4 id="只写断点"><a href="#只写断点" class="headerlink" title="只写断点"></a>只写断点</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) watch &lt;address&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="只读断点"><a href="#只读断点" class="headerlink" title="只读断点"></a>只读断点</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) rwatch &lt;address&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="读写断点"><a href="#读写断点" class="headerlink" title="读写断点"></a>读写断点</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awatch &lt;address&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置访问断点的大小"><a href="#设置访问断点的大小" class="headerlink" title="设置访问断点的大小"></a>设置访问断点的大小</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) watch *(char *) &lt;address&gt; </span><br><span class="line"><span class="meta">#</span><span class="bash">would <span class="built_in">set</span> a watchpoint to <span class="built_in">break</span> on access to the one byte at &lt;address&gt;, and therefore wouldn\<span class="string">&#x27;t fire if address+2 was written to. Whereas</span></span></span><br><span class="line"></span><br><span class="line">(gdb )watch *(long long *) &lt;address&gt;</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="string">would fire if any of the 8 bytes starting at &lt;address&gt; were written to.</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="硬件断点"><a href="#硬件断点" class="headerlink" title="硬件断点"></a>硬件断点</h3><p>使用”hbreak” 命令 (short form: hb) 用法与break相似</p>
+<h2 id="检查-修改数据"><a href="#检查-修改数据" class="headerlink" title="检查/修改数据"></a>检查/修改数据</h2><p>Commands: x (examine), print, display</p>
+<p>格式化输出：<br>后边跟/nFMT</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">10.5 Output Formats</span><br><span class="line"></span><br><span class="line">By default, GDB prints a value according to its data type. Sometimes this is not what you want. For example, you might want to print a number in hex, or a pointer in decimal. Or you might want to view data in memory at a certain address as a character string or as an instruction. To do these things, specify an output format when you print a value.</span><br><span class="line"></span><br><span class="line">The simplest use of output formats is to say how to print a value already computed. This is done by starting the arguments of the print command with a slash and a format letter. The format letters supported are:</span><br><span class="line"></span><br><span class="line">x</span><br><span class="line">Regard the bits of the value as an integer, and print the integer in hexadecimal.</span><br><span class="line"></span><br><span class="line">d</span><br><span class="line">Print as integer in signed decimal.</span><br><span class="line"></span><br><span class="line">u</span><br><span class="line">Print as integer in unsigned decimal.</span><br><span class="line"></span><br><span class="line">o</span><br><span class="line">Print as integer in octal.</span><br><span class="line"></span><br><span class="line">t</span><br><span class="line">Print as integer in binary. The letter ‘t’ stands for “two”. 11</span><br><span class="line"></span><br><span class="line">a</span><br><span class="line">Print as an address, both absolute in hexadecimal and as an offset from the nearest preceding symbol. You can use this format used to discover where (in what function) an unknown address is located:</span><br><span class="line"></span><br><span class="line">(gdb) p/a 0x54320</span><br><span class="line">$3 = 0x54320 <span class="xml">&lt;_initialize_vx+396&gt;</span></span><br><span class="line">The command info symbol 0x54320 yields similar results. See info symbol.</span><br><span class="line"></span><br><span class="line">c</span><br><span class="line">Regard as an integer and print it as a character constant. This prints both the numerical value and its character representation. The character representation is replaced with the octal escape ‘\nnn’ for characters outside the 7-bit ASCII range.</span><br><span class="line"></span><br><span class="line">Without this format, GDB displays char, unsigned char, and signed char data as character constants. Single-byte members of vectors are displayed as integer data.</span><br><span class="line"></span><br><span class="line">f</span><br><span class="line">Regard the bits of the value as a floating point number and print using typical floating point syntax.</span><br><span class="line"></span><br><span class="line">s</span><br><span class="line">Regard as a string, if possible. With this format, pointers to single-byte data are displayed as null-terminated strings and arrays of single-byte data are displayed as fixed-length strings. Other values are displayed in their natural types.</span><br><span class="line"></span><br><span class="line">Without this format, GDB displays pointers to and arrays of char, unsigned char, and signed char as strings. Single-byte members of a vector are displayed as an integer array.</span><br><span class="line"></span><br><span class="line">z</span><br><span class="line">Like ‘x’ formatting, the value is treated as an integer and printed as hexadecimal, but leading zeros are printed to pad the value to the size of the integer type.</span><br><span class="line"></span><br><span class="line">r</span><br><span class="line">Print using the ‘raw’ formatting. By default, GDB will use a Python-based pretty-printer, if one is available (see Pretty Printing). This typically results in a higher-level display of the value’s contents. The ‘r’ format bypasses any Python pretty-printer which might exist.</span><br><span class="line"></span><br><span class="line">For example, to print the program counter in hex (see Registers), type</span><br><span class="line"></span><br><span class="line">p/x $pc</span><br><span class="line">Note that no space is required before the slash; this is because command names in GDB cannot contain a slash.</span><br><span class="line"></span><br><span class="line">To reprint the last value in the value history with a different format, you can use the print command with just a format and no expression. For example, ‘p/x’ reprints the last value in hex.</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://sourceware.org/gdb/onlinedocs/gdb/Output-Formats.html">FMT</a></p>
+<h3 id="检查寄存器"><a href="#检查寄存器" class="headerlink" title="检查寄存器"></a>检查寄存器</h3><p>info r rax rbx rbp</p>
+<p>也可以使用print(short form:p)结合/FMT，进行格式化输出</p>
+<h3 id="修改寄存器"><a href="#修改寄存器" class="headerlink" title="修改寄存器"></a>修改寄存器</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(gdb) set $rax = 0xdeadbeeff00dface</span><br><span class="line">(gdb) p/x $rax</span><br><span class="line"><span class="meta">$</span><span class="bash">15 = 0xdeadbeeff00dface</span></span><br><span class="line">(gdb) set $ax = 0xcafef00d</span><br><span class="line">(gdb) p/x $rax</span><br><span class="line"><span class="meta">$</span><span class="bash">16 = 0xdeadbeeff00df00d</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="检查内存"><a href="#检查内存" class="headerlink" title="检查内存"></a>检查内存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">The <span class="string">&quot;x&quot;</span> <span class="built_in">command</span> (<span class="keyword">for</span> examine memory) supports the /FMT specifier.</span></span><br><span class="line">(gdb) x/8xb $rsp</span><br><span class="line">0x7fffffffe038: 0xb3 0xd0 0xde 0xf7 0xff 0x7f 0x00 0x00</span><br><span class="line">(gdb) x/4xh $rsp</span><br><span class="line">0x7fffffffe038: 0xd0b3 0xf7de 0x7fff 0x0000</span><br><span class="line">(gdb) x/2xw $rsp</span><br><span class="line">0x7fffffffe038: 0xf7ded0b3 0x00007fff</span><br><span class="line">(gdb) x/1xg $rsp</span><br><span class="line">0x7fffffffe038: 0x00007ffff7ded0b3</span><br><span class="line">(gdb) x/s 0x555555556008</span><br><span class="line">0x555555556008: &quot;First %d elements of the Fibbonacci sequence: &quot;</span><br><span class="line">(gdb) x/3i $rip</span><br><span class="line">=&gt; 0x5555555551a9 &lt;main&gt;: endbr64 </span><br><span class="line">   0x5555555551ad &lt;main+4&gt;: push   %rbp</span><br><span class="line">   0x5555555551ae &lt;main+5&gt;: mov    %rsp,%rbp</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改内存"><a href="#修改内存" class="headerlink" title="修改内存"></a>修改内存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> (gdb) x/1xg $rsp</span><br><span class="line">0x7fffffffe038: 0x00007ffff7ded0b3</span><br><span class="line">(gdb) set &#123;char&#125;$rsp = 0xFF</span><br><span class="line">(gdb) x/1xg $rsp</span><br><span class="line">0x7fffffffe038: 0x00007ffff7ded0ff</span><br><span class="line">(gdb) set &#123;short&#125;$rsp = 0xFF</span><br><span class="line">(gdb) x/1xg $rsp</span><br><span class="line">0x7fffffffe038: 0x00007ffff7de00ff</span><br><span class="line">(gdb) set &#123;short&#125;$rsp = 0xFFFF</span><br><span class="line">(gdb) x/1xg $rsp</span><br><span class="line">0x7fffffffe038: 0x00007ffff7deffff</span><br><span class="line">(gdb) set &#123;long long&#125;$rsp = 0x1337bee7</span><br><span class="line">(gdb) x/1xg $rsp</span><br><span class="line">0x7fffffffe038: 0x000000001337bee7</span><br></pre></td></tr></table></figure>
+
+<h3 id="栈回溯"><a href="#栈回溯" class="headerlink" title="栈回溯"></a>栈回溯</h3><p><a target="_blank" rel="noopener" href="https://sourceware.org/gdb/current/onlinedocs/gdb/Backtrace.html#Backtrace">bt</a></p>
+<h2 id="五、单步运行"><a href="#五、单步运行" class="headerlink" title="五、单步运行"></a>五、单步运行</h2><p>单步步过：ni<br>单步步入：si<br>单步步出：finish(short form:fin)</p>
+<p>运行到某个地址：until &lt;address&gt;</p>
+<h2 id="六、附加运行"><a href="#六、附加运行" class="headerlink" title="六、附加运行"></a>六、附加运行</h2><p>依赖于你的系统安全设置支不支持ptrace的系统调用，你也许不能附加到进程上，尽管你们使用的是相同的用户。你也可以使用root权限运行gdb，或者使用下述命令去禁用掉这个安全选项。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope</span><br></pre></td></tr></table></figure>
+
+<p>Remembering to re-restrict access when done via:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 1 | sudo tee /proc/sys/kernel/yama/ptrace_scope</span><br></pre></td></tr></table></figure>
+
+<p>attach &lt;process ID&gt;</p>
+<h2 id="七、杂项配置"><a href="#七、杂项配置" class="headerlink" title="七、杂项配置"></a>七、杂项配置</h2><p>可以在gdb中使用下述命令修改gdb的汇编语言的类型到Intel或者AT&amp;T：</p>
+<p>set disassembly-flavor intel<br>set disassembly-flavor att</p>
+<h2 id="八、gdb的命令行文件"><a href="#八、gdb的命令行文件" class="headerlink" title="八、gdb的命令行文件"></a>八、gdb的命令行文件</h2><p>有时候想要让他在启动gdb时就自动运行一些命令，可以使用脚本，gdb启动时加上 -x 指定脚本文件 就可以了。</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2021/08/03/gdb%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/" class="leancloud-visitors view" data-flag-title="gdb使用总结">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2021/08/11/Arm Instractions/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2021/08/01/pwn总结/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-08-03 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/软件调试/">软件调试<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

@@ -1,0 +1,347 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Angr初探 | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="一、介绍首先我将简要介绍一下Angr，因为我认为知道我们的工具如何工作是很重要的一件事情。
+
+二、符号执行 - 简要介绍Angr是一个python模块的，我将使用它作为二进制分析的框架。它是采用动态和静态结合的方式来进行符号分析的工作。这种工作方式被叫做“导向性随机测试”，虽然如此，但是大家基本叫它">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Angr初探"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/blog/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/blog/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/blog/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/blog/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/blog/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/blog/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/blog/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/blog/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Angr初探</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><pre><code>首先我将简要介绍一下Angr，因为我认为知道我们的工具如何工作是很重要的一件事情。
+</code></pre>
+<h2 id="二、符号执行-简要介绍"><a href="#二、符号执行-简要介绍" class="headerlink" title="二、符号执行 - 简要介绍"></a>二、符号执行 - 简要介绍</h2><p>Angr是一个python模块的，我将使用它作为二进制分析的框架。它是采用动态和静态结合的方式来进行符号分析的工作。这种工作方式被叫做“导向性随机测试”，虽然如此，但是大家基本叫它符号执行/分析引擎。</p>
+<h3 id="什么是符号执行？"><a href="#什么是符号执行？" class="headerlink" title="什么是符号执行？"></a>什么是符号执行？</h3><pre><code>符号执行就是通过用“符号”值替换程序的输入值来模拟程序的执行。随着执行模拟的进行，每当处理输入时，执行程序的约束条件都会被添加到“符号”值中。 当遇到分支条件时，模拟分为两条路径：一条路径分支条件评估为真，另一条路径评估为假。
+</code></pre>
+<p>通俗的说，就是用符号去替换输入的值。用符号值执行程序会建立起约束的边界。<br>看下面的一个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// Assume a &amp; b are controlled by the user</span><br><span class="line">if (a &gt; b)</span><br><span class="line">  a = a - b;</span><br><span class="line">else b = b - a;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，左分支的约束是 a&gt;b，而右分支的约束是 a&lt;=b。</p>
+<p>真实世界的程序肯定不会如此简单，代码分支深处的约束会变得非常大、非常快。为了解决这些限制，Angr使用了微软的定理证明器Z3。Z3检查约束是否可满足 (SAT)。假设某个分支有可满足的约束，我们可以要求Angr给出一个满足约束的输入的例子。</p>
+<h2 id="三、Angr-基础使用"><a href="#三、Angr-基础使用" class="headerlink" title="三、Angr - 基础使用"></a>三、Angr - 基础使用</h2><p>下面是一个Angr基础使用的用法示例。在下面的例子中，我们将会添加约束条件，并让Angr去执行它。<br>考虑下面的代码片段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void main(int argc, char *argv[])&#123;</span><br><span class="line">    int a=atoi(argv[1]);</span><br><span class="line">    int b=atoi(argv[2]);</span><br><span class="line">    if (10 &gt; a &amp;&amp; a &gt; 5 &amp;&amp; 10 &gt; b &amp;&amp; b &gt; 1 &amp;&amp; 2*b - a == 10)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;[+] Math is hard... but not 4 u! \n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们将会使用Angr手工的加上约束条件，然后使用内置的求解器（solver）进行求解。这与我们通常使用Angr的方式不同，它只是在我们深入研究复杂案例之前展示一下的例子。</p>
+<p>带上注释一步一步的用iPython命令，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Importing angr</span></span><br><span class="line">In [<span class="number">1</span>]: <span class="keyword">import</span> angr </span><br><span class="line"></span><br><span class="line"><span class="comment"># A wrapper for Z3. Claripy is used for constraint-solving.</span></span><br><span class="line">In [<span class="number">2</span>]: <span class="keyword">import</span> claripy </span><br><span class="line"></span><br><span class="line"><span class="comment"># Loading the binary to angr. </span></span><br><span class="line">In [<span class="number">3</span>]: p = angr.Project(<span class="string">&#x27;./a.out&#x27;</span>) </span><br><span class="line">WARNING | <span class="number">2021</span>-05-<span class="number">24</span> <span class="number">17</span>:<span class="number">54</span>:05,<span class="number">450</span> | cle.loader | The main binary <span class="keyword">is</span> a position-independent executable. It <span class="keyword">is</span> being loaded <span class="keyword">with</span> a base address of <span class="number">0x400000</span>.</span><br><span class="line"></span><br><span class="line"><span class="comment"># Constructs a state ready to execute at the binary&#x27;s entry point.</span></span><br><span class="line">In [<span class="number">4</span>]: state = p.factory.entry_state() </span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a bitvector symbol named &quot;a&quot; of length 32 bits</span></span><br><span class="line">In [<span class="number">5</span>]: a = state.solver.BVS(<span class="string">&quot;a&quot;</span>, <span class="number">32</span>) </span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a bitvector symbol named &quot;b&quot; of length 32 bits</span></span><br><span class="line">In [<span class="number">6</span>]: b = state.solver.BVS(<span class="string">&quot;b&quot;</span>, <span class="number">32</span>) </span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27; Adding constraints manually &#x27;&#x27;&#x27;</span></span><br><span class="line">In [<span class="number">7</span>]: state.solver.add(<span class="number">10</span>&gt;a) </span><br><span class="line">Out[<span class="number">7</span>]: [&lt;Bool a_39_32 &lt; <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">8</span>]: state.solver.add(a&gt;<span class="number">5</span>)</span><br><span class="line">Out[<span class="number">8</span>]: [&lt;Bool a_39_32 &gt; <span class="number">0x5</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">9</span>]: state.solver.add(b&gt;<span class="number">1</span>)</span><br><span class="line">Out[<span class="number">9</span>]: [&lt;Bool b_40_32 &gt; <span class="number">0x1</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">10</span>]: state.solver.add(b&lt;<span class="number">10</span>)</span><br><span class="line">Out[<span class="number">10</span>]: [&lt;Bool b_40_32 &lt; <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">11</span>]: state.solver.add(<span class="number">2</span>*b - a == <span class="number">10</span>)</span><br><span class="line">Out[<span class="number">11</span>]: [&lt;Bool <span class="number">0x2</span> * b_40_32 - a_39_32 == <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluates the value of &quot;a&quot; by taking the current constraints into consideration.</span></span><br><span class="line">In [<span class="number">12</span>]: state.solver.<span class="built_in">eval</span>(a)</span><br><span class="line">Out[<span class="number">12</span>]: <span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluates the value of &quot;b&quot; by taking the current constraints into consideration.</span></span><br><span class="line">In [<span class="number">13</span>]: state.solver.<span class="built_in">eval</span>(b)</span><br><span class="line">Out[<span class="number">13</span>]: <span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<p>现在我们有了这些基础之后，让我们转到主要的事情上：</p>
+<h2 id="四、逆向混淆的二进制文件"><a href="#四、逆向混淆的二进制文件" class="headerlink" title="四、逆向混淆的二进制文件"></a>四、逆向混淆的二进制文件</h2><p>我们使用的二进制文件是“<a target="_blank" rel="noopener" href="https://ctftime.org/event/1118">DarkCTF2020</a>”的“<a target="_blank" rel="noopener" href="https://napongizero.github.io/blog/assets/Defeating-Code-Obfuscation-with-Angr/jack">Jack</a>”</p>
+<h3 id="文件分析"><a href="#文件分析" class="headerlink" title="文件分析"></a>文件分析</h3><p>首先收集一些二进制文件的基础信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ file ./jack</span><br><span class="line">./jack: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=f530c71efca944a196fe383afcd8df60591edf78, for GNU/Linux 3.2.0, not stripped</span><br></pre></td></tr></table></figure>
+
+<p>执行下文件，并且使用ltrace去trace写库函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ ltrace ./jack</span><br><span class="line">puts(&quot;Enter your key: &quot;Enter your key: </span><br><span class="line">)                         = 17</span><br><span class="line">fgets(adf</span><br><span class="line">&quot;adf\n&quot;, 17, 0x7f8f337f0a00)               = 0x7ffd58fe1040</span><br><span class="line">strlen(&quot;adf\n&quot;)                                  = 4</span><br><span class="line">puts(&quot;Try Harder&quot;Try Harder</span><br><span class="line">)                               = 11</span><br><span class="line">puts(&quot;bye&quot;bye</span><br><span class="line">)                                      = 4</span><br><span class="line">+++ exited (status 1) +++</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这为我们提供了一些关于我们面对的问题的有用的信息。<br>看来问题是找到程序的key（可能不止一个）。<br>接下来，我决定在 Ghidra 中加载二进制文件，以便更好地了解发生了什么。</p>
+<p>反编译主程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">bool main(void)</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  uint uVar1;</span><br><span class="line">  size_t sVar2;</span><br><span class="line">  long in_FS_OFFSET;</span><br><span class="line">  uint local_38;</span><br><span class="line">  int local_34;</span><br><span class="line">  int local_30;</span><br><span class="line">  int local_2c;</span><br><span class="line">  char local_28;</span><br><span class="line">  char local_27;</span><br><span class="line">  char local_26;</span><br><span class="line">  char local_25;</span><br><span class="line">  char local_24;</span><br><span class="line">  char local_23;</span><br><span class="line">  char local_22;</span><br><span class="line">  char local_21;</span><br><span class="line">  char local_20;</span><br><span class="line">  char local_1f;</span><br><span class="line">  char local_1e;</span><br><span class="line">  char local_1d;</span><br><span class="line">  char local_1c;</span><br><span class="line">  char local_1b;</span><br><span class="line">  char local_1a;</span><br><span class="line">  char local_19;</span><br><span class="line">  undefined local_18;</span><br><span class="line">  long local_10;</span><br><span class="line">  </span><br><span class="line">  local_10 = *(long *)(in_FS_OFFSET + 0x28);</span><br><span class="line">  puts(&quot;Enter your key: &quot;);</span><br><span class="line">  fgets(&amp;local_28,0x11,stdin);</span><br><span class="line">  local_18 = 0;</span><br><span class="line">  sVar2 = strlen(&amp;local_28);</span><br><span class="line">  if (sVar2 != 0x10) &#123;</span><br><span class="line">    puts(&quot;Try Harder&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else &#123;</span><br><span class="line">    local_38 = local_25 * 0x1000000 + (int)local_28 + local_27 * 0x100 + local_26 * 0x10000;</span><br><span class="line">    local_38 = local_38 ^ ((int)local_38 &gt;&gt; 3 &amp; 0x20000000U) + local_38 * 0x20;</span><br><span class="line">    local_38 = local_38 ^ local_38 &lt;&lt; 7;</span><br><span class="line">    local_38 = (local_38 &gt;&gt; 1 &amp; 0xff) + local_38;</span><br><span class="line">    local_38 = ((int)local_38 &gt;&gt; 3 &amp; 0x20000000U) + local_38 * 0x20 ^ local_38;</span><br><span class="line">    local_38 = local_38 ^ local_38 &lt;&lt; 7;</span><br><span class="line">    local_38 = local_38 + (local_38 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_21 * 0x1000000 + (int)local_24 + local_23 * 0x100 + local_22 * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_34 = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_1d * 0x1000000 + (int)local_20 + local_1f * 0x100 + local_1e * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_30 = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_19 * 0x1000000 + (int)local_1c + local_1b * 0x100 + local_1a * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_2c = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    check_flag(&amp;local_38);</span><br><span class="line">  &#125;</span><br><span class="line">  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) &#123;</span><br><span class="line">    return sVar2 != 0x10;</span><br><span class="line">  &#125;</span><br><span class="line">                    /* WARNING: Subroutine does not return */</span><br><span class="line">  __stack_chk_fail();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到这我们可以确定输入有16个字符长。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (sVar2 != 0x10) &#123;</span><br><span class="line">    puts(&quot;Try Harder&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else &#123;</span><br></pre></td></tr></table></figure>
+
+<p>然后经过一连串的异或移位，加法，乘法之后，调用了check_flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/* check_flag(unsigned int*) */</span><br><span class="line"></span><br><span class="line">void check_flag(uint *param_1)</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  if ((((*param_1 == 0xcb9f59b7) &amp;&amp; (param_1[1] == 0x5b90f617)) &amp;&amp; (param_1[2] == 0x20e59633)) &amp;&amp;</span><br><span class="line">     (param_1[3] == 0x102fd1da)) &#123;</span><br><span class="line">    puts(&quot;Good Work!&quot;);</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">  puts(&quot;Try Harder&quot;);</span><br><span class="line">  return;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设我们的目标是来到“Good Work!”这一行。我们需要找到程序的正确的输入，（也许这里有多个答案，因为这个移位操作）。</p>
+<p>我们有以下的几个选择：</p>
+<blockquote>
+<p>&gt;暴力破解，16个字符，可能是字母符号数字…暴力太难了<br>&gt;逆向-动态/静态分析，尽管逆向不是很有趣，我们也可以在运行时改变一下param_1的值通过hook的方式…<br>&gt;打补丁，通过打补丁的方式让他到puts这里。但让我们假设我们不想做任何的改变。<br>&gt;符号执行（Angr），我们今天的明显选择。另外，它为我们提供了一个实际有效的程序输入。</p>
+</blockquote>
+<h3 id="Angr"><a href="#Angr" class="headerlink" title="Angr"></a>Angr</h3><p>首先我们加载需要的库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import angr</span><br><span class="line">import claripy</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们将设置程序的基地址并通过 Angr 加载二进制文件。<br>我们会设置程序的基地址，并且设置”auto_load_libs”为false。<br><em>注意：设置”auto_load_libs”为false，将禁止CLE（Angr的二进制文件加载器）自动处理动态库依赖。我建议使用它，防止当某个动态库无法找到时，抛出异常。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># Ghidra loaded the binary to 0x00100000 (default Image Base)</span><br><span class="line">base_addr = 0x00100000 </span><br><span class="line"></span><br><span class="line">proj = angr.Project(&#x27;./jack&#x27;, main_opts=&#123;&#x27;base_addr&#x27;: base_addr&#125;, load_options=&#123;&quot;auto_load_libs&quot;: False&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>填上我们收集的二进制文件信息：<br>我们知道我们的输入需要16个字符的长度，因此，我们需要为我们的16个字符创建一个符号位向量。在把它们链接到一起之前，我为每个输入字节创建一个位向量。</p>
+<p><em>注意：位向量本质只是一串位序列，一个符号位向量只是一个符号变量，它在某种意义上不是保存具体的数值，而是保存一个符号。然后，使用该变量执行算术运算将产生一个运算树（根据编译器理论称为抽象语法树或 AST）。如示例中所示，AST 可以转换为约束。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">input_length = 16</span><br><span class="line"></span><br><span class="line"># claripy.BVS(&#x27;x&#x27;, 8) =&gt; Create an eight-bit symbolic bitvector &quot;x&quot;.</span><br><span class="line"># Creating a symbolic bitvector for each character:</span><br><span class="line">input_chars = [claripy.BVS(&quot;char_%d&quot; % i, 8) for i in range(input_length)]</span><br><span class="line">input = claripy.Concat(*input_chars)</span><br></pre></td></tr></table></figure>
+
+<p>接下来，在将程序的输入设置为stdin的同时获取程序的入口状态。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">entry_state = proj.factory.entry_state(args=[&quot;./jack&quot;], stdin=input)</span><br></pre></td></tr></table></figure>
+
+<p>添加约束条件，以便每个字符都必须在可打印的 ascii 范围内。 这只是我的一个假设，我们不知道它是真是假。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for byte in input_chars:</span><br><span class="line">    entry_state.solver.add(byte &gt;= 0x20, byte &lt;= 0x7e)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>现在我们已经完成了设置，我们可以用符号模拟二进制的执行了。我们还需要关键的一个东西SimulationManager。有了它我们就可以控制多种状态，step() run()就像调试器一样。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Establish the simulation with the entry state</span><br><span class="line">simulation = proj.factory.simulation_manager(entry_state)</span><br></pre></td></tr></table></figure>
+
+<p>现在我们可以使用符号执行程序了，我们应该设置一些目标。我们可以设置Angr应该运行到哪，哪一个分支不用关心</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">success_addr = 0x00101489 # Address of &quot;puts(&quot;Good Work!&quot;);&quot;</span><br><span class="line">failure_addr = 0x00101468 # Address of &quot;puts(&quot;Try Harder&quot;);&quot;</span><br><span class="line"></span><br><span class="line"># Finding a state that reaches `success_addr`, while discarding all states that go through `failure_addr`</span><br><span class="line">simulation.explore(find = success_addr, avoid = failure_addr)</span><br></pre></td></tr></table></figure>
+
+<p>检查我们是否执行到success_addr就很简单了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># If at least one state was found</span><br><span class="line">if len(simulation.found) &gt; 0:</span><br><span class="line">    # Take the first one and print what it evaluates to</span><br><span class="line">    solution = simulation.found[0]</span><br><span class="line">    print(solution.solver.eval(input, cast_to=bytes))</span><br><span class="line">else:</span><br><span class="line">    print(&quot;[-] no solution found :(&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在原来的程序上执行脚本的结果，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">b&#x27;n0_5ymb0l1c,3x30&#x27;</span><br><span class="line"></span><br><span class="line">❯ ./jack</span><br><span class="line">Enter your key: </span><br><span class="line">n0_5ymb0l1c,3x30</span><br><span class="line">Good Work!</span><br><span class="line">bye</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、结论"><a href="#六、结论" class="headerlink" title="六、结论"></a>六、结论</h2><p>Angr在有些情况下，比如在上面的例子中，的确非常有用，你可以使用它作为一个单独的工具或者一些逆向工具的开源插件，例如：IDA，Ghidra，Binary Ninja或者更多。</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/blog/2021/06/26/Angr%E5%88%9D%E6%8E%A2/" class="leancloud-visitors view" data-flag-title="Angr初探">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/blog/2021/07/03/一道有意思的pwn题目/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    
+
+    <a href="/blog/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/blog/2020/12/13/Josephus/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-06-26 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/blog/tags/符号执行/">符号执行<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/blog/js/jquery.imagesloaded.min.js"></script>
+<script src="/blog/js/gallery.js"></script>
+<script src="/blog/js/bootstrap.min.js"></script>
+<script src="/blog/js/main.js"></script>
+<script src="/blog/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/blog/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>
