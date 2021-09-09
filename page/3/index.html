@@ -114,6 +114,64 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2020/12/13/Josephus/" >Josephus</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2020-12-13  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2020/12/13/Josephus/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>约瑟夫问题是个有名的问题：N个人围成一圈，从第一个开始报数，第M个将被杀掉，最后剩下一个，其余人都将被杀掉。例如N=6，M=5，被杀掉的顺序是：5，4，6，2，3，1。</p>
+<p>代码实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Joseph</span><span class="params">(<span class="keyword">int</span> n, <span class="keyword">int</span> m)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a[<span class="number">100</span>]; <span class="comment">//开局每个人的编号</span></span><br><span class="line">    <span class="keyword">int</span> k = <span class="number">0</span>;  <span class="comment">//记录第k个出局的人</span></span><br><span class="line">    <span class="keyword">int</span> p = <span class="number">0</span>;  <span class="comment">//出局人的当前位置</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++)&#123;</span><br><span class="line">        a[i] = i + <span class="number">1</span>; <span class="comment">//编号初始化，</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//循环T人</span></span><br><span class="line">    <span class="keyword">while</span> (n &gt; <span class="number">1</span>)&#123;</span><br><span class="line">        p = (p + m - <span class="number">1</span>) % n; <span class="comment">//关键点，计算出圈人的位置</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;第&quot;</span> &lt;&lt; ++k &lt;&lt; <span class="string">&quot;个出圈的是：&quot;</span> &lt;&lt; a[p] &lt;&lt; endl;</span><br><span class="line">        <span class="comment">//重新排序</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = p + <span class="number">1</span>; j &lt; n; j++)</span><br><span class="line">            a[j - <span class="number">1</span>] = a[j]; </span><br><span class="line">        <span class="comment">//人数减一</span></span><br><span class="line">        n--;</span><br><span class="line">        <span class="keyword">if</span> (p == n) p = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;最后剩下的是&quot;</span> &lt;&lt; a[p] &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/2020/12/13/Josephus/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2020/12/12/CVE-2010-2883/" >CVE-2010-2883 Adobe Reader TTF字体SING表栈溢出漏洞</a>
 		</h3>
 		</div>
@@ -2228,29 +2286,29 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/python/">python<span>2</span></a></li>
+		
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+		
+			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
+		
+			<li><a href="/tags/Android/">Android<span>1</span></a></li>
+		
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+		
 			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
 		
 			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
 		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
-		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
-		
-			<li><a href="/tags/Android/">Android<span>1</span></a></li>
-		
 			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
 		
-			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
 		
 			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
-		
-			<li><a href="/tags/python/">python<span>2</span></a></li>
-		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
 		
 			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
 		
@@ -2268,6 +2326,10 @@
   <ul class="entry list-unstyled">
     
       <li>
+        <a href="/2021/09/09/遇到hexo莫名其妙的bug/" ><i class="fa fa-file-o"></i>遇到hexo莫名其妙的bug</a>
+      </li>
+    
+      <li>
         <a href="/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>2021-08-04-CVE-2021-3156分析</a>
       </li>
     
@@ -2281,10 +2343,6 @@
     
       <li>
         <a href="/2021/08/20/Android-Java类加载机制/" ><i class="fa fa-file-o"></i>Java类加载机制</a>
-      </li>
-    
-      <li>
-        <a href="/2021/08/17/CVE-2019-6250/" ><i class="fa fa-file-o"></i>CVE-2019-6250 libzmq远程代码执行漏...</a>
       </li>
     
   </ul>
