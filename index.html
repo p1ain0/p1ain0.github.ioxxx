@@ -114,6 +114,325 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/09/17/Windbg用法/" >Windbg用法</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-09-17  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+		
+            
+            <p class="post">&lt;h2 id=&#34;在内核空间和用户空间工作的命令&#34;&gt;&lt;a href=&#34;#在内核空间和用户空间工作的命令&#34; class=&#34;headerlink&#34; title=&#34;在内核空间和用户空间工作的命令&#34;&gt;&lt;/a&gt;在内核空间和用户空间工作的命令&lt;/h2&gt;&lt;h3 id=&#34;dv-dt&#34;&gt;&lt;a href=&#34;#dv-dt&#34; class=&#34;headerlink&#34; title=&#34;dv/dt&#34;&gt;&lt;/a&gt;dv/dt&lt;/h3&gt;&lt;p&gt;当您进行源代码级调试时，可以使用“Display Local Variables”（dv） 命令，或者您可以打开本地变量窗口。&lt;/p&gt;
+&lt;p&gt;“Display Type”(dt) 命令既可以显示struct的字段，也可以根据给定的struct类型解释给定地址处的内存。&lt;/p&gt;
+&lt;h4 id=&#34;仅显示给定类型struct的顶级字段&#34;&gt;&lt;a href=&#34;#仅显示给定类型struct的顶级字段&#34; class=&#34;headerlink&#34; title=&#34;仅显示给定类型struct的顶级字段&#34;&gt;&lt;/a&gt;仅显示给定类型struct的顶级字段&lt;/h4&gt;&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;dt &amp;#123;structure type&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;: kd&amp;gt; dt nt!_EPROCESS&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Pcb              : _KPROCESS&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x438&lt;/span&gt; ProcessLock      : _EX_PUSH_LOCK&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x440&lt;/span&gt; UniqueProcessId  : Ptr64 Void&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x448&lt;/span&gt; ActiveProcessLinks : _LIST_ENTRY&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x458&lt;/span&gt; RundownProtect   : _EX_RUNDOWN_REF&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;h4 id=&#34;递归显示struct定义&#34;&gt;&lt;a href=&#34;#递归显示struct定义&#34; class=&#34;headerlink&#34; title=&#34;递归显示struct定义&#34;&gt;&lt;/a&gt;递归显示struct定义&lt;/h4&gt;&lt;p&gt;要递归显示struct（和sub-struct）的字段：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;dt -r&amp;#123;depth&amp;#125; &amp;#123;structure type&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;: kd&amp;gt; dt -r2 nt!_EPROCESS&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Pcb              : _KPROCESS&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;      +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Header           : _DISPATCHER_HEADER&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;         +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Lock             : Int4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;         +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; LockNV           : Int4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;         +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Type             : UChar&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;h4 id=&#34;按struct显示给定地址出内存中的值：&#34;&gt;&lt;a href=&#34;#按struct显示给定地址出内存中的值：&#34; class=&#34;headerlink&#34; title=&#34;按struct显示给定地址出内存中的值：&#34;&gt;&lt;/a&gt;按struct显示给定地址出内存中的值：&lt;/h4&gt;&lt;p&gt;根据结构定义解释给定地址处的内存：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;dt &amp;#123;structure type&amp;#125; &amp;#123;address&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;: kd&amp;gt; dt nt!_EPROCESS ffffb38b26516340&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Pcb              : _KPROCESS&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x438&lt;/span&gt; ProcessLock      : _EX_PUSH_LOCK&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x440&lt;/span&gt; UniqueProcessId  : &lt;span class=&#34;number&#34;&gt;0x00000000&lt;/span&gt;`&lt;span class=&#34;number&#34;&gt;00001858&lt;/span&gt; Void&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x448&lt;/span&gt; ActiveProcessLinks : _LIST_ENTRY [ &lt;span class=&#34;number&#34;&gt;0xffffb38b&lt;/span&gt;`&lt;span class=&#34;number&#34;&gt;25&lt;/span&gt;aab748 - &lt;span class=&#34;number&#34;&gt;0xffffb38b&lt;/span&gt;`&lt;span class=&#34;number&#34;&gt;263&lt;/span&gt;da4c8 ]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x458&lt;/span&gt; RundownProtect   : _EX_RUNDOWN_REF&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x460&lt;/span&gt; Flags2           : &lt;span class=&#34;number&#34;&gt;0x200d080&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;...&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;h3 id=&#34;sxe-ld&#34;&gt;&lt;a href=&#34;#sxe-ld&#34; class=&#34;headerlink&#34; title=&#34;sxe ld&#34;&gt;&lt;/a&gt;sxe ld&lt;/h3&gt;&lt;h4 id=&#34;模块加载时中断&#34;&gt;&lt;a href=&#34;#模块加载时中断&#34; class=&#34;headerlink&#34; title=&#34;模块加载时中断&#34;&gt;&lt;/a&gt;模块加载时中断&lt;/h4&gt;&lt;p&gt;Set Exception (sx) 命令可用于在发生特定事件时中断。形式如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Enable: sxe&lt;/li&gt;
+&lt;li&gt;Ignore: sxi&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以触发调试器中断的事件有很多，现在只看模块加载，在进行用户空间调试时，“模块”可以是 .exe 或 .dll。 在内核模式下，模块是 .sys 内核驱动程序（或.exe NT的内核本身。）&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sxe ld&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;这条命令会使调试器将在每个模块加载时中断。&lt;/p&gt;
+&lt;h4 id=&#34;在-sx-中断时自动运行命令&#34;&gt;&lt;a href=&#34;#在-sx-中断时自动运行命令&#34; class=&#34;headerlink&#34; title=&#34;在 sx* 中断时自动运行命令&#34;&gt;&lt;/a&gt;在 sx* 中断时自动运行命令&lt;/h4&gt;&lt;p&gt;sx*有个可可选的参数 &lt;code&gt; -c &amp;quot;some ; list ; of ; commands&amp;quot;&lt;/code&gt;;一个有用的命令是“.lastevent”，它可以打印出关于最后发生的事件的信息。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sxe -c &lt;span class=&#34;string&#34;&gt;&amp;quot;.lastevent&amp;quot;&lt;/span&gt; ld&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;如果您只想查看模块何时加载，而不是实际停止（例如，仅查看引导时加载内核驱动程序的顺序），您可以使用：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sxi -c &lt;span class=&#34;string&#34;&gt;&amp;quot;.lastevent ; g&amp;quot;&lt;/span&gt; ld&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;h4 id=&#34;忽略-禁用断点：&#34;&gt;&lt;a href=&#34;#忽略-禁用断点：&#34; class=&#34;headerlink&#34; title=&#34;忽略/禁用断点：&#34;&gt;&lt;/a&gt;忽略/禁用断点：&lt;/h4&gt;&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sxi -c &lt;span class=&#34;string&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt; ld&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;h3 id=&#34;lm-List-Modules&#34;&gt;&lt;a href=&#34;#lm-List-Modules&#34; class=&#34;headerlink&#34; title=&#34;lm:List Modules&#34;&gt;&lt;/a&gt;lm:List Modules&lt;/h3&gt;&lt;p&gt;List Modules (Userspace &amp;amp; Kernel)：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;List Modules Userspace only：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm u&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;List Modules kernel only：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm k&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;List Modules(按字母排序)：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm sm&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;列出的模块带着系统路径：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm f&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;组合命令输出方式：&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm ksmf&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;给lm命令加一个v选项，获取冗长的输出信息。&lt;/p&gt;
+&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;lm ksmv&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;查看地址属于哪个模块：&lt;/p&gt;
+<p>
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/09/17/Windbg用法/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="在内核空间和用户空间工作的命令"><a href="#在内核空间和用户空间工作的命令" class="headerlink" title="在内核空间和用户空间工作的命令"></a>在内核空间和用户空间工作的命令</h2><h3 id="dv-dt"><a href="#dv-dt" class="headerlink" title="dv/dt"></a>dv/dt</h3><p>当您进行源代码级调试时，可以使用“Display Local Variables”（dv） 命令，或者您可以打开本地变量窗口。</p>
+<p>“Display Type”(dt) 命令既可以显示struct的字段，也可以根据给定的struct类型解释给定地址处的内存。</p>
+<h4 id="仅显示给定类型struct的顶级字段"><a href="#仅显示给定类型struct的顶级字段" class="headerlink" title="仅显示给定类型struct的顶级字段"></a>仅显示给定类型struct的顶级字段</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">dt &#123;structure type&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">0</span>: kd&gt; dt nt!_EPROCESS</span><br><span class="line">   +<span class="number">0x000</span> Pcb              : _KPROCESS</span><br><span class="line">   +<span class="number">0x438</span> ProcessLock      : _EX_PUSH_LOCK</span><br><span class="line">   +<span class="number">0x440</span> UniqueProcessId  : Ptr64 Void</span><br><span class="line">   +<span class="number">0x448</span> ActiveProcessLinks : _LIST_ENTRY</span><br><span class="line">   +<span class="number">0x458</span> RundownProtect   : _EX_RUNDOWN_REF</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="递归显示struct定义"><a href="#递归显示struct定义" class="headerlink" title="递归显示struct定义"></a>递归显示struct定义</h4><p>要递归显示struct（和sub-struct）的字段：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dt -r&#123;depth&#125; &#123;structure type&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">0</span>: kd&gt; dt -r2 nt!_EPROCESS</span><br><span class="line">   +<span class="number">0x000</span> Pcb              : _KPROCESS</span><br><span class="line">      +<span class="number">0x000</span> Header           : _DISPATCHER_HEADER</span><br><span class="line">         +<span class="number">0x000</span> Lock             : Int4B</span><br><span class="line">         +<span class="number">0x000</span> LockNV           : Int4B</span><br><span class="line">         +<span class="number">0x000</span> Type             : UChar</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="按struct显示给定地址出内存中的值："><a href="#按struct显示给定地址出内存中的值：" class="headerlink" title="按struct显示给定地址出内存中的值："></a>按struct显示给定地址出内存中的值：</h4><p>根据结构定义解释给定地址处的内存：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dt &#123;structure type&#125; &#123;address&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">0</span>: kd&gt; dt nt!_EPROCESS ffffb38b26516340</span><br><span class="line">   +<span class="number">0x000</span> Pcb              : _KPROCESS</span><br><span class="line">   +<span class="number">0x438</span> ProcessLock      : _EX_PUSH_LOCK</span><br><span class="line">   +<span class="number">0x440</span> UniqueProcessId  : <span class="number">0x00000000</span>`<span class="number">00001858</span> Void</span><br><span class="line">   +<span class="number">0x448</span> ActiveProcessLinks : _LIST_ENTRY [ <span class="number">0xffffb38b</span>`<span class="number">25</span>aab748 - <span class="number">0xffffb38b</span>`<span class="number">263</span>da4c8 ]</span><br><span class="line">   +<span class="number">0x458</span> RundownProtect   : _EX_RUNDOWN_REF</span><br><span class="line">   +<span class="number">0x460</span> Flags2           : <span class="number">0x200d080</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="sxe-ld"><a href="#sxe-ld" class="headerlink" title="sxe ld"></a>sxe ld</h3><h4 id="模块加载时中断"><a href="#模块加载时中断" class="headerlink" title="模块加载时中断"></a>模块加载时中断</h4><p>Set Exception (sx) 命令可用于在发生特定事件时中断。形式如下：</p>
+<ul>
+<li>Enable: sxe</li>
+<li>Ignore: sxi</li>
+</ul>
+<p>可以触发调试器中断的事件有很多，现在只看模块加载，在进行用户空间调试时，“模块”可以是 .exe 或 .dll。 在内核模式下，模块是 .sys 内核驱动程序（或.exe NT的内核本身。）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxe ld</span><br></pre></td></tr></table></figure>
+
+<p>这条命令会使调试器将在每个模块加载时中断。</p>
+<h4 id="在-sx-中断时自动运行命令"><a href="#在-sx-中断时自动运行命令" class="headerlink" title="在 sx* 中断时自动运行命令"></a>在 sx* 中断时自动运行命令</h4><p>sx*有个可可选的参数 <code> -c &quot;some ; list ; of ; commands&quot;</code>;一个有用的命令是“.lastevent”，它可以打印出关于最后发生的事件的信息。</p>
+<p>例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxe -c <span class="string">&quot;.lastevent&quot;</span> ld</span><br></pre></td></tr></table></figure>
+
+<p>如果您只想查看模块何时加载，而不是实际停止（例如，仅查看引导时加载内核驱动程序的顺序），您可以使用：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxi -c <span class="string">&quot;.lastevent ; g&quot;</span> ld</span><br></pre></td></tr></table></figure>
+
+<h4 id="忽略-禁用断点："><a href="#忽略-禁用断点：" class="headerlink" title="忽略/禁用断点："></a>忽略/禁用断点：</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxi -c <span class="string">&quot;&quot;</span> ld</span><br></pre></td></tr></table></figure>
+
+<h3 id="lm-List-Modules"><a href="#lm-List-Modules" class="headerlink" title="lm:List Modules"></a>lm:List Modules</h3><p>List Modules (Userspace &amp; Kernel)：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm</span><br></pre></td></tr></table></figure>
+
+<p>List Modules Userspace only：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm u</span><br></pre></td></tr></table></figure>
+
+<p>List Modules kernel only：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm k</span><br></pre></td></tr></table></figure>
+
+<p>List Modules(按字母排序)：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm sm</span><br></pre></td></tr></table></figure>
+
+<p>列出的模块带着系统路径：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm f</span><br></pre></td></tr></table></figure>
+
+<p>组合命令输出方式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm ksmf</span><br></pre></td></tr></table></figure>
+
+<p>给lm命令加一个v选项，获取冗长的输出信息。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm ksmv</span><br></pre></td></tr></table></figure>
+
+<p>查看地址属于哪个模块：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm a address</span><br></pre></td></tr></table></figure>
+
+<h3 id="load-加载第三方插件"><a href="#load-加载第三方插件" class="headerlink" title="!load 加载第三方插件"></a>!load 加载第三方插件</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">!load </span><br><span class="line">!unload </span><br></pre></td></tr></table></figure>
+
+<h2 id="kernel-only-command"><a href="#kernel-only-command" class="headerlink" title="kernel-only command"></a>kernel-only command</h2><h3 id="process-process"><a href="#process-process" class="headerlink" title="!process/.process"></a>!process/.process</h3><p>display 当前进程的context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process <span class="number">-1</span> [flags]</span><br></pre></td></tr></table></figure>
+
+<p>列出所有进程的context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process <span class="number">0</span> [flags]</span><br></pre></td></tr></table></figure>
+
+<p>通过进程名查看进程的context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process <span class="number">0</span> [flags] [exec name]</span><br></pre></td></tr></table></figure>
+
+<p>通过进程的pid查看进程context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process [pid] [flags]</span><br></pre></td></tr></table></figure>
+
+<p>将进程上下文切换为目标进程：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.process /i /r /p [<span class="string">&quot;PROCESS&quot;</span> address from !process output]</span><br></pre></td></tr></table></figure>
+
+<h3 id="rdmsr-wrmsr-Reading-Writing-Model-Specific-Registers-MSRs"><a href="#rdmsr-wrmsr-Reading-Writing-Model-Specific-Registers-MSRs" class="headerlink" title="rdmsr/wrmsr: Reading/Writing Model Specific Registers (MSRs)"></a>rdmsr/wrmsr: Reading/Writing Model Specific Registers (MSRs)</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rdmsr [MSR #]</span><br><span class="line">wrmsr [MSR #] [value to write]</span><br></pre></td></tr></table></figure>
+
+<h3 id="ms-gdt-Examine-the-Global-Descriptor-Table-GDT"><a href="#ms-gdt-Examine-the-Global-Descriptor-Table-GDT" class="headerlink" title="!ms_gdt: Examine the Global Descriptor Table (GDT)"></a>!ms_gdt: Examine the Global Descriptor Table (GDT)</h3><h3 id="idt-ms-idt-Examine-the-Interrupt-Descriptor-Table-IDT"><a href="#idt-ms-idt-Examine-the-Interrupt-Descriptor-Table-IDT" class="headerlink" title="!idt/!ms_idt: Examine the Interrupt Descriptor Table (IDT)"></a>!idt/!ms_idt: Examine the Interrupt Descriptor Table (IDT)</h3><h3 id="pte-Examining-Virtual-Memory-and-Page-Tables"><a href="#pte-Examining-Virtual-Memory-and-Page-Tables" class="headerlink" title="!pte: Examining Virtual Memory and Page Tables"></a>!pte: Examining Virtual Memory and Page Tables</h3><h3 id="pool"><a href="#pool" class="headerlink" title="!pool:"></a>!pool:</h3><p>将内存地址与数据结构或驱动程序相关联</p>
+<h3 id="irql-Examining-Windows-Interrupt-Request-Level-IRQL"><a href="#irql-Examining-Windows-Interrupt-Request-Level-IRQL" class="headerlink" title="!irql: Examining Windows Interrupt Request Level (IRQL)"></a>!irql: Examining Windows Interrupt Request Level (IRQL)</h3>
+	
+	</div>
+  <a type="button" href="/2021/09/17/Windbg用法/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/09/09/遇到hexo莫名其妙的bug/" >遇到hexo莫名其妙的bug</a>
 		</h3>
 		</div>
@@ -825,6 +1144,60 @@
             
             
 		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
 
 	
 
@@ -850,10 +1223,28 @@
 </ol>
 <p>双亲委派机制：</p>
 <p>双亲委派模式的工作原理的是;如果一个类加载器收到了类加载请求，它并不会自己先去加载，而是把这个请求委托给父类的加载器去执行，如果父类加载器还存在其父类加载器，则进一步向上委托，依次递归，请求最终将到达顶层的启动类加载器，如果父类加载器可以完成类加载任务，就成功返回，倘若父类加载器无法完成此加载任务，子加载器才会尝试自己去加载，这就是双亲委派模式，即每个儿子都不愿意干活，每次有活就丢给父亲去干，直到父亲说这件事我也干不了时，儿子自己想办法去完成，这个就是双亲委派。</p>
-<p>1）避免重复加载，如果已经加载过一次Class，可以直接读取已经加载的Class<br>2）更加安全，无法自定义类来替代系统的类，可以防止核心API库被随意篡改</p>
-<p>类加载：</p>
-<p>类加载的时机：<br>1、隐式加载：<br>创建类的实例<br>访问类的静态变量，或者为静态变量赋值<br>调用类的静态方法<br>使用反射方式来强制创建某个类或接口对应的java.lang.Class对象<br>初始化某个类的子类<br>2、显示加载：两者又有所区别<br>使用LoadClass（）加载<br>使用forName（）加载<br>通过源码分析Android下类加载的流程</p>
-<p>1、装载：查找和导入Class文件<br>2、链接：其中解析步骤是可以选择的<br>（a）检查：检查载入的class文件数据的正确性<br>（b）准备：给类的静态变量分配存储空间<br>（c）解析：将符号引用转成直接引用<br>3、初始化：即调用&lt;clinit&gt;函数，对静态变量，静态代码块执行初始化工作</p>
+<p>why：</p>
+<p>1）避免重复加载，如果已经加载过一次Class，可以直接读取已经加载的Class</p>
+<p>2）更加安全，无法自定义类来替代系统的类，可以防止核心API库被随意篡改</p>
+<p>类加载的时机：</p>
+<p>1、隐式加载：</p>
+<pre><code>创建类的实例
+访问类的静态变量，或者为静态变量赋值
+调用类的静态方法
+使用反射方式来强制创建某个类或接口对应的java.lang.Class对象
+初始化某个类的子类
+</code></pre>
+<p>2、显示加载：两者又有所区别</p>
+<pre><code>使用LoadClass（）加载
+使用forName（）加载
+</code></pre>
+<p>1、装载：查找和导入Class文件</p>
+<p>2、链接：其中解析步骤是可以选择的</p>
+<pre><code>（a）检查：检查载入的class文件数据的正确性
+（b）准备：给类的静态变量分配存储空间
+（c）解析：将符号引用转成直接引用
+</code></pre>
+<p>3、初始化：即调用&lt;clinit&gt;函数，对静态变量，静态代码块执行初始化工作</p>
 <h2 id="Android的类加载器"><a href="#Android的类加载器" class="headerlink" title="Android的类加载器"></a>Android的类加载器</h2><p>Android系统中与ClassLoader相关的一共有8个：</p>
 <p>ClassLoader为抽象类；</p>
 <p>BootClassLoader预加载常用类，单例模式。与Java中的BootClassLoader不同，它并不是由C/C++代码实现，而是由Java实现的；</p>
@@ -2534,303 +2925,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/08/01/pwn总结/" >pwn总结</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-08-01  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-		
-            
-            <p class="post">&lt;h2 id=&#34;栈溢出&#34;&gt;&lt;a href=&#34;#栈溢出&#34; class=&#34;headerlink&#34; title=&#34;栈溢出&#34;&gt;&lt;/a&gt;栈溢出&lt;/h2&gt;&lt;h3 id=&#34;过NX&#34;&gt;&lt;a href=&#34;#过NX&#34; class=&#34;headerlink&#34; title=&#34;过NX&#34;&gt;&lt;/a&gt;过NX&lt;/h3&gt;&lt;p&gt;No-eXecute，表示不可执行，其原理是将数据所在的内存页标识为不可执行，如果程序产生溢出转入执行 shellcode 时，CPU 会抛出异常。&lt;/p&gt;
-&lt;p&gt;在 Linux 中，当装载器将程序装载进内存空间后，将程序的 .text 段标记为可执行，而其余的数据段（.data、.bss 等）以及栈、堆均为不可执行。因此，传统利用方式中通过修改 GOT 来执行 shellcode 的方式不再可行。&lt;/p&gt;
-&lt;p&gt;使用ROP，ret2libc&lt;/p&gt;
-&lt;h3 id=&#34;过PIE，ASLR&#34;&gt;&lt;a href=&#34;#过PIE，ASLR&#34; class=&#34;headerlink&#34; title=&#34;过PIE，ASLR&#34;&gt;&lt;/a&gt;过PIE，ASLR&lt;/h3&gt;&lt;p&gt;地址空间布局随机化（ASLR），该技术虽然不是由 GCC 编译时提供的，但对 PIE 还是有影响。该技术旨在将程序的内存布局随机化，使得攻击者不能轻易地得到数据区的地址来构造 payload。由于程序的堆栈分配与共享库的装载都是在运行时进行，系统在程序每次执行时，随机地分配程序堆栈的地址以及共享库装载的地址。使得攻击者无法预测自己写入的数据区的虚拟地址。&lt;/p&gt;
-&lt;p&gt;针对该保护机制的攻击，往往是通过信息泄漏来实现。由于同一模块中的所有代码和数据的相对偏移是固定的，攻击者只要泄漏出某个模块中的任一代码指针或数据指针，即可通过计算得到此模块中任意代码或数据的地址。&lt;/p&gt;
-&lt;p&gt;PIE（Position Independent Executable）其实就是把可执行文件给编译成动态链接库，需要配合 ASLR 来使用，以达到可执行文件的加载时地址随机化。简单来说，PIE 是编译时随机化，由编译器完成；ASLR 是加载时随机化，由操作系统完成。ASLR 将程序运行时的堆栈以及共享库的加载地址随机化，而 PIE 在编译时将程序编译为位置无关、即程序运行时各个段加载的虚拟地址在装载时确定。开启 PIE 时，编译生成的是动态库文件（Shared object）文件，而关闭 PIE 后生成可执行文件（Executable）&lt;/p&gt;
-&lt;p&gt;需要把地址泄漏出来&lt;/p&gt;
-&lt;h3 id=&#34;过canary&#34;&gt;&lt;a href=&#34;#过canary&#34; class=&#34;headerlink&#34; title=&#34;过canary&#34;&gt;&lt;/a&gt;过canary&lt;/h3&gt;&lt;p&gt;-fno-stack-protector 关闭canary检测&lt;br&gt;-fstack-protector 打开canary检测&lt;/p&gt;
-&lt;p&gt;通过泄漏地址或者&lt;/p&gt;
-&lt;h3 id=&#34;RELRO&#34;&gt;&lt;a href=&#34;#RELRO&#34; class=&#34;headerlink&#34; title=&#34;RELRO&#34;&gt;&lt;/a&gt;RELRO&lt;/h3&gt;&lt;p&gt;RELRO（ReLocation Read-Only）设置符号重定向表为只读或在程序启动时就解析并绑定所有动态符号，从而减少对 GOT（Global Offset Table）的攻击。&lt;/p&gt;
-&lt;p&gt;RELOR 有两种形式：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Partial RELRO：一些段（包括 &lt;code&gt;.dynamic&lt;/code&gt;）在初始化后将会被标记为只读。&lt;/li&gt;
-&lt;li&gt;Full RELRO：除了 Partial RELRO，延迟绑定将被禁止，所有的导入符号将在开始时被解析，&lt;code&gt;.got.plt&lt;/code&gt; 段会被完全初始化为目标函数的最终地址，并被标记为只读。另外 &lt;code&gt;link_map&lt;/code&gt; 和 &lt;code&gt;_dl_runtime_resolve&lt;/code&gt; 的地址也不会被装入。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;编译参数&#34;&gt;&lt;a href=&#34;#编译参数&#34; class=&#34;headerlink&#34; title=&#34;编译参数&#34;&gt;&lt;/a&gt;编译参数&lt;/h2&gt;&lt;p&gt;各种安全技术的编译参数如下：&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;安全技术&lt;/th&gt;
-&lt;th&gt;完全开启&lt;/th&gt;
-&lt;th&gt;部分开启&lt;/th&gt;
-&lt;th&gt;关闭&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td&gt;Canary&lt;/td&gt;
-&lt;td&gt;-fstack-protector-all&lt;/td&gt;
-&lt;td&gt;-fstack-protector&lt;/td&gt;
-&lt;td&gt;-fno-stack-protector&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;NX&lt;/td&gt;
-&lt;td&gt;-z noexecstack&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;td&gt;-z execstack&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;PIE&lt;/td&gt;
-&lt;td&gt;-pie&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;td&gt;-no-pie&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;RELRO&lt;/td&gt;
-&lt;td&gt;-z now&lt;/td&gt;
-&lt;td&gt;-z lazy&lt;/td&gt;
-&lt;td&gt;-z norelro&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-<p>
-		
-
-	
-
-	</div>
-  <a type="button" href="/2021/08/01/pwn总结/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h2 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h2><h3 id="过NX"><a href="#过NX" class="headerlink" title="过NX"></a>过NX</h3><p>No-eXecute，表示不可执行，其原理是将数据所在的内存页标识为不可执行，如果程序产生溢出转入执行 shellcode 时，CPU 会抛出异常。</p>
-<p>在 Linux 中，当装载器将程序装载进内存空间后，将程序的 .text 段标记为可执行，而其余的数据段（.data、.bss 等）以及栈、堆均为不可执行。因此，传统利用方式中通过修改 GOT 来执行 shellcode 的方式不再可行。</p>
-<p>使用ROP，ret2libc</p>
-<h3 id="过PIE，ASLR"><a href="#过PIE，ASLR" class="headerlink" title="过PIE，ASLR"></a>过PIE，ASLR</h3><p>地址空间布局随机化（ASLR），该技术虽然不是由 GCC 编译时提供的，但对 PIE 还是有影响。该技术旨在将程序的内存布局随机化，使得攻击者不能轻易地得到数据区的地址来构造 payload。由于程序的堆栈分配与共享库的装载都是在运行时进行，系统在程序每次执行时，随机地分配程序堆栈的地址以及共享库装载的地址。使得攻击者无法预测自己写入的数据区的虚拟地址。</p>
-<p>针对该保护机制的攻击，往往是通过信息泄漏来实现。由于同一模块中的所有代码和数据的相对偏移是固定的，攻击者只要泄漏出某个模块中的任一代码指针或数据指针，即可通过计算得到此模块中任意代码或数据的地址。</p>
-<p>PIE（Position Independent Executable）其实就是把可执行文件给编译成动态链接库，需要配合 ASLR 来使用，以达到可执行文件的加载时地址随机化。简单来说，PIE 是编译时随机化，由编译器完成；ASLR 是加载时随机化，由操作系统完成。ASLR 将程序运行时的堆栈以及共享库的加载地址随机化，而 PIE 在编译时将程序编译为位置无关、即程序运行时各个段加载的虚拟地址在装载时确定。开启 PIE 时，编译生成的是动态库文件（Shared object）文件，而关闭 PIE 后生成可执行文件（Executable）</p>
-<p>需要把地址泄漏出来</p>
-<h3 id="过canary"><a href="#过canary" class="headerlink" title="过canary"></a>过canary</h3><p>-fno-stack-protector 关闭canary检测<br>-fstack-protector 打开canary检测</p>
-<p>通过泄漏地址或者</p>
-<h3 id="RELRO"><a href="#RELRO" class="headerlink" title="RELRO"></a>RELRO</h3><p>RELRO（ReLocation Read-Only）设置符号重定向表为只读或在程序启动时就解析并绑定所有动态符号，从而减少对 GOT（Global Offset Table）的攻击。</p>
-<p>RELOR 有两种形式：</p>
-<ul>
-<li>Partial RELRO：一些段（包括 <code>.dynamic</code>）在初始化后将会被标记为只读。</li>
-<li>Full RELRO：除了 Partial RELRO，延迟绑定将被禁止，所有的导入符号将在开始时被解析，<code>.got.plt</code> 段会被完全初始化为目标函数的最终地址，并被标记为只读。另外 <code>link_map</code> 和 <code>_dl_runtime_resolve</code> 的地址也不会被装入。</li>
-</ul>
-<h2 id="编译参数"><a href="#编译参数" class="headerlink" title="编译参数"></a>编译参数</h2><p>各种安全技术的编译参数如下：</p>
-<table>
-<thead>
-<tr>
-<th>安全技术</th>
-<th>完全开启</th>
-<th>部分开启</th>
-<th>关闭</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Canary</td>
-<td>-fstack-protector-all</td>
-<td>-fstack-protector</td>
-<td>-fno-stack-protector</td>
-</tr>
-<tr>
-<td>NX</td>
-<td>-z noexecstack</td>
-<td></td>
-<td>-z execstack</td>
-</tr>
-<tr>
-<td>PIE</td>
-<td>-pie</td>
-<td></td>
-<td>-no-pie</td>
-</tr>
-<tr>
-<td>RELRO</td>
-<td>-z now</td>
-<td>-z lazy</td>
-<td>-z norelro</td>
-</tr>
-</tbody></table>
-
-	
-	</div>
-  <a type="button" href="/2021/08/01/pwn总结/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -2880,33 +2974,33 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
-		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
-		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
-		
 			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
-		
-			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
 		
 			<li><a href="/tags/Android/">Android<span>1</span></a></li>
 		
 			<li><a href="/tags/unix/">unix<span>2</span></a></li>
 		
-			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+			<li><a href="/tags/python/">python<span>2</span></a></li>
 		
 			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
 		
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+		
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
+		
+			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+		
 			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
 		
-			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
 		
-			<li><a href="/tags/python/">python<span>2</span></a></li>
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -2918,6 +3012,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
+      </li>
     
       <li>
         <a href="/2021/09/09/遇到hexo莫名其妙的bug/" ><i class="fa fa-file-o"></i>遇到hexo莫名其妙的bug</a>
@@ -2933,10 +3031,6 @@
     
       <li>
         <a href="/2021/08/30/守护进程/" ><i class="fa fa-file-o"></i>Unix守护进程</a>
-      </li>
-    
-      <li>
-        <a href="/2021/08/20/Android-Java类加载机制/" ><i class="fa fa-file-o"></i>Java类加载机制</a>
       </li>
     
   </ul>

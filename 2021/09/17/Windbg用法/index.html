@@ -1,0 +1,341 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Windbg用法 | P1AIN0&#39;S BLOG</title>
+  
+  
+  <meta name="description" content="在内核空间和用户空间工作的命令dv/dt当您进行源代码级调试时，可以使用“Display Local Variables”（dv） 命令，或者您可以打开本地变量窗口。
+“Display Type”(dt) 命令既可以显示struct的字段，也可以根据给定的struct类型解释给定地址处的内存。
+仅显">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Windbg用法"/>
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Windbg用法</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="在内核空间和用户空间工作的命令"><a href="#在内核空间和用户空间工作的命令" class="headerlink" title="在内核空间和用户空间工作的命令"></a>在内核空间和用户空间工作的命令</h2><h3 id="dv-dt"><a href="#dv-dt" class="headerlink" title="dv/dt"></a>dv/dt</h3><p>当您进行源代码级调试时，可以使用“Display Local Variables”（dv） 命令，或者您可以打开本地变量窗口。</p>
+<p>“Display Type”(dt) 命令既可以显示struct的字段，也可以根据给定的struct类型解释给定地址处的内存。</p>
+<h4 id="仅显示给定类型struct的顶级字段"><a href="#仅显示给定类型struct的顶级字段" class="headerlink" title="仅显示给定类型struct的顶级字段"></a>仅显示给定类型struct的顶级字段</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">dt &#123;structure type&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">0</span>: kd&gt; dt nt!_EPROCESS</span><br><span class="line">   +<span class="number">0x000</span> Pcb              : _KPROCESS</span><br><span class="line">   +<span class="number">0x438</span> ProcessLock      : _EX_PUSH_LOCK</span><br><span class="line">   +<span class="number">0x440</span> UniqueProcessId  : Ptr64 Void</span><br><span class="line">   +<span class="number">0x448</span> ActiveProcessLinks : _LIST_ENTRY</span><br><span class="line">   +<span class="number">0x458</span> RundownProtect   : _EX_RUNDOWN_REF</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="递归显示struct定义"><a href="#递归显示struct定义" class="headerlink" title="递归显示struct定义"></a>递归显示struct定义</h4><p>要递归显示struct（和sub-struct）的字段：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dt -r&#123;depth&#125; &#123;structure type&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">0</span>: kd&gt; dt -r2 nt!_EPROCESS</span><br><span class="line">   +<span class="number">0x000</span> Pcb              : _KPROCESS</span><br><span class="line">      +<span class="number">0x000</span> Header           : _DISPATCHER_HEADER</span><br><span class="line">         +<span class="number">0x000</span> Lock             : Int4B</span><br><span class="line">         +<span class="number">0x000</span> LockNV           : Int4B</span><br><span class="line">         +<span class="number">0x000</span> Type             : UChar</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="按struct显示给定地址出内存中的值："><a href="#按struct显示给定地址出内存中的值：" class="headerlink" title="按struct显示给定地址出内存中的值："></a>按struct显示给定地址出内存中的值：</h4><p>根据结构定义解释给定地址处的内存：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dt &#123;structure type&#125; &#123;address&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">0</span>: kd&gt; dt nt!_EPROCESS ffffb38b26516340</span><br><span class="line">   +<span class="number">0x000</span> Pcb              : _KPROCESS</span><br><span class="line">   +<span class="number">0x438</span> ProcessLock      : _EX_PUSH_LOCK</span><br><span class="line">   +<span class="number">0x440</span> UniqueProcessId  : <span class="number">0x00000000</span>`<span class="number">00001858</span> Void</span><br><span class="line">   +<span class="number">0x448</span> ActiveProcessLinks : _LIST_ENTRY [ <span class="number">0xffffb38b</span>`<span class="number">25</span>aab748 - <span class="number">0xffffb38b</span>`<span class="number">263</span>da4c8 ]</span><br><span class="line">   +<span class="number">0x458</span> RundownProtect   : _EX_RUNDOWN_REF</span><br><span class="line">   +<span class="number">0x460</span> Flags2           : <span class="number">0x200d080</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="sxe-ld"><a href="#sxe-ld" class="headerlink" title="sxe ld"></a>sxe ld</h3><h4 id="模块加载时中断"><a href="#模块加载时中断" class="headerlink" title="模块加载时中断"></a>模块加载时中断</h4><p>Set Exception (sx) 命令可用于在发生特定事件时中断。形式如下：</p>
+<ul>
+<li>Enable: sxe</li>
+<li>Ignore: sxi</li>
+</ul>
+<p>可以触发调试器中断的事件有很多，现在只看模块加载，在进行用户空间调试时，“模块”可以是 .exe 或 .dll。 在内核模式下，模块是 .sys 内核驱动程序（或.exe NT的内核本身。）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxe ld</span><br></pre></td></tr></table></figure>
+
+<p>这条命令会使调试器将在每个模块加载时中断。</p>
+<h4 id="在-sx-中断时自动运行命令"><a href="#在-sx-中断时自动运行命令" class="headerlink" title="在 sx* 中断时自动运行命令"></a>在 sx* 中断时自动运行命令</h4><p>sx*有个可可选的参数 <code> -c &quot;some ; list ; of ; commands&quot;</code>;一个有用的命令是“.lastevent”，它可以打印出关于最后发生的事件的信息。</p>
+<p>例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxe -c <span class="string">&quot;.lastevent&quot;</span> ld</span><br></pre></td></tr></table></figure>
+
+<p>如果您只想查看模块何时加载，而不是实际停止（例如，仅查看引导时加载内核驱动程序的顺序），您可以使用：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxi -c <span class="string">&quot;.lastevent ; g&quot;</span> ld</span><br></pre></td></tr></table></figure>
+
+<h4 id="忽略-禁用断点："><a href="#忽略-禁用断点：" class="headerlink" title="忽略/禁用断点："></a>忽略/禁用断点：</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sxi -c <span class="string">&quot;&quot;</span> ld</span><br></pre></td></tr></table></figure>
+
+<h3 id="lm-List-Modules"><a href="#lm-List-Modules" class="headerlink" title="lm:List Modules"></a>lm:List Modules</h3><p>List Modules (Userspace &amp; Kernel)：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm</span><br></pre></td></tr></table></figure>
+
+<p>List Modules Userspace only：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm u</span><br></pre></td></tr></table></figure>
+
+<p>List Modules kernel only：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm k</span><br></pre></td></tr></table></figure>
+
+<p>List Modules(按字母排序)：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm sm</span><br></pre></td></tr></table></figure>
+
+<p>列出的模块带着系统路径：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm f</span><br></pre></td></tr></table></figure>
+
+<p>组合命令输出方式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm ksmf</span><br></pre></td></tr></table></figure>
+
+<p>给lm命令加一个v选项，获取冗长的输出信息。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm ksmv</span><br></pre></td></tr></table></figure>
+
+<p>查看地址属于哪个模块：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lm a address</span><br></pre></td></tr></table></figure>
+
+<h3 id="load-加载第三方插件"><a href="#load-加载第三方插件" class="headerlink" title="!load 加载第三方插件"></a>!load 加载第三方插件</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">!load </span><br><span class="line">!unload </span><br></pre></td></tr></table></figure>
+
+<h2 id="kernel-only-command"><a href="#kernel-only-command" class="headerlink" title="kernel-only command"></a>kernel-only command</h2><h3 id="process-process"><a href="#process-process" class="headerlink" title="!process/.process"></a>!process/.process</h3><p>display 当前进程的context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process <span class="number">-1</span> [flags]</span><br></pre></td></tr></table></figure>
+
+<p>列出所有进程的context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process <span class="number">0</span> [flags]</span><br></pre></td></tr></table></figure>
+
+<p>通过进程名查看进程的context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process <span class="number">0</span> [flags] [exec name]</span><br></pre></td></tr></table></figure>
+
+<p>通过进程的pid查看进程context</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!process [pid] [flags]</span><br></pre></td></tr></table></figure>
+
+<p>将进程上下文切换为目标进程：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.process /i /r /p [<span class="string">&quot;PROCESS&quot;</span> address from !process output]</span><br></pre></td></tr></table></figure>
+
+<h3 id="rdmsr-wrmsr-Reading-Writing-Model-Specific-Registers-MSRs"><a href="#rdmsr-wrmsr-Reading-Writing-Model-Specific-Registers-MSRs" class="headerlink" title="rdmsr/wrmsr: Reading/Writing Model Specific Registers (MSRs)"></a>rdmsr/wrmsr: Reading/Writing Model Specific Registers (MSRs)</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rdmsr [MSR #]</span><br><span class="line">wrmsr [MSR #] [value to write]</span><br></pre></td></tr></table></figure>
+
+<h3 id="ms-gdt-Examine-the-Global-Descriptor-Table-GDT"><a href="#ms-gdt-Examine-the-Global-Descriptor-Table-GDT" class="headerlink" title="!ms_gdt: Examine the Global Descriptor Table (GDT)"></a>!ms_gdt: Examine the Global Descriptor Table (GDT)</h3><h3 id="idt-ms-idt-Examine-the-Interrupt-Descriptor-Table-IDT"><a href="#idt-ms-idt-Examine-the-Interrupt-Descriptor-Table-IDT" class="headerlink" title="!idt/!ms_idt: Examine the Interrupt Descriptor Table (IDT)"></a>!idt/!ms_idt: Examine the Interrupt Descriptor Table (IDT)</h3><h3 id="pte-Examining-Virtual-Memory-and-Page-Tables"><a href="#pte-Examining-Virtual-Memory-and-Page-Tables" class="headerlink" title="!pte: Examining Virtual Memory and Page Tables"></a>!pte: Examining Virtual Memory and Page Tables</h3><h3 id="pool"><a href="#pool" class="headerlink" title="!pool:"></a>!pool:</h3><p>将内存地址与数据结构或驱动程序相关联</p>
+<h3 id="irql-Examining-Windows-Interrupt-Request-Level-IRQL"><a href="#irql-Examining-Windows-Interrupt-Request-Level-IRQL" class="headerlink" title="!irql: Examining Windows Interrupt Request Level (IRQL)"></a>!irql: Examining Windows Interrupt Request Level (IRQL)</h3>
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/2021/09/17/Windbg%E7%94%A8%E6%B3%95/" class="leancloud-visitors view" data-flag-title="Windbg用法">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2021/09/09/遇到hexo莫名其妙的bug/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xx","appKey":"xx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-09-17 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

