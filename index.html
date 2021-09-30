@@ -114,6 +114,140 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/09/30/一个加密木马的分析/" >一个加密木马的分析</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-09-30  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/09/30/一个加密木马的分析/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>主要分析木马的解密过程。</p>
+<h2 id="分析过程"><a href="#分析过程" class="headerlink" title="分析过程"></a>分析过程</h2><p>使用ollydbg利用命令<code>bp VirtualAlloc</code>首先在VirtualAlloc处下断点，第一次是个size=0xE0，暂时忽略，第二次size=0xDCA00，看起来像是一个pe文件的大小了，调用地址也比较奇怪，是栈空间的地址，有此可以断定在此之前一定还有另一个解密过程，把代码揭秘到栈空间去执行。</p>
+<p>先去看它第一次的解密过程，把它返回地址(0x12f88f)和数据(0x85)记下来，重新运行该样本，等它断在入口点时，在这个栈地址上下硬件断点，等这地方的数据成为0x85时再观察，来到了0x67DF8F地址处，如图所示：</p>
+<p><img src="1.png"></p>
+<p>接下来就是分析这片的代码干了什么事，经过分析后，我添加了注释，如下图所示：</p>
+<p><img src="2.png"></p>
+<p>其实就是简单的解密操作，源数据地址在0x46B370，大小为0x67D，解密密钥地址为0x53FA20,大小为0x10字节，目标地址为0x12F714。</p>
+<p>接下来分析第二个解密的地方，首先在分配完内存后，使用硬件断点找到解密代码的地方，在0x12f9d3地址处把数据复制进目标地址，然后在0x12fa25地址处解密，先分析复制数据区域的代码，如图所示：</p>
+<p><img src="3.png"></p>
+<pre><code>0012F66C   004020B1
+0012F670   004D6A10
+0012F674   00540A40
+0012F678   005AAB40
+0012F67C   00614BE0
+0012F680   006E9330
+0012F684   0067F000
+0012F688   0046CA00
+</code></pre>
+<p>经过分析复制的过程是这样的：将这八个地址的数据，每次循环各取出一字节，按顺序复制到目标缓冲区中。</p>
+<p>接下来分析解密过程：</p>
+<p><img src="4.png"></p>
+<p>解密也是使用的0x53FA20地址处的密钥，密钥与数据xor运算后，又使用了数据的索引的低16位进行了一次xor运算得到揭秘结果，通过，通过MZ和PE的标志，由此我们推断这是个PE文件。</p>
+
+	
+	</div>
+  <a type="button" href="/2021/09/30/一个加密木马的分析/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/09/24/Windows系统调用/" >Windows系统调用</a>
 		</h3>
 		</div>
@@ -1854,938 +1988,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/08/11/Arm Instractions/" >ARM-Instractions</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-08-11  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-		
-            
-            <p class="post">&lt;h2 id=&#34;DATA-Types&#34;&gt;&lt;a href=&#34;#DATA-Types&#34; class=&#34;headerlink&#34; title=&#34;DATA Types&#34;&gt;&lt;/a&gt;DATA Types&lt;/h2&gt;&lt;p&gt;与高级语言相似，ARM支持操作不同类型的数据类型。我们可以load（or stroe）的数据类型有signed and unsigned words、halfwords、or bytes. 这些数据类型的extensions分别是：halfwords是-h or -sh，bytes是-b or -sb，word没有extension. signed and unsinged 数据的区别：&lt;br&gt;    1.signed data type 能储存正数和负数，因此范围较小&lt;br&gt;    2.unsigned data type 可以保存大的正值（包括“零”），但不能保存负值，因此范围更广。&lt;/p&gt;
-&lt;p&gt;以下是一些load和store指令的操作指令的一些例子：&lt;/p&gt;
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;ldr = Load Word&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ldrh = Load &lt;span class=&#34;keyword&#34;&gt;unsigned&lt;/span&gt; Half Word&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ldrsh = Load &lt;span class=&#34;keyword&#34;&gt;signed&lt;/span&gt; Half Word&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ldrb = Load &lt;span class=&#34;keyword&#34;&gt;unsigned&lt;/span&gt; Byte&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ldrsb = Load &lt;span class=&#34;keyword&#34;&gt;signed&lt;/span&gt; Bytes&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;str = Store Word&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;strh = Store &lt;span class=&#34;keyword&#34;&gt;unsigned&lt;/span&gt; Half Word&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;strsh = Store &lt;span class=&#34;keyword&#34;&gt;signed&lt;/span&gt; Half Word&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;strb = Store &lt;span class=&#34;keyword&#34;&gt;unsigned&lt;/span&gt; Byte&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;strsb = Store &lt;span class=&#34;keyword&#34;&gt;signed&lt;/span&gt; Byte&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;查看内存中的字节有两种基本方式：Little-Endian (LE) 或 Big-Endian (BE)。 区别在于对象的每个字节存储在内存中的字节顺序。 在像 Intel x86 这样的小端机器上，最低有效字节存储在最低地址（最接近零的地址）。 在 big-endian 机器上，最高有效字节存储在最低地址。 ARM 体系结构在第 3 版之前是小端的，从那时起它是双端的，这意味着它具有允许可切换的端的设置。 例如，在 ARMv6 上，指令是固定的 little-endian，数据访问可以是 little-endian 或 big-endian，由程序状态寄存器 (CPSR) 的第 9 位（E 位）控制。&lt;/p&gt;
-&lt;p&gt;寄存器的数量是依赖于ARM的版本的，通过查询ARM Reference Manual，除了基于 ARMv6-M 和 ARMv7-M 的处理器外，都有 30 个通用 32 位寄存器，前 16 个寄存器(r1-r15)可在用户级模式下访问，其他寄存器可在特权软件执行中使用（ARMv6-M 和 ARMv7-M 除外）。&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;#&lt;/th&gt;
-&lt;th&gt;Alias&lt;/th&gt;
-&lt;th&gt;Purpose&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td&gt;R0&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;R1&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;R2&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;R3&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;R4&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;R5&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;R6&lt;/td&gt;
-&lt;td&gt;-&lt;/td&gt;
-&lt;td&gt;General purppose&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-<p>
-		
-
-	
-
-	</div>
-  <a type="button" href="/2021/08/11/Arm Instractions/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h2 id="DATA-Types"><a href="#DATA-Types" class="headerlink" title="DATA Types"></a>DATA Types</h2><p>与高级语言相似，ARM支持操作不同类型的数据类型。我们可以load（or stroe）的数据类型有signed and unsigned words、halfwords、or bytes. 这些数据类型的extensions分别是：halfwords是-h or -sh，bytes是-b or -sb，word没有extension. signed and unsinged 数据的区别：<br>    1.signed data type 能储存正数和负数，因此范围较小<br>    2.unsigned data type 可以保存大的正值（包括“零”），但不能保存负值，因此范围更广。</p>
-<p>以下是一些load和store指令的操作指令的一些例子：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ldr = Load Word</span><br><span class="line">ldrh = Load <span class="keyword">unsigned</span> Half Word</span><br><span class="line">ldrsh = Load <span class="keyword">signed</span> Half Word</span><br><span class="line">ldrb = Load <span class="keyword">unsigned</span> Byte</span><br><span class="line">ldrsb = Load <span class="keyword">signed</span> Bytes</span><br><span class="line"></span><br><span class="line">str = Store Word</span><br><span class="line">strh = Store <span class="keyword">unsigned</span> Half Word</span><br><span class="line">strsh = Store <span class="keyword">signed</span> Half Word</span><br><span class="line">strb = Store <span class="keyword">unsigned</span> Byte</span><br><span class="line">strsb = Store <span class="keyword">signed</span> Byte</span><br></pre></td></tr></table></figure>
-
-<p>查看内存中的字节有两种基本方式：Little-Endian (LE) 或 Big-Endian (BE)。 区别在于对象的每个字节存储在内存中的字节顺序。 在像 Intel x86 这样的小端机器上，最低有效字节存储在最低地址（最接近零的地址）。 在 big-endian 机器上，最高有效字节存储在最低地址。 ARM 体系结构在第 3 版之前是小端的，从那时起它是双端的，这意味着它具有允许可切换的端的设置。 例如，在 ARMv6 上，指令是固定的 little-endian，数据访问可以是 little-endian 或 big-endian，由程序状态寄存器 (CPSR) 的第 9 位（E 位）控制。</p>
-<p>寄存器的数量是依赖于ARM的版本的，通过查询ARM Reference Manual，除了基于 ARMv6-M 和 ARMv7-M 的处理器外，都有 30 个通用 32 位寄存器，前 16 个寄存器(r1-r15)可在用户级模式下访问，其他寄存器可在特权软件执行中使用（ARMv6-M 和 ARMv7-M 除外）。</p>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Alias</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>R0</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R1</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R2</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R3</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R4</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R5</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R6</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R7</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R8</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R9</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R10</td>
-<td>-</td>
-<td>General purppose</td>
-</tr>
-<tr>
-<td>R11</td>
-<td>FP</td>
-<td>Frame Pointer</td>
-</tr>
-<tr>
-<td>R12</td>
-<td>IP</td>
-<td>Instra Procedural Call</td>
-</tr>
-<tr>
-<td>R13</td>
-<td>SP</td>
-<td>Stack Pointer</td>
-</tr>
-<tr>
-<td>R14</td>
-<td>LR</td>
-<td>Link Register</td>
-</tr>
-<tr>
-<td>R15</td>
-<td>PC</td>
-<td>Program Counter</td>
-</tr>
-<tr>
-<td>CPSR</td>
-<td>-</td>
-<td>Current Program Status Register</td>
-</tr>
-</tbody></table>
-<p>下表只是快速了解 ARM 寄存器如何与 Intel 处理器中的寄存器相关联。</p>
-<table>
-<thead>
-<tr>
-<th>ARM</th>
-<th>Description</th>
-<th>x86</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>R0</td>
-<td>General Purpose</td>
-<td>EAX</td>
-</tr>
-<tr>
-<td>R1-R5</td>
-<td>General Purpose</td>
-<td>EBX, ECX, EDX, ESI, EDI</td>
-</tr>
-<tr>
-<td>R6-R10</td>
-<td>General Purpose</td>
-<td>–</td>
-</tr>
-<tr>
-<td>R11 (FP)</td>
-<td>Frame Pointer</td>
-<td>EBP</td>
-</tr>
-<tr>
-<td>R12</td>
-<td>Intra Procedural Call</td>
-<td>–</td>
-</tr>
-<tr>
-<td>R13 (SP)</td>
-<td>Stack Pointer</td>
-<td>ESP</td>
-</tr>
-<tr>
-<td>R14 (LR)</td>
-<td>Link Register</td>
-<td>–</td>
-</tr>
-<tr>
-<td>R15 (PC)</td>
-<td>&lt;- Program Counter / Instruction Pointer -&gt;</td>
-<td>EIP</td>
-</tr>
-<tr>
-<td>CPSR</td>
-<td>Current Program State Register/Flags</td>
-<td>EFLAGS</td>
-</tr>
-</tbody></table>
-<p>R0-R12：在普通的操作中可以被用作储存临时数据、指针等等。例如，R0 可在算术运算期间称为累加器或用于存储先前调用函数的结果。 R7 在处理系统调用时变得有用，因为它存储系统调用编号，而 R11 帮助我们跟踪用作帧指针的堆栈边界。 此外，ARM 上的函数调用约定指定函数的前四个参数存储在寄存器 r0-r3 中。</p>
-<p>R13：SP(Stack Pointer). 这个栈指针指向栈顶，栈是用于特定于函数的存储的内存区域，在函数返回时被回收。 因此，栈指针用于在栈上分配空间，方法是从栈指针中减去我们想要分配的值（以字节为单位）。 换句话说，如果我们想分配一个 32 位的值，我们从栈指针中减去 4。</p>
-<p>R14:LR(Link Register). 当一个函数调用被执行了，链接寄存器就会更新为下一条指令的内存地址。止痒允许程序在子函数完成后返回到父函数中接着执行。</p>
-<p>R15:PC(Program Counter).程序计数器根据所执行指令的大小自动递增。 此大小在 ARM 状态下始终为 4 个字节，在 THUMB 模式下始终为 2 个字节。 当执行分支指令时，PC 持有目的地址。 在执行过程中，PC 在 ARM 状态下存储当前指令加 8（两条 ARM 指令）的地址，在 Thumb(v1) 状态下存储当前指令加 4（两条 Thumb 指令）的地址。 这与 x86 不同，在 x86 中 PC 总是指向要执行的下一条指令。</p>
-<h3 id="下面在调试器下看一下PC寄存器的行为"><a href="#下面在调试器下看一下PC寄存器的行为" class="headerlink" title="下面在调试器下看一下PC寄存器的行为"></a>下面在调试器下看一下PC寄存器的行为</h3><p>源程序如下：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line"> <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">pc</span></span><br><span class="line"> <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#2</span></span><br><span class="line"> <span class="keyword">add</span> <span class="built_in">r2</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line"> bkpt</span><br></pre></td></tr></table></figure>
-
-<p>在GDB中我们设置断点_start然后运行</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gef&gt; b _start</span><br><span class="line">Breakpoint 1 at 0x10054</span><br><span class="line">gef&gt; r</span><br></pre></td></tr></table></figure>
-
-<p>断点的现场状态如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">Breakpoint 1, 0x00010054 in _start ()</span><br><span class="line">---------------------------------------------------------------[ registers ]----</span><br><span class="line">$r0   : 0x00000000</span><br><span class="line">$r1   : 0x00000000</span><br><span class="line">$r2   : 0x00000000</span><br><span class="line">$r3   : 0x00000000</span><br><span class="line">$r4   : 0x00000000</span><br><span class="line">$r5   : 0x00000000</span><br><span class="line">$r6   : 0x00000000</span><br><span class="line">$r7   : 0x00000000</span><br><span class="line">$r8   : 0x00000000</span><br><span class="line">$r9   : 0x00000000</span><br><span class="line">$r10  : 0x00000000</span><br><span class="line">$r11  : 0x00000000</span><br><span class="line">$r12  : 0x00000000</span><br><span class="line">$sp   : 0xbefff3b0 -&gt; 0x00000001</span><br><span class="line">$lr   : 0x00000000</span><br><span class="line">$pc   : 0x00010054 -&gt; &lt;_start+0&gt; mov r0,  pc</span><br><span class="line">$cpsr : [thumb fast interrupt overflow carry zero negative]</span><br><span class="line">-------------------------------------------------------------------[ stack ]----</span><br><span class="line">0xbefff3b0|+0x00: 0x00000001    &lt;-$sp</span><br><span class="line">0xbefff3b4|+0x04: 0xbefff51c -&gt; &quot;/home/pi/asm/test_pc&quot;</span><br><span class="line">0xbefff3b8|+0x08: 0x00000000</span><br><span class="line">0xbefff3bc|+0x0c: 0xbefff531 -&gt; 0x49464e49</span><br><span class="line">0xbefff3c0|+0x10: 0xbefff56b -&gt; &quot;XDG_SESSION_ID=c2&quot;</span><br><span class="line">0xbefff3c4|+0x14: 0xbefff57d -&gt; &quot;SHELL=/bin/bash&quot;</span><br><span class="line">0xbefff3c8|+0x18: 0xbefff58d -&gt; &quot;TERM=xterm&quot;</span><br><span class="line">0xbefff3cc|+0x1c: 0xbefff598 -&gt; 0x49464e49</span><br><span class="line">-------------------------------------------------------------[ code:armv5t ]----</span><br><span class="line">      0x1003c                  andeq  r0,  r1,  r0</span><br><span class="line">      0x10040                  andeq  r0,  r1,  r0</span><br><span class="line">      0x10044                  andeq  r0,  r0,  r4,  rrx</span><br><span class="line">      0x10048                  andeq  r0,  r0,  r4,  rrx</span><br><span class="line">      0x1004c                  andeq  r0,  r0,  r5</span><br><span class="line">      0x10050                  andeq  r0,  r1,  r0</span><br><span class="line">-&gt;   0x10054 &lt;_start+0&gt;       mov    r0,  pc</span><br><span class="line">      0x10058 &lt;_start+4&gt;       mov    r1,  #2</span><br><span class="line">      0x1005c &lt;_start+8&gt;       add    r2,  r1,  r1</span><br><span class="line">      0x10060 &lt;_start+12&gt;      bkpt   0x0000</span><br><span class="line">      0x10064                  andeq  r1,  r0,  r1,  asr #6</span><br><span class="line">      0x10068                  cmnvs  r5,  r0,  lsl #2</span><br><span class="line">-----------------------------------------------------------------[ threads ]----</span><br><span class="line">[#0] Id 1, Name: &quot;test_pc&quot;, stopped, reason: BREAKPOINT</span><br><span class="line">-------------------------------------------------------------------[ trace ]----</span><br><span class="line">[#0] 0x10054-&gt;Name: _start()</span><br><span class="line">-------------------------------------------------------------------------------- </span><br></pre></td></tr></table></figure>
-
-<p>单步运行后：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">0x00010058 in _start ()</span><br><span class="line">--------------------------------------------------------------------------------------------------------------------------------------------------------------------[ registers ]----</span><br><span class="line">$r0   : 0x0001005c -&gt; &lt;_start+8&gt; add r2,  r1,  r1</span><br><span class="line">$r1   : 0x00000000</span><br><span class="line">$r2   : 0x00000000</span><br><span class="line">$r3   : 0x00000000</span><br><span class="line">$r4   : 0x00000000</span><br><span class="line">$r5   : 0x00000000</span><br><span class="line">$r6   : 0x00000000</span><br><span class="line">$r7   : 0x00000000</span><br><span class="line">$r8   : 0x00000000</span><br><span class="line">$r9   : 0x00000000</span><br><span class="line">$r10  : 0x00000000</span><br><span class="line">$r11  : 0x00000000</span><br><span class="line">$r12  : 0x00000000</span><br><span class="line">$sp   : 0xbefff3b0 -&gt; 0x00000001</span><br><span class="line">$lr   : 0x00000000</span><br><span class="line">$pc   : 0x00010058 -&gt; &lt;_start+4&gt; mov r1,  #2</span><br><span class="line">$cpsr : [thumb fast interrupt overflow carry zero negative]</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------------------[ stack ]----</span><br><span class="line">0xbefff3b0|+0x00: 0x00000001    &lt;-$sp</span><br><span class="line">0xbefff3b4|+0x04: 0xbefff51c -&gt; &quot;/home/pi/asm/test_pc&quot;</span><br><span class="line">0xbefff3b8|+0x08: 0x00000000</span><br><span class="line">0xbefff3bc|+0x0c: 0xbefff531 -&gt; 0x49464e49</span><br><span class="line">0xbefff3c0|+0x10: 0xbefff56b -&gt; &quot;XDG_SESSION_ID=c2&quot;</span><br><span class="line">0xbefff3c4|+0x14: 0xbefff57d -&gt; &quot;SHELL=/bin/bash&quot;</span><br><span class="line">0xbefff3c8|+0x18: 0xbefff58d -&gt; &quot;TERM=xterm&quot;</span><br><span class="line">0xbefff3cc|+0x1c: 0xbefff598 -&gt; 0x49464e49</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------------[ code:armv5t ]----</span><br><span class="line">      0x10040                  andeq  r0,  r1,  r0</span><br><span class="line">      0x10044                  andeq  r0,  r0,  r4,  rrx</span><br><span class="line">      0x10048                  andeq  r0,  r0,  r4,  rrx</span><br><span class="line">      0x1004c                  andeq  r0,  r0,  r5</span><br><span class="line">      0x10050                  andeq  r0,  r1,  r0</span><br><span class="line">      0x10054 &lt;_start+0&gt;       mov    r0,  pc</span><br><span class="line">-&gt;   0x10058 &lt;_start+4&gt;       mov    r1,  #2</span><br><span class="line">      0x1005c &lt;_start+8&gt;       add    r2,  r1,  r1</span><br><span class="line">      0x10060 &lt;_start+12&gt;      bkpt   0x0000</span><br><span class="line">      0x10064                  andeq  r1,  r0,  r1,  asr #6</span><br><span class="line">      0x10068                  cmnvs  r5,  r0,  lsl #2</span><br><span class="line">      0x1006c                  tsteq  r0,  r2,  ror #18</span><br><span class="line">----------------------------------------------------------------------------------------------------------------------------------------------------------------------[ threads ]----</span><br><span class="line">[#0] Id 1, Name: &quot;test_pc&quot;, stopped, reason: SINGLE STEP</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------------------[ trace ]----</span><br><span class="line">[#0] 0x10058-&gt;Name: _start()</span><br><span class="line">-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-
-<p>奇妙的事情发生了，查看R0中的地址。 虽然我们希望 R0 包含先前读取的 PC 值 (0x10054)，但它保存的是我们先前读取的 PC (0x1005c) 前两条指令的值。 从这个例子可以看出，当我们直接读取PC时，它遵循PC指向下一条指令的定义； 但在调试时，PC 指向当前 PC 值（0x10054 + 8 = 0x1005C）之前的两条指令。 这是因为较旧的 ARM 处理器总是在当前执行的指令之前获取两条指令。 ARM 保留此定义的原因是为了确保与早期处理器的兼容性。</p>
-<h3 id="状态寄存器"><a href="#状态寄存器" class="headerlink" title="状态寄存器"></a>状态寄存器</h3><p>寄存器 $CPSR 显示当前程序状态寄存器 (CPSR) 的值，在其下方您可以看到标志拇指、快速中断、溢出、进位、零和负数。 这些标志代表 CPSR 寄存器中的某些位，根据 CPSR 的值设置，激活时变为1。 N、Z、C 和 V 位与 x86 上 EFLAG 寄存器中的 SF、ZF、CF 和 OF 位相同。 这些位用于在程序集级别支持条件和循环中的条件执行</p>
-<table>
-<thead>
-<tr>
-<th>N</th>
-<th>Z</th>
-<th>C</th>
-<th>V</th>
-<th>Q</th>
-<th>-</th>
-<th>J</th>
-<th>-</th>
-<th>GE</th>
-<th>-</th>
-<th>E</th>
-<th>A</th>
-<th>I</th>
-<th>F</th>
-<th>T</th>
-<th>M</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Negative</td>
-<td>Zero</td>
-<td>Carry</td>
-<td>Overflow</td>
-<td>underflow</td>
-<td></td>
-<td>Jazelle</td>
-<td></td>
-<td>Greater than or Equal for SIMD</td>
-<td></td>
-<td>Endianness</td>
-<td>Abort disable</td>
-<td>IRQ disable</td>
-<td>FIQ disable</td>
-<td>Thumb</td>
-<td>Processor mode(Privilege mode)</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th>Flag</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>N(Negative)</td>
-<td>如果指令结果是负数则置1.</td>
-</tr>
-<tr>
-<td>Z(Zero)</td>
-<td>如果指令结果产生零值则置1.</td>
-</tr>
-<tr>
-<td>C(Carry)</td>
-<td>如果指令的结果产生一个需要第 33 位才能完全表示的值，则置1.</td>
-</tr>
-<tr>
-<td>V(Overflow)</td>
-<td>如果该指令的结果产生不能在32位二进制补码表示的值.</td>
-</tr>
-<tr>
-<td>E(Endian-bit)</td>
-<td>ARM 可以以小端或大端方式运行。 对于小端模式，该位设置为 0，对于大端模式设置为 1.</td>
-</tr>
-<tr>
-<td>T(Thumb-bit)</td>
-<td>如果是Thumb模式置1，如果是ARM模式置0.</td>
-</tr>
-<tr>
-<td>M(Mode-bits)</td>
-<td>这些位指定当前特权模式（USR、SVC 等）.</td>
-</tr>
-<tr>
-<td>J(Jazelle)</td>
-<td>允许某些 ARM 处理器在硬件中执行 Java 字节码的第三种执行状态.</td>
-</tr>
-</tbody></table>
-<p>APSR包含下列ALU的状态标志：</p>
-<p>N-当操作结果为负数时设置；</p>
-<p>Z-当操作结果为0时设置；</p>
-<p>C-当操作导致进位时设置；</p>
-<p>V-当操作造成溢出时设置。</p>
-<p>在下列情况下，进位发生:</p>
-<ol>
-<li>如果加法的结果大于或等于 2^32，</li>
-<li>如果减法的结果是正数或零，</li>
-<li>作为move or logical指令中的内联桶形移位器操作的结果。</li>
-</ol>
-<p>如果加法、减法或比较的结果大于或等于 2^31，或小于 –2^31，溢出发生。</p>
-<h2 id="Mode"><a href="#Mode" class="headerlink" title="Mode"></a>Mode</h2><p>ARM 处理器有两个主要的状态可以运行（这里不计算 Jazelle），ARM 和 Thumb。 这些状态与特权级别无关。 例如，在 SVC 模式下运行的代码可以是 ARM 或 Thumb。 这两种状态的主要区别在于指令集，其中ARM状态的指令总是32位的，Thumb状态的指令是16位的（但也可以是32位的）。 了解何时以及如何使用 Thumb 对于我们的 ARM 漏洞利用开发目的尤其重要。 在编写 ARM shellcode 时，我们需要去掉 NULL 字节，使用 16 位 Thumb 指令而不是 32 位 ARM 指令减少了拥有它们的机会。</p>
-<p>这里有不同的Thumb版本：</p>
-<ol>
-<li>Thumb-1 (16-bit instructions): 在 ARMv6 and 更早的架构中使用.</li>
-<li>Thumb-2 (16-bit and 32-bit instructions): 扩展了 Thumb-1 通过加了更多的指令并且允许它们可以是16bits和32bits(ARMv6T2, ARMv7).</li>
-<li>ThumbEE: 包含了一些改变和添加使其能够动态的添加和生成代码（在执行之前或执行期间在设备上编译的代码）。</li>
-</ol>
-<p>ARM和Thumb之间的差别：</p>
-<ol>
-<li>条件执行，ARM状态下的所有的指令都支持条件执行，某些 ARM 处理器版本允许使用 IT 指令在 Thumb 中进行条件执行。 条件执行导致更高的代码密度，因为它减少了要执行的指令数量并减少分支预测的指令数量。</li>
-<li>32位的ARM和Thumb指令：32位的Thumb指令有.w后缀。</li>
-<li>桶形移位器是另一个独特的 ARM 模式功能。 它可用于将多条指令压缩为一条指令。例如，不使用两条指令进行乘法（将寄存器乘以 2 并使用 MOV 将结果存储到另一个寄存器中），您可以通过使用左移 1 -&gt; <code>Mov R1, R0, LSL #1</code> 将乘法包含在 MOV 指令中; <code>R1 = R0 * 2</code>.</li>
-</ol>
-<p>要切换处理器执行的状态，必须满足以下两个条件之一：</p>
-<ol>
-<li>我们可以使用分支指令BX (branch and exchange) or BLX (branch, link, and exchange) ，将目标寄存器的最低有效位设置为 1。这可以通过向偏移量加 1 来实现，例如 0x5530 + 1。您可能认为这会导致对齐问题，因为指令是 2 字节或 4 字节对齐的。 这不是问题，因为处理器将忽略最低有效位。</li>
-<li>如果当前程序状态寄存器中的 T 位被设置，我们就知道我们处于 Thumb 模式。</li>
-</ol>
-<h3 id="Briefly-introduce-into-ARM-Instructions"><a href="#Briefly-introduce-into-ARM-Instructions" class="headerlink" title="Briefly introduce into ARM Instructions"></a>Briefly introduce into ARM Instructions</h3><p>汇编语言由作为主要构建块的指令组成。 ARM 指令通常后跟一两个操作数，一般使用以下模板：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MNEMONIC&#123;S&#125;&#123;condition&#125; &#123;Rd&#125;, Operand1, Operand2</span><br></pre></td></tr></table></figure>
-
-<p>由于 ARM 指令集的灵活性，并非所有指令都使用模板中提供的所有字段。模板中字段的用途描述如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MNEMONIC     - Short name (mnemonic) of the instruction</span><br><span class="line">&#123;S&#125;          - An optional suffix. If S is specified, the condition flags are updated on the result of the operation</span><br><span class="line">&#123;condition&#125;  - Condition that is needed to be met in order for the instruction to be executed</span><br><span class="line">&#123;Rd&#125;         - Register (destination) for storing the result of the instruction</span><br><span class="line">Operand1     - First operand. Either a register or an immediate value </span><br><span class="line">Operand2     - Second (flexible) operand. Can be an immediate value (number) or a register with an optional shift</span><br></pre></td></tr></table></figure>
-
-<p>MNEMONIC、S、Rd 和 Operand1 字段是比较直观的，但条件和 Operand2 字段需要更多说明。 条件字段与 CPSR 寄存器的值密切相关，或者准确地说，是寄存器中特定位的值。 Operand2 被称为灵活操作数，因为我们可以以各种形式使用它——作为立即数（具有有限的值集）、寄存器或带有移位的寄存器。 例如，我们可以将这些表达式用作 Operand2：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#123                    - Immediate value (with limited set of values). </span></span><br><span class="line"><span class="symbol">Rx</span>                      - Register x (like <span class="built_in">R1</span>, <span class="built_in">R2</span>, <span class="built_in">R3</span> ...)</span><br><span class="line"><span class="symbol">Rx</span>, <span class="keyword">ASR</span> n               - Register x with arithmetic shift right by n bits (<span class="number">1</span> = n = <span class="number">32</span>)</span><br><span class="line"><span class="symbol">Rx</span>, <span class="keyword">LSL</span> n               - Register x with logical shift left by n bits (<span class="number">0</span> = n = <span class="number">31</span>)</span><br><span class="line"><span class="symbol">Rx</span>, <span class="keyword">LSR</span> n               - Register x with logical shift right by n bits (<span class="number">1</span> = n = <span class="number">32</span>)</span><br><span class="line"><span class="symbol">Rx</span>, <span class="keyword">ROR</span> n               - Register x with rotate right by n bits (<span class="number">1</span> = n = <span class="number">31</span>)</span><br><span class="line"><span class="symbol">Rx</span>, <span class="keyword">RRX</span>                 - Register x with rotate right by one bit, with extend</span><br></pre></td></tr></table></figure>
-
-<p>不同种类的指令的例子如下所示：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ADD</span>   <span class="built_in">R0</span>, <span class="built_in">R1</span>, <span class="built_in">R2</span>         - <span class="keyword">Adds</span> contents of <span class="built_in">R1</span> (Operand1) <span class="keyword">and</span> <span class="built_in">R2</span> (Operand2 in a form of register) <span class="keyword">and</span> stores the result into <span class="built_in">R0</span> (Rd)</span><br><span class="line"><span class="keyword">ADD</span>   <span class="built_in">R0</span>, <span class="built_in">R1</span>, <span class="number">#2</span>         - <span class="keyword">Adds</span> contents of <span class="built_in">R1</span> (Operand1) <span class="keyword">and</span> the value <span class="number">2</span> (Operand2 in a form of an immediate value) <span class="keyword">and</span> stores the result into <span class="built_in">R0</span> (Rd)</span><br><span class="line"><span class="keyword">MOVLE</span> <span class="built_in">R0</span>, <span class="number">#5</span>             - Moves number <span class="number">5</span> (Operand2, because the compiler treats <span class="keyword">it</span> as <span class="keyword">MOVLE</span> <span class="built_in">R0</span>, <span class="built_in">R0</span>, <span class="number">#5</span>) to <span class="built_in">R0</span> (Rd) ONLY <span class="meta">if</span> the condition LE (Less Than or Equal) is satisfied</span><br><span class="line"><span class="keyword">MOV</span>   <span class="built_in">R0</span>, <span class="built_in">R1</span>, <span class="keyword">LSL</span> <span class="number">#1</span>     - Moves the contents of <span class="built_in">R1</span> (Operand2 in a form of register with logical shift left) shifted left by one bit to <span class="built_in">R0</span> (Rd). So <span class="meta">if</span> <span class="built_in">R1</span> had value <span class="number">2</span>, <span class="keyword">it</span> gets shifted left by one bit <span class="keyword">and</span> becomes <span class="number">4</span>. <span class="number">4</span> is then moved to <span class="built_in">R0</span>.</span><br></pre></td></tr></table></figure>
-
-<p>总结下：</p>
-<table>
-<thead>
-<tr>
-<th>Instruction</th>
-<th>Description</th>
-<th>Instruction</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>MOV</td>
-<td>Move data</td>
-<td>EOR</td>
-<td>Bitwise XOR</td>
-</tr>
-<tr>
-<td>MVN</td>
-<td>Move and negate</td>
-<td>LDR</td>
-<td>Load</td>
-</tr>
-<tr>
-<td>ADD</td>
-<td>Addition</td>
-<td>STR</td>
-<td>Store</td>
-</tr>
-<tr>
-<td>SUB</td>
-<td>Subtraction</td>
-<td>LDM</td>
-<td>Load Multiple</td>
-</tr>
-<tr>
-<td>MUL</td>
-<td>Multiplication</td>
-<td>STM</td>
-<td>Store Multiple</td>
-</tr>
-<tr>
-<td>LSL</td>
-<td>Logical Shift Left</td>
-<td>PUSH</td>
-<td>Push on Stack</td>
-</tr>
-<tr>
-<td>LSR</td>
-<td>Logical Shift Right</td>
-<td>POP</td>
-<td>Pop off Stack</td>
-</tr>
-<tr>
-<td>ASR</td>
-<td>Arithmetic Shift Right</td>
-<td>B</td>
-<td>Branch</td>
-</tr>
-<tr>
-<td>ROR</td>
-<td>Rotate Right</td>
-<td>BL</td>
-<td>Branch with Link</td>
-</tr>
-<tr>
-<td>CMP</td>
-<td>Compare</td>
-<td>BX</td>
-<td>Branch and eXchange</td>
-</tr>
-<tr>
-<td>AND</td>
-<td>Bitwise AND</td>
-<td>BLX</td>
-<td>Branch with Link and eXchange</td>
-</tr>
-<tr>
-<td>ORR</td>
-<td>Bitwise OR</td>
-<td>SWI/SVC</td>
-<td>System Call</td>
-</tr>
-</tbody></table>
-<h2 id="load-and-store-Instruction"><a href="#load-and-store-Instruction" class="headerlink" title="load and store Instruction"></a>load and store Instruction</h2><p>ARM使用load-store模式进行内存的访问，这意味着只能使用load/store(LDR and LDR)指令能访问内存。而x86允许直接在内存上操作数据，在arm上数据在操作前必须被move到寄存器中。这意味着在 ARM 上的特定内存地址处递增 32 位值将需要三种类型的指令(load, increment, and store) 来首先将特定地址处的值加载到寄存器中，在寄存器中递增它，然后将它从寄存器存储回内存。为了解释 ARM 上加载和存储操作的基本原理，我们从一个基本示例开始，然后继续介绍三种基本偏移量形式，每种偏移量形式具有三种不同的地址模式。 对于每个示例，我们将使用具有不同 LDR/STR 偏移形式的同一段汇编代码，以保持简单。</p>
-<p>立即数作为偏移：<br>地址模式: 偏移<br>地址模式: 预先索引<br>地址模式: 后索引<br>寄存器作为偏移:<br>地址模式: 偏移<br>地址模式: 预先索引<br>地址模式: 后索引<br>Scaled register作为偏移<br>地址模式: 偏移<br>地址模式: 预先索引<br>地址模式: 后索引</p>
-<p>通常，LDR用于将内存中的某些内容加载到寄存器中，STR用于将存储器中的某些内容存储到内存地址。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">LDR</span> <span class="built_in">R2</span>, [<span class="built_in">R0</span>]   <span class="comment">@ [R0] - origin address is the value found in R0.</span></span><br><span class="line"><span class="keyword">STR</span> <span class="built_in">R2</span>, [<span class="built_in">R1</span>]   <span class="comment">@ [R1] - destination address is the value found in R1.</span></span><br></pre></td></tr></table></figure>
-
-<p>LDR操作：将R0中找到的地址上的值加载到目标寄存器R2。</p>
-<p>STR操作：将R2中找到的值存储到R1中找到的内存地址。</p>
-<h3 id="example-1"><a href="#example-1" class="headerlink" title="example 1"></a>example 1</h3><figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.data</span>          <span class="comment">/* the .data section is dynamically created and its addresses cannot be easily predicted */</span></span><br><span class="line"><span class="symbol">var1:</span> <span class="meta">.word</span> <span class="number">3</span>  <span class="comment">/* variable 1 in memory */</span></span><br><span class="line"><span class="symbol">var2:</span> <span class="meta">.word</span> <span class="number">4</span>  <span class="comment">/* variable 2 in memory */</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.text</span>          <span class="comment">/* start of the text (code) section */</span> </span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r0</span>, adr_var1  <span class="comment">@ load the memory address of var1 via label adr_var1 into R0 </span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r1</span>, adr_var2  <span class="comment">@ load the memory address of var2 via label adr_var2 into R1 </span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">r0</span>]      <span class="comment">@ load the value (0x03) at memory address found in R0 to register R2  </span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>]      <span class="comment">@ store the value found in R2 (0x03) to the memory address found in R1 </span></span><br><span class="line">    <span class="keyword">bkpt</span>             </span><br><span class="line"></span><br><span class="line"><span class="symbol">adr_var1:</span> <span class="meta">.word</span> var1  <span class="comment">/* address to var1 stored here */</span></span><br><span class="line"><span class="symbol">adr_var2:</span> <span class="meta">.word</span> var2  <span class="comment">/* address to var2 stored here */</span></span><br></pre></td></tr></table></figure>
-
-<p>在底部，我们有我们的 Literal Pool（同一代码段中的一个内存区域，用于存储其他人可以以与位置无关的方式引用的常量、字符串或偏移量），其中存储了 var1 和 var2 的内存地址（在顶部的数据部分）使用标签 adr_var1 和 adr_var2。第一个 LDR 将 var1 的地址加载到寄存器 R0 中。第二个 LDR 对 var2 执行相同的操作并将其加载到 R1。然后我们将存储在 R0 中找到的内存地址的值加载到 R2，并将 R2 中找到的值存储到 R1 中找到的内存地址。</p>
-<p>当我们将某些内容加载到寄存器中时，方括号 ([ ]) 表示：在这些方括号之间的寄存器中找到的值是我们要从中加载某些内容的内存地址。</p>
-<p>当我们将内容存储到内存位置时，方括号 ([]) 表示：在这些方括号之间的寄存器中找到的值是我们想要存储内容的内存地址。</p>
-<p>调试器中的代码片段：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-&gt;   <span class="number">0x10074</span> &lt;_start+<span class="number">0</span>&gt;       <span class="keyword">ldr</span>    <span class="built_in">r0</span>,  [<span class="built_in">pc</span>,  <span class="number">#12</span>]    <span class="comment">; 0x10088 &lt;adr_var1&gt;</span></span><br><span class="line">      <span class="number">0x10078</span> &lt;_start+<span class="number">4</span>&gt;       <span class="keyword">ldr</span>    <span class="built_in">r1</span>,  [<span class="built_in">pc</span>,  <span class="number">#12</span>]     <span class="number">0x1008c</span> &lt;adr_var2&gt;</span><br><span class="line">      <span class="number">0x1007c</span> &lt;_start+<span class="number">8</span>&gt;       <span class="keyword">ldr</span>    <span class="built_in">r2</span>,  [<span class="built_in">r0</span>]</span><br><span class="line">      <span class="number">0x10080</span> &lt;_start+<span class="number">12</span>&gt;      <span class="keyword">str</span>    <span class="built_in">r2</span>,  [<span class="built_in">r1</span>]</span><br><span class="line">      <span class="number">0x10084</span> &lt;_start+<span class="number">16</span>&gt;      <span class="keyword">bkpt</span>   <span class="number">0x0000</span></span><br><span class="line">      <span class="number">0x10088</span> &lt;adr_var1+<span class="number">0</span>&gt;     <span class="keyword">muleq</span>  <span class="built_in">r2</span>,  <span class="built_in">r0</span>,  <span class="built_in">r0</span></span><br><span class="line">----------------------------------------------------------------------------------------------------------------------------------------------------------------------[ threads ]----</span><br><span class="line">[<span class="number">#0</span>] Id <span class="number">1</span>, Name: <span class="string">&quot;test_pc&quot;</span>, stopped, reason: BREAKPOINT</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------------------[ trace ]----</span><br><span class="line">[<span class="number">#0</span>] <span class="number">0x10074</span>-&gt;Name: _start()</span><br><span class="line">-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"><span class="symbol">gef</span>&gt; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>我们在前两个 LDR 操作中指定的标签更改为 [pc, #12]。这称为 PC 相对寻址。因为我们使用了标签，所以编译器计算了我们在文字池 (PC+12) 中指定的值的位置。您可以使用这种精确方法自己计算位置，也可以像我们之前所做的那样使用标签。唯一的区别是，您需要计算您的值在 Literal Pool 中的确切位置，而不是使用标签。在这种情况下，它距离有效 PC 位置 3 跳（4+4+4=12）。</p>
-<h4 id="立即数作为偏移"><a href="#立即数作为偏移" class="headerlink" title="立即数作为偏移"></a>立即数作为偏移</h4><figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">STR</span>    Ra, [Rb, imm]</span><br><span class="line"><span class="keyword">LDR</span>    Ra, [Rc, imm]</span><br></pre></td></tr></table></figure>
-
-<p>这里我们使用立即数（整数）作为偏移量。 该值与基址寄存器（下例中的 R1）相加或相减，以在编译时已知的偏移量处访问数据。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.data</span></span><br><span class="line"><span class="symbol">var1:</span> <span class="meta">.word</span> <span class="number">3</span></span><br><span class="line"><span class="symbol">var2:</span> <span class="meta">.word</span> <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r0</span>, adr_var1  <span class="comment">@ load the memory address of var1 via label adr_var1 into R0</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r1</span>, adr_var2  <span class="comment">@ load the memory address of var2 via label adr_var2 into R1</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">r0</span>]      <span class="comment">@ load the value (0x03) at memory address found in R0 to register R2 </span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#2</span>]  <span class="comment">@ address mode: offset. Store the value found in R2 (0x03) to the memory address found in R1 plus 2. Base register (R1) unmodified. </span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#4</span>]! <span class="comment">@ address mode: pre-indexed. Store the value found in R2 (0x03) to the memory address found in R1 plus 4. Base register (R1) modified: R1 = R1+4 </span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r3</span>, [<span class="built_in">r1</span>], <span class="number">#4</span>  <span class="comment">@ address mode: post-indexed. Load the value at memory address found in R1 to register R3. Base register (R1) modified: R1 = R1+4 </span></span><br><span class="line">    <span class="keyword">bkpt</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">adr_var1:</span> <span class="meta">.word</span> var1</span><br><span class="line"><span class="symbol">adr_var2:</span> <span class="meta">.word</span> var2</span><br></pre></td></tr></table></figure>
-
-<p>将在偏移地址模式下执行 STR 操作的下一条指令。 它会将 R2 (0x00000003) 中的值存储到 R1 (0x0001009c) 中指定的内存地址 + 偏移量 (#2) = 0x1009e。</p>
-<h4 id="寄存器作为偏移"><a href="#寄存器作为偏移" class="headerlink" title="寄存器作为偏移"></a>寄存器作为偏移</h4><figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">STR</span>    Ra, [Rb, Rc]</span><br><span class="line"><span class="keyword">LDR</span>    Ra, [Rb, Rc]</span><br></pre></td></tr></table></figure>
-
-<p>这种偏移形式使用寄存器作为偏移。 这种偏移形式的一个示例用法是当您的代码想要访问在运行时计算索引的数组时。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.data</span></span><br><span class="line"><span class="symbol">var1:</span> <span class="meta">.word</span> <span class="number">3</span></span><br><span class="line"><span class="symbol">var2:</span> <span class="meta">.word</span> <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r0</span>, adr_var1  <span class="comment">@ load the memory address of var1 via label adr_var1 to R0 </span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r1</span>, adr_var2  <span class="comment">@ load the memory address of var2 via label adr_var2 to R1 </span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">r0</span>]      <span class="comment">@ load the value (0x03) at memory address found in R0 to R2</span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="built_in">r2</span>]  <span class="comment">@ address mode: offset. Store the value found in R2 (0x03) to the memory address found in R1 with the offset R2 (0x03). Base register unmodified.   </span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="built_in">r2</span>]! <span class="comment">@ address mode: pre-indexed. Store value found in R2 (0x03) to the memory address found in R1 with the offset R2 (0x03). Base register modified: R1 = R1+R2. </span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r3</span>, [<span class="built_in">r1</span>], <span class="built_in">r2</span>  <span class="comment">@ address mode: post-indexed. Load value at memory address found in R1 to register R3. Then modify base register: R1 = R1+R2.</span></span><br><span class="line">    <span class="keyword">bx</span> <span class="built_in">lr</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">adr_var1:</span> <span class="meta">.word</span> var1</span><br><span class="line"><span class="symbol">adr_var2:</span> <span class="meta">.word</span> var2</span><br></pre></td></tr></table></figure>
-
-<p>在偏移地址模式下执行第一个STR操作后，R2的值（0x00000003）将存储在内存地址0x0001009c + 0x00000003 = 0x0001009F。</p>
-<h4 id="Scaled寄存器作偏移"><a href="#Scaled寄存器作偏移" class="headerlink" title="Scaled寄存器作偏移"></a>Scaled寄存器作偏移</h4><figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">LDR</span>    Ra, [Rb, Rc, &lt;shifter&gt;]</span><br><span class="line"><span class="keyword">STR</span>    Ra, [Rb, Rc, &lt;shifter&gt;]</span><br></pre></td></tr></table></figure>
-
-<p>第三种偏移形式有一个缩放寄存器作为偏移。 在这种情况下，Rb 是基址寄存器，Rc 是立即偏移量（或包含立即值的寄存器）左/右移位 (&lt;shifter&gt;) 以缩放立即数。 这意味着桶形移位器用于缩放偏移。 这种偏移形式的一个示例用法是循环遍历数组。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.data</span></span><br><span class="line"><span class="symbol">var1:</span> <span class="meta">.word</span> <span class="number">3</span></span><br><span class="line"><span class="symbol">var2:</span> <span class="meta">.word</span> <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r0</span>, adr_var1         <span class="comment">@ load the memory address of var1 via label adr_var1 to R0</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r1</span>, adr_var2         <span class="comment">@ load the memory address of var2 via label adr_var2 to R1</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">r0</span>]             <span class="comment">@ load the value (0x03) at memory address found in R0 to R2</span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="built_in">r2</span>, LSL<span class="number">#2</span>]  <span class="comment">@ address mode: offset. Store the value found in R2 (0x03) to the memory address found in R1 with the offset R2 left-shifted by 2. Base register (R1) unmodified.</span></span><br><span class="line">    <span class="keyword">str</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="built_in">r2</span>, LSL<span class="number">#2</span>]! <span class="comment">@ address mode: pre-indexed. Store the value found in R2 (0x03) to the memory address found in R1 with the offset R2 left-shifted by 2. Base register modified: R1 = R1 + R2&lt;&lt;2</span></span><br><span class="line">    <span class="keyword">ldr</span> <span class="built_in">r3</span>, [<span class="built_in">r1</span>], <span class="built_in">r2</span>, LSL<span class="number">#2</span>  <span class="comment">@ address mode: post-indexed. Load value at memory address found in R1 to the register R3. Then modifiy base register: R1 = R1 + R2&lt;&lt;2</span></span><br><span class="line">    <span class="keyword">bkpt</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">adr_var1:</span> <span class="meta">.word</span> var1</span><br><span class="line"><span class="symbol">adr_var2:</span> <span class="meta">.word</span> var2</span><br></pre></td></tr></table></figure>
-
-<p>第一个 STR 操作使用偏移地址模式，并将在 R2 中找到的值存储在从 [r1, r2, LSL#2] 计算出的内存位置，这意味着它以 R1 中的值为基数（在这种情况下，R1 包含 var2 的内存地址)，然后取 R2 (0x3) 中的值，并将其左移 2。下图是尝试可视化如何使用 [r1, r2, LSL#2] 计算内存位置 .</p>
-<h3 id="在arm上使用立即数"><a href="#在arm上使用立即数" class="headerlink" title="在arm上使用立即数"></a>在arm上使用立即数</h3><p>在 ARM 上的寄存器中加载立即值并不像在 x86 上那样简单。您可以使用哪些直接值是有限制的。可以使用一些技巧来绕过这些限制（提示：LDR）。</p>
-<p>我们知道每条 ARM 指令都是 32bit 长的，所有指令都是有条件的。我们可以使用16个条件码，一个条件码占指令的4位。然后我们需要 2 位作为目标寄存器。 2 位用于第一个操作数寄存器，1 位用于设置状态标志，以及用于其他事项（如实际操作码）的各种位。这里的重点是，在为指令类型、寄存器和其他字段分配位后，立即数只剩下 12 位，这将只允许 4096 个不同的值。</p>
-<p>这意味着 ARM 指令只能直接在 MOV 中使用有限范围的立即数。如果一个数字不能直接使用，就必须把它分成几部分，由多个较小的数字拼凑起来。</p>
-<p>但还有更多。不是将 12 位用于单个整数，而是将这 12 位拆分为一个 8 位数字 (n)，能够加载 0-255 范围内的任何 8 位值，以及一个 4 位旋转字段 (r) 作为一个在 0 到 30 之间以 2 为步长向右循环。这意味着完整的立即数 v 由以下公式给出：v = n ror 2*r。换句话说，唯一有效的立即数是循环字节（可以减少到循环一个偶数的字节的值）。</p>
-<p>以下是一些有效和无效的立即数的例子：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">Valid</span> values:</span><br><span class="line"><span class="comment">#256        // 1 ror 24 --&gt; 256</span></span><br><span class="line"><span class="comment">#384        // 6 ror 26 --&gt; 384</span></span><br><span class="line"><span class="comment">#484        // 121 ror 30 --&gt; 484</span></span><br><span class="line"><span class="comment">#16384      // 1 ror 18 --&gt; 16384</span></span><br><span class="line"><span class="comment">#2030043136 // 121 ror 8 --&gt; 2030043136</span></span><br><span class="line"><span class="comment">#0x06000000 // 6 ror 8 --&gt; 100663296 (0x06000000 in hex)</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">Invalid</span> values:</span><br><span class="line"><span class="comment">#370        // 185 ror 31 --&gt; 31 is not in range (0 – 30)</span></span><br><span class="line"><span class="comment">#511        // 1 1111 1111 --&gt; bit-pattern can’t fit into one byte</span></span><br><span class="line"><span class="comment">#0x06010000 // 1 1000 0001.. --&gt; bit-pattern can’t fit into one byte</span></span><br></pre></td></tr></table></figure>
-
-<p>这导致无法一次性加载完整的 32 位地址。 我们可以使用以下两个选项之一绕过此限制：</p>
-<ol>
-<li>用较小的部分构造较大的值：不使用<code>Mov r0 ,#511</code>,分割511到两部分:<code>MOV r0, #256, and ADD r0, #255</code></li>
-<li>使用加载结构<code>ldr r1,=value</code>，如果不可能，汇编器会很乐意将其转换为 MOV 或与 PC 相关的加载。比如：<code>LDR r1, =511</code></li>
-</ol>
-<p>如果你试图加载一个无效的立即数，汇编器会产生一个错误，”Error: invalid constant.”,<br>如果您需要弄清楚某个数字是否可以用作有效的立即数，则无需自己计算。 您可以使用我的名为 <a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/azeria-labs/rotator/master/rotator.py">rotator.py</a> 的小 Python 脚本，它将您的号码作为输入并告诉您它是否可以用作有效的立即数。</p>
-<p>rotator.py</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function   <span class="comment"># PEP 3105</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># Rotate right: 0b1001 --&gt; 0b1100</span></span><br><span class="line">ror = <span class="keyword">lambda</span> val, r_bits, max_bits: \</span><br><span class="line">    ((val &amp; (<span class="number">2</span>**max_bits-<span class="number">1</span>)) &gt;&gt; r_bits%max_bits) | \</span><br><span class="line">    (val &lt;&lt; (max_bits-(r_bits%max_bits)) &amp; (<span class="number">2</span>**max_bits-<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">max_bits = <span class="number">32</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">input</span> = <span class="built_in">int</span>(raw_input(<span class="string">&quot;Enter the value you want to check: &quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>()</span><br><span class="line"><span class="keyword">for</span> n <span class="keyword">in</span> xrange(<span class="number">1</span>, <span class="number">256</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">0</span>, <span class="number">31</span>, <span class="number">2</span>):</span><br><span class="line"></span><br><span class="line">        rotated = ror(n, i, max_bits)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(rotated == <span class="built_in">input</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;The number %i can be used as a valid immediate number.&quot;</span> % <span class="built_in">input</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;%i ror %x --&gt; %s&quot;</span> % (n, <span class="built_in">int</span>(<span class="built_in">str</span>(i), <span class="number">16</span>), rotated))</span><br><span class="line">            <span class="built_in">print</span>()</span><br><span class="line">            sys.exit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Sorry, %i cannot be used as an immediate number and has to be split.&quot;</span> % <span class="built_in">input</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="load-store-多个值"><a href="#load-store-多个值" class="headerlink" title="load/store 多个值"></a>load/store 多个值</h2><p>有时一次加载（或存储）多个值更有效。为此，我们使用LDM（负载倍数）和STM（存储倍数）。这些指令的变体基本上只因访问初始地址的方式而异。这是我们本节将使用的代码。我们将一步一步地完成每项指令。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.data</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">array_buff:</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000000</span>             <span class="comment">/* array_buff[0] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000000</span>             <span class="comment">/* array_buff[1] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000000</span>             <span class="comment">/* array_buff[2]. This element has a relative address of array_buff+8 */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000000</span>             <span class="comment">/* array_buff[3] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000000</span>             <span class="comment">/* array_buff[4] */</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line"> <span class="keyword">adr</span> <span class="built_in">r0</span>, words+<span class="number">12</span>             <span class="comment">/* address of words[3] -&gt; r0 */</span></span><br><span class="line"> <span class="keyword">ldr</span> <span class="built_in">r1</span>, array_buff_bridge    <span class="comment">/* address of array_buff[0] -&gt; r1 */</span></span><br><span class="line"> <span class="keyword">ldr</span> <span class="built_in">r2</span>, array_buff_bridge+<span class="number">4</span>  <span class="comment">/* address of array_buff[2] -&gt; r2 */</span></span><br><span class="line"> <span class="keyword">ldm</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>,<span class="built_in">r5</span>&#125;              <span class="comment">/* words[3] -&gt; r4 = 0x03; words[4] -&gt; r5 = 0x04 */</span></span><br><span class="line"> <span class="keyword">stm</span> <span class="built_in">r1</span>, &#123;<span class="built_in">r4</span>,<span class="built_in">r5</span>&#125;              <span class="comment">/* r4 -&gt; array_buff[0] = 0x03; r5 -&gt; array_buff[1] = 0x04 */</span></span><br><span class="line"> <span class="keyword">ldmia</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* words[3] -&gt; r4 = 0x03, words[4] -&gt; r5 = 0x04; words[5] -&gt; r6 = 0x05; */</span></span><br><span class="line"> <span class="keyword">stmia</span> <span class="built_in">r1</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* r4 -&gt; array_buff[0] = 0x03; r5 -&gt; array_buff[1] = 0x04; r6 -&gt; array_buff[2] = 0x05 */</span></span><br><span class="line"> <span class="keyword">ldmib</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* words[4] -&gt; r4 = 0x04; words[5] -&gt; r5 = 0x05; words[6] -&gt; r6 = 0x06 */</span></span><br><span class="line"> <span class="keyword">stmib</span> <span class="built_in">r1</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* r4 -&gt; array_buff[1] = 0x04; r5 -&gt; array_buff[2] = 0x05; r6 -&gt; array_buff[3] = 0x06 */</span></span><br><span class="line"> <span class="keyword">ldmda</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* words[3] -&gt; r6 = 0x03; words[2] -&gt; r5 = 0x02; words[1] -&gt; r4 = 0x01 */</span></span><br><span class="line"> <span class="keyword">ldmdb</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* words[2] -&gt; r6 = 0x02; words[1] -&gt; r5 = 0x01; words[0] -&gt; r4 = 0x00 */</span></span><br><span class="line"> <span class="keyword">stmda</span> <span class="built_in">r2</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* r6 -&gt; array_buff[2] = 0x02; r5 -&gt; array_buff[1] = 0x01; r4 -&gt; array_buff[0] = 0x00 */</span></span><br><span class="line"> <span class="keyword">stmdb</span> <span class="built_in">r2</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r5</span>&#125;            <span class="comment">/* r5 -&gt; array_buff[1] = 0x01; r4 -&gt; array_buff[0] = 0x00; */</span></span><br><span class="line"> <span class="keyword">bx</span> <span class="built_in">lr</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">words:</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000000</span>             <span class="comment">/* words[0] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000001</span>             <span class="comment">/* words[1] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000002</span>             <span class="comment">/* words[2] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000003</span>             <span class="comment">/* words[3] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000004</span>             <span class="comment">/* words[4] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000005</span>             <span class="comment">/* words[5] */</span></span><br><span class="line"> <span class="meta">.word</span> <span class="number">0x00000006</span>             <span class="comment">/* words[6] */</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">array_buff_bridge:</span></span><br><span class="line"> <span class="meta">.word</span> array_buff             <span class="comment">/* address of array_buff, or in other words - array_buff[0] */</span></span><br><span class="line"> <span class="meta">.word</span> array_buff+<span class="number">8</span>           <span class="comment">/* address of array_buff[2] */</span></span><br></pre></td></tr></table></figure>
-
-<p>在开始之前，请记住，.word 指的是 32 位 = 4 BYTES 的数据（内存）块。 这对于理解偏移很重要。 因此该程序由 .data 部分组成，我们在其中分配了一个具有 5 个元素的空数组 (array_buff)。 我们将使用它作为存储数据的可写内存位置。 .text 部分包含我们的代码以及内存操作指令和一个包含两个标签的只读数据池：一个用于具有 7 个元素的数组，另一个用于“桥接” .text 和 .data 部分，以便我们可以访问驻留的 array_buff 在 .data 部分。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">adr</span> <span class="built_in">r0</span>, words+<span class="number">12</span>             <span class="comment">/* address of words[3] -&gt; r0 */</span></span><br></pre></td></tr></table></figure>
-
-<p>我们使用 ADR 指令将第 4 个元素（words[3]）的地址放入 R0。 我们指向 words 数组的中间，因为我们将从那里向前和向后操作。</p>
-<p>我们用 array_buff 数组的第一个 (array_buff[0]) 和第三个 (array_buff[2]) 元素的地址准备 R1 和 R2。 一旦获得地址，我们就可以开始对其进行操作。</p>
-<p>下一条指令使用 LDM 从 R0 指向的内存中加载两个字值。 因此，因为我们之前让 R0 指向 words[3] 元素，所以 words[3] 值转到 R4，words[4] 值转到 R5。</p>
-<p>下一条指令让我们执行 STM 指令将多个值存储到内存中。 我们代码中的 STM 指令从寄存器 R4 和 R5 获取值（0x3 和 0x4），并将这些值存储到 R1 指定的内存位置。</p>
-<p>变体的类型由指令的后缀定义。 示例中使用的后缀是：-IA（之后增加）、-IB（之前增加）、-DA（之后减少）、-DB（之前减少）。 这些变体的不同之处在于它们如何访问由第一个操作数（存储源地址或目标地址的寄存器）指定的内存。 实际上，LDM 与 LDMIA 相同，这意味着每次加载后都会增加下一个要加载的元素的地址。 通过这种方式，我们从第一个操作数（存储源地址的寄存器）指定的内存地址中获得顺序（前向）数据加载。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ldmia</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125; <span class="comment">/* words[3] -&gt; r4 = 0x03, words[4] -&gt; r5 = 0x04; words[5] -&gt; r6 = 0x05; */</span> </span><br><span class="line"><span class="keyword">stmia</span> <span class="built_in">r1</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125; <span class="comment">/* r4 -&gt; array_buff[0] = 0x03; r5 -&gt; array_buff[1] = 0x04; r6 -&gt; array_buff[2] = 0x05 */</span></span><br></pre></td></tr></table></figure>
-
-<p>执行上述两条指令后，寄存器 R4-R6 和内存地址 0x000100D0、0x000100D4 和 0x000100D8 包含值 0x3、0x4 和 0x5。</p>
-<p>LDMIB 指令首先将源地址增加 4 个字节（一个字值），然后执行第一次加载。 通过这种方式，我们仍然可以顺序（向前）加载数据，但第一个元素与源地址有 4 个字节的偏移量。 这就是为什么在我们的示例中，通过 LDMIB 指令从内存加载到 R4 的第一个元素是 0x00000004（word[4]）而不是 R0 指向的 0x00000003（word[3]）。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ldmib</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* words[4] -&gt; r4 = 0x04; words[5] -&gt; r5 = 0x05; words[6] -&gt; r6 = 0x06 */</span></span><br><span class="line"><span class="keyword">stmib</span> <span class="built_in">r1</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125;            <span class="comment">/* r4 -&gt; array_buff[1] = 0x04; r5 -&gt; array_buff[2] = 0x05; r6 -&gt; array_buff[3] = 0x06 */</span></span><br></pre></td></tr></table></figure>
-
-<p>执行上述两条指令后，寄存器 R4-R6 和内存地址 0x100D4、0x100D8 和 0x100DC 包含值 0x4、0x5 和 0x6。</p>
-<p>当我们使用 LDMDA 指令时，一切都开始向后运行。 R0 指向word[3]。 当加载开始时，我们向后移动并将word[3]、word[2]和word[1]加载到R6、R5、R4中。 是的，寄存器也是反向加载的。 所以在指令完成后 R6 = 0x00000003，R5 = 0x00000002，R4 = 0x00000001。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ldmda</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125; <span class="comment">/* words[3] -&gt; r6 = 0x03; words[2] -&gt; r5 = 0x02; words[1] -&gt; r4 = 0x01 */</span></span><br></pre></td></tr></table></figure>
-
-<p>加载多个，递减后：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ldmdb</span> <span class="built_in">r0</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125; <span class="comment">/* words[2] -&gt; r6 = 0x02; words[1] -&gt; r5 = 0x01; words[0] -&gt; r4 = 0x00 */</span></span><br></pre></td></tr></table></figure>
-
-<p>store多个，递减后：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">stmda</span> <span class="built_in">r2</span>, &#123;<span class="built_in">r4</span>-<span class="built_in">r6</span>&#125; <span class="comment">/* r6 -&gt; array_buff[2] = 0x02; r5 -&gt; array_buff[1] = 0x01; r4 -&gt; array_buff[0] = 0x00 */</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="push-and-pop"><a href="#push-and-pop" class="headerlink" title="push and pop"></a>push and pop</h3><p>PUSH：</p>
-<ol>
-<li>SP -= 4</li>
-<li>信息store到新地址</li>
-</ol>
-<p>POP：</p>
-<ol>
-<li>SP地址处的value被load到指示的register中</li>
-<li>SP += 4</li>
-</ol>
-<h2 id="条件执行"><a href="#条件执行" class="headerlink" title="条件执行"></a>条件执行</h2><table>
-<thead>
-<tr>
-<th>Condition Code</th>
-<th>Meaning (for cmp or subs)</th>
-<th>Status of Flags</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>EQ</td>
-<td>Equal</td>
-<td>Z==1</td>
-</tr>
-<tr>
-<td>NE</td>
-<td>Not Equal</td>
-<td>Z==0</td>
-</tr>
-<tr>
-<td>GT</td>
-<td>Signed Greater Than</td>
-<td>(Z==0) &amp;&amp; (N==V)</td>
-</tr>
-<tr>
-<td>LT</td>
-<td>Signed Less Than</td>
-<td>N!=V</td>
-</tr>
-<tr>
-<td>GE</td>
-<td>Signed Greater Than or Equal</td>
-<td>N==V</td>
-</tr>
-<tr>
-<td>LE</td>
-<td>Signed Less Than or Equal</td>
-<td>(Z==1) || (N!=V)</td>
-</tr>
-<tr>
-<td>CS or HS</td>
-<td>Unsigned Higher or Same (or Carry Set)</td>
-<td>C==1</td>
-</tr>
-<tr>
-<td>CC or LO</td>
-<td>Unsigned Lower (or Carry Clear)</td>
-<td>C==0</td>
-</tr>
-<tr>
-<td>MI</td>
-<td>Negative (or Minus)</td>
-<td>N==1</td>
-</tr>
-<tr>
-<td>PL</td>
-<td>Positive (or Plus)</td>
-<td>N==0</td>
-</tr>
-<tr>
-<td>AL</td>
-<td>Always executed</td>
-<td>–</td>
-</tr>
-<tr>
-<td>NV</td>
-<td>Never executed</td>
-<td>–</td>
-</tr>
-<tr>
-<td>VS</td>
-<td>Signed Overflow</td>
-<td>V==1</td>
-</tr>
-<tr>
-<td>VC</td>
-<td>No signed Overflow</td>
-<td>V==0</td>
-</tr>
-<tr>
-<td>HI</td>
-<td>Unsigned Higher</td>
-<td>(C==1) &amp;&amp; (Z==0)</td>
-</tr>
-<tr>
-<td>LS</td>
-<td>Unsigned Lower or same</td>
-<td>(C==0) || (Z==0)</td>
-</tr>
-</tbody></table>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.global</span> main</span><br><span class="line"></span><br><span class="line"><span class="symbol">main:</span></span><br><span class="line">        <span class="keyword">mov</span>     <span class="built_in">r0</span>, <span class="number">#2</span>     <span class="comment">/* setting up initial variable */</span></span><br><span class="line">        <span class="keyword">cmp</span>     <span class="built_in">r0</span>, <span class="number">#3</span>     <span class="comment">/* comparing r0 to number 3. Negative bit get&#x27;s set to 1 */</span></span><br><span class="line">        <span class="keyword">addlt</span>   <span class="built_in">r0</span>, <span class="built_in">r0</span>, <span class="number">#1</span> <span class="comment">/* increasing r0 IF it was determined that it is smaller (lower than) number 3 */</span></span><br><span class="line">        <span class="keyword">cmp</span>     <span class="built_in">r0</span>, <span class="number">#3</span>     <span class="comment">/* comparing r0 to number 3 again. Zero bit gets set to 1. Negative bit is set to 0 */</span></span><br><span class="line">        <span class="keyword">addlt</span>   <span class="built_in">r0</span>, <span class="built_in">r0</span>, <span class="number">#1</span> <span class="comment">/* increasing r0 IF it was determined that it is smaller (lower than) number 3 */</span></span><br><span class="line">        <span class="keyword">bx</span>      <span class="built_in">lr</span></span><br></pre></td></tr></table></figure>
-
-<p>上面代码中的第一条 CMP 指令触发负位被置位 (2 – 3 = -1) 表示 r0 中的值低于数字 3。随后执行 ADDLT 指令，因为当 V 时 LT 条件已满！ = N（CPSR 中溢出位和负位的值不同）。 在我们执行第二个 CMP 之前，我们的 r0 = 3。这就是为什么第二个 CMP 清除负位（因为 3 – 3 = 0，不需要设置负标志）并设置零标志（Z = 1）。 现在我们有 V = 0 和 N = 0 这导致 LT 条件失败。 因此，不会执行第二个 ADDLT，并且 r0 保持不变。 程序退出，结果为 3。</p>
-<h3 id="Thumb条件执行"><a href="#Thumb条件执行" class="headerlink" title="Thumb条件执行"></a>Thumb条件执行</h3><p>在允许条件执行的 Thumb 版本 (Thumb-2)中。 某些 ARM 处理器版本支持“IT”指令，该指令允许在 Thumb 状态下有条件地执行最多 4 条指令。</p>
-<p>语法：IT{x{y{z}}} cond</p>
-<ol>
-<li>cond 指定 IT 块中第一条指令的条件</li>
-<li>x 指定 IT 块中第二条指令的条件开关</li>
-<li>y 指定 IT 块中第三条指令的条件开关</li>
-<li>z 指定 IT 块中第四条指令的条件开关</li>
-</ol>
-<p>IT 指令的结构是“IF-Then-(Else)”，语法是两个字母 T 和 E 的结构：</p>
-<ol>
-<li>IT 指的是 If-Then（下一条指令是有条件的）</li>
-<li>ITT 指的是 If-Then-Then（接下来的 2 条指令是有条件的）</li>
-<li>ITE 指的是 If-Then-Else（接下来的 2 条指令是有条件的）</li>
-<li>ITTE 指的是 If-Then-Then-Else（接下来的 3 条指令是有条件的）</li>
-<li>ITTEE 指的是 If-Then-Then-Else-Else（接下来的 4 条指令是有条件的）</li>
-</ol>
-<p>IT 块内的每条指令都必须指定一个条件后缀，该后缀相同或逻辑相反。 这意味着，如果您使用 ITE，则第一条和第二条指令 (If-Then) 必须具有相同的条件后缀，而第三条 (Else) 必须具有前两条的逻辑逆。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ITTE</span>   NE           <span class="comment">; Next 3 instructions are conditional</span></span><br><span class="line"><span class="keyword">ANDNE</span>  <span class="built_in">R0</span>, <span class="built_in">R0</span>, <span class="built_in">R1</span>   <span class="comment">; ANDNE does not update condition flags</span></span><br><span class="line"><span class="symbol">ADDSNE</span> <span class="built_in">R2</span>, <span class="built_in">R2</span>, <span class="number">#1</span>   <span class="comment">; ADDSNE updates condition flags</span></span><br><span class="line"><span class="keyword">MOVEQ</span>  <span class="built_in">R2</span>, <span class="built_in">R3</span>       <span class="comment">; Conditional move</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ITE</span>    GT           <span class="comment">; Next 2 instructions are conditional</span></span><br><span class="line"><span class="keyword">ADDGT</span>  <span class="built_in">R1</span>, <span class="built_in">R0</span>, <span class="number">#55</span>  <span class="comment">; Conditional addition in case the GT is true</span></span><br><span class="line"><span class="keyword">ADDLE</span>  <span class="built_in">R1</span>, <span class="built_in">R0</span>, <span class="number">#48</span>  <span class="comment">; Conditional addition in case the GT is not true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ITTEE</span>  EQ           <span class="comment">; Next 4 instructions are conditional</span></span><br><span class="line"><span class="keyword">MOVEQ</span>  <span class="built_in">R0</span>, <span class="built_in">R1</span>       <span class="comment">; Conditional MOV</span></span><br><span class="line"><span class="keyword">ADDEQ</span>  <span class="built_in">R2</span>, <span class="built_in">R2</span>, <span class="number">#10</span>  <span class="comment">; Conditional ADD</span></span><br><span class="line"><span class="keyword">ANDNE</span>  <span class="built_in">R3</span>, <span class="built_in">R3</span>, <span class="number">#1</span>   <span class="comment">; Conditional AND</span></span><br><span class="line"><span class="symbol">BNE.W</span>  dloop        <span class="comment">; Branch instruction can only be used in the last instruction of an IT block</span></span><br></pre></td></tr></table></figure>
-
-<p>以下是条件代码及其对立的条件：</p>
-<table>
-<thead>
-<tr>
-<th>Code</th>
-<th>Meaning</th>
-<th>Code</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>EQ</td>
-<td>Equal</td>
-<td>NE</td>
-<td>Not Equal</td>
-</tr>
-<tr>
-<td>HS(or CS)</td>
-<td>Unsigned higher or same(or carry set)</td>
-<td>LO(or CC</td>
-<td>Unsigned lower(or carry clear)</td>
-</tr>
-<tr>
-<td>MI</td>
-<td>Negative</td>
-<td>PL</td>
-<td>Positive or Zero</td>
-</tr>
-<tr>
-<td>VS</td>
-<td>Signed Overflow</td>
-<td>VC</td>
-<td>No Signed Overflow</td>
-</tr>
-<tr>
-<td>HI</td>
-<td>Unsigned Higher</td>
-<td>LS</td>
-<td>Unsigned Lower or Same</td>
-</tr>
-<tr>
-<td>GE</td>
-<td>Signed Greater Than or Equal</td>
-<td>LT</td>
-<td>Signed Less Than</td>
-</tr>
-<tr>
-<td>GT</td>
-<td>Signed Greater Than</td>
-<td>LE</td>
-<td>Signed Less Than or Equal</td>
-</tr>
-<tr>
-<td>AL (or omitted)</td>
-<td>Always Executed</td>
-<td>There is no opposite to AL</td>
-<td>–</td>
-</tr>
-</tbody></table>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.syntax</span> unified    <span class="comment">@ this is important!</span></span><br><span class="line"><span class="symbol">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">    <span class="meta">.code</span> <span class="number">32</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span>   <span class="comment">@ increase value of PC by 1 and add it to R3</span></span><br><span class="line">    <span class="keyword">bx</span> <span class="built_in">r3</span>            <span class="comment">@ branch + exchange to the address in R3 -&gt; switch to Thumb state because LSB = 1</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">.code</span> <span class="number">16</span>         <span class="comment">@ Thumb state</span></span><br><span class="line">    <span class="keyword">cmp</span> <span class="built_in">r0</span>, <span class="number">#10</span>      </span><br><span class="line">    <span class="keyword">ite</span> eq           <span class="comment">@ if R0 is equal 10...</span></span><br><span class="line">    <span class="keyword">addeq</span> <span class="built_in">r1</span>, <span class="number">#2</span>     <span class="comment">@ ... then R1 = R1 + 2</span></span><br><span class="line">    <span class="keyword">addne</span> <span class="built_in">r1</span>, <span class="number">#3</span>     <span class="comment">@ ... else R1 = R1 + 3</span></span><br><span class="line">    bkpt</span><br></pre></td></tr></table></figure>
-
-<p>.code 32</p>
-<p>此示例代码以ARM状态开始。第一条指令将 PC 加 1 指定的地址添加到 R3，然后分支到 R3 中的地址。这将导致切换到拇指状态，因为LSB（最不重要的位）是1，因此不是4字节对齐的。为此使用bx（分支+交换）很重要。在分支之后设置T（拇指）标志，我们处于拇指状态。</p>
-<p>.code 16</p>
-<p>在拇指状态下，我们首先将R0与#10进行比较，这将设置负标志（0–10 = – 10）。然后我们使用If-Then-Else块。此块将跳过ADDEQ指令，因为没有设置Z（零）标志，并将执行ADDNE指令，因为结果为NE（不等于）为10。</p>
-<h3 id="分支"><a href="#分支" class="headerlink" title="分支"></a>分支</h3><h4 id="B-BX-BLX"><a href="#B-BX-BLX" class="headerlink" title="B / BX / BLX"></a>B / BX / BLX</h4><p>存在三种类型的分支指令：</p>
-<p>Branch (B)</p>
-<pre><code>简单跳转到函数
-</code></pre>
-<p>Branch link (BL)</p>
-<pre><code>在 LR 中保存 (PC+4) 并跳转到函数
-</code></pre>
-<p>Branch exchange (BX) and Branch link exchange (BLX)</p>
-<pre><code>与 B/BL + 交换指令集相同 (ARM &lt;-&gt; Thumb)
-需要一个寄存器作为第一个操作数：BX/BLX reg
-</code></pre>
-<h3 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h3><table>
-<thead>
-<tr>
-<th>Stack Type</th>
-<th>Store</th>
-<th>Load</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Full descending</td>
-<td>STMFD (STMDB, Decrement Before)</td>
-<td>LDMFD (LDM, Increment after)</td>
-</tr>
-<tr>
-<td>Full ascending</td>
-<td>STMFA (STMIB, Increment Before)</td>
-<td>LDMFA (LDMDA, Decrement After)</td>
-</tr>
-<tr>
-<td>Empty descending</td>
-<td>STMED (STMDA, Decrement After)</td>
-<td>LDMED (LDMIB, Increment Before)</td>
-</tr>
-<tr>
-<td>Empty ascending</td>
-<td>STMEA (STM, Increment after)</td>
-<td>LDMEA (LDMDB, Decrement Before)</td>
-</tr>
-</tbody></table>
-<p>◎ Full descending 满递减堆栈<br>堆栈首部是高地址，堆栈向低地址增长。栈指针总是指向堆栈最后一个元素(最后一个元素是最后压入的数据)。<br>ARM-Thumb过程调用标准和ARM、Thumb C/C++ 编译器总是使用Full descending 类型堆栈。</p>
-<p>◎ Full ascending 满递增堆栈<br>堆栈首部是低地址，堆栈向高地址增长。栈指针总是指向堆栈最后一个元素(最后一个元素是最后压入的数据)。</p>
-<p>◎ Empty descending 空递减堆栈<br>堆栈首部是低地址，堆栈向高地址增长。栈指针总是指向下一个将要放入数据的空位置。</p>
-<p>◎ Empty ascending 空递增堆栈<br>堆栈首部是高地址，堆栈向低地址增长。栈指针总是指向下一个将要放入数据的空位置。</p>
-
-	
-	</div>
-  <a type="button" href="/2021/08/11/Arm Instractions/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -2835,33 +2037,35 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+		
+			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
 		
 			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
 		
-			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
 		
 			<li><a href="/tags/漏洞分析/">漏洞分析<span>6</span></a></li>
 		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
+			<li><a href="/tags/Android/">Android<span>1</span></a></li>
 		
-			<li><a href="/tags/python/">python<span>2</span></a></li>
+			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
+		
+			<li><a href="/tags/恶意代码分析/">恶意代码分析<span>1</span></a></li>
 		
 			<li><a href="/tags/漏洞研究/">漏洞研究<span>1</span></a></li>
 		
+			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+		
+			<li><a href="/tags/python/">python<span>2</span></a></li>
+		
 			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
 		
-			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
 		
 			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
 		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
-		
 			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
-		
-			<li><a href="/tags/Android/">Android<span>1</span></a></li>
-		
-			<li><a href="/tags/软件调试/">软件调试<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -2873,6 +2077,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/09/30/一个加密木马的分析/" ><i class="fa fa-file-o"></i>一个加密木马的分析</a>
+      </li>
     
       <li>
         <a href="/2021/09/24/Windows系统调用/" ><i class="fa fa-file-o"></i>Windows系统调用</a>
@@ -2888,10 +2096,6 @@
     
       <li>
         <a href="/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>CVE-2021-3156分析</a>
-      </li>
-    
-      <li>
-        <a href="/2021/09/02/高级IO/" ><i class="fa fa-file-o"></i>高级I/O</a>
       </li>
     
   </ul>
@@ -2949,6 +2153,12 @@
   $('.fancybox').fancybox();
 })(jQuery);
 </script>
+
+
+
+</body>
+   </html>
+>
 
 
 
