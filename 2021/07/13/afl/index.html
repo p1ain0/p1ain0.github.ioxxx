@@ -15,9 +15,9 @@
 4.使用模糊数据进行测试
 5.监控系统的行为
 6.记录缺陷
-afl-fuzz最近在研究afl-fuzz，发现一些有意思的东西，记录一下。
+afl-fuzz浅谈最近在研究afl-fuzz，发现一些有意思的东西，记录一下。
 先说这个afl-fuzz的打桩机制，越想越觉得作者这人脑回路新奇。先说说使用这个方法的初衷。
-为了">
+">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -127,10 +127,34 @@ afl-fuzz最近在研究afl-fuzz，发现一些有意思的东西，记录一下�
 <p>4.使用模糊数据进行测试</p>
 <p>5.监控系统的行为</p>
 <p>6.记录缺陷</p>
-<h2 id="afl-fuzz"><a href="#afl-fuzz" class="headerlink" title="afl-fuzz"></a>afl-fuzz</h2><p>最近在研究afl-fuzz，发现一些有意思的东西，记录一下。</p>
+<h2 id="afl-fuzz浅谈"><a href="#afl-fuzz浅谈" class="headerlink" title="afl-fuzz浅谈"></a>afl-fuzz浅谈</h2><p>最近在研究afl-fuzz，发现一些有意思的东西，记录一下。</p>
 <p>先说这个afl-fuzz的打桩机制，越想越觉得作者这人脑回路新奇。先说说使用这个方法的初衷。</p>
 <p>为了提升性能，afl-fuzz使用了一个”fork server”，fuzz的进程只进行一次execve(), 连接(linking), 库初始化(libc initialization)。fuzz进程通过copy-on-write的方式从已停止的fuzz进程中clone下来。</p>
 <p>为了实现copy-on-write功能，作者在编译的时候把初始化操作插入到程序的最开始，把编译后的程序拖到IDA会发现文件格式的DT_INIT_ARRAY里被添加了几个名字带有afl的函数，这几个函数会在程序加载完后先执行，（先于main函数），程序会在这里进行fork()子进程的操作。等待afl-fuzz的命令，接受子进程的状态，并发送给afl-fuzz。</p>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><h4 id="afl-gcc"><a href="#afl-gcc" class="headerlink" title="afl-gcc"></a>afl-gcc</h4><p>1.找afl-as的路径，</p>
+<p>2.设置编译参数，</p>
+<p>3.执行gcc/g++/clang执行真正的编译过程…</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">  <span class="comment">//找afl-as的路径</span></span><br><span class="line">  find_as(argv[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">  edit_params(argc, argv);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//打印gcc的命令行参数</span></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; argc + <span class="number">128</span>; i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span>(cc_params[i])</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,cc_params[i]);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  execvp(cc_params[<span class="number">0</span>], (<span class="keyword">char</span>**)cc_params);</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>如下是参数的输出情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">gcc</span><br><span class="line">/root/AFLcpp/test-instr.c</span><br><span class="line">-o</span><br><span class="line">test-instr</span><br><span class="line">-B</span><br><span class="line">/root/AFLcpp</span><br><span class="line">-g</span><br><span class="line">-O3</span><br><span class="line">-funroll-loops</span><br><span class="line">-D__AFL_COMPILER=1</span><br><span class="line">-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION=1</span><br></pre></td></tr></table></figure>
+
+<h4 id="afl-as"><a href="#afl-as" class="headerlink" title="afl-as"></a>afl-as</h4><p>这里值得一提的函数就是<code>add_instrumentation</code>,也是afl-as的最关键的操作，用来插桩，在处理到某个分支，需要插入桩代码时，afl-as会生成一个随机数，作为运行时保存在ecx中的值。而这个随机数，便是用于标识这个代码块的key。</p>
+<h4 id="afl-cmin"><a href="#afl-cmin" class="headerlink" title="afl-cmin"></a>afl-cmin</h4><p>afl-cmin -i tests/ -o output_dir – ./proc -e -r @@</p>
+<p>trace_bits</p>
+<h4 id="afl-fuzz-c"><a href="#afl-fuzz-c" class="headerlink" title="afl-fuzz.c"></a>afl-fuzz.c</h4><p>参数说明</p>
+<p>-i in_dir 输入目录，-o out_dir 输出目录，-M sync_id force_deterministic， -S sync_id，-f out_file target file，-x extras_dir，-t timeout，-m mem_limit，-b cpu_to_bind_given (bind cpu core)，-d skip_deterministic = 1 use_splicing = 1（skip deterministic）-B in_bitmap read_bitmap()，-c crash_mode = FAULT_CRASH，-n dump mode，-T use_banner，-Q qemu_mode，</p>
+<p>setup_shm()<br>1.初始化virgin_bits, virgin_tmout, virgin_crash三个全局变量。<br>2.申请并初始化共享变量内存区域。并将该共享变量的值写入环境变量。</p>
+<p>init_count_class16()<br>初始化count_class_lookup16数组,</p>
+<p>setup_dirs_fds()<br>初始化输出目录</p>
+<p>read_testcases()<br>把输入目录的文件添加到队列中</p>
+<p>load_auto()<br>加载自动生成的附加功能。</p>
+<p>pivot_inputs()<br>在输出目录中为输入测试用例创建硬链接,名字会标记好id和name。</p>
+<p>if (extras_dir) load_extras(extras_dir);  由-x 设置<br>load_extras会读取目录文件并放到extras数组里。</p>
+<p>if (!timeout_given) find_timeout();<br>如果没有给出超时时间，先去看看是不是恢复任务，会去寻找out_dir目录里的fuzzer_stats文件或in_dir目录里的fuzzer_stats，找里边的exec_timeout      : 的值，赋给exec_tmout timeout_given复制给3;</p>
+<p>detect_file_args() 找参数里有没有@@，如果有，把”output/.cur_input”</p>
+<p>check_binary()检查二进制文件<br>通过检查二进制文件里边的字符串，检查是否合法，并设置一些相关的变量，设置开始时间start_time = get_cur_time();</p>
+<p>perform_dry_run()<br>运行一遍测试程序和测试用例。<br>  calibrate_case()<br>    init_forkserver()<br>      pipe(st_pipe)<br>      pipe(ctl_pipe)<br>    打开两个管道，<br>      forksrv_pid = fork();<br>    fork子进程，子进程会根据参数配置，限制一些内存，文件描述符数量如果低于200，设置成200。  dup2(dev_null_fd, 1);dup2(dev_null_fd, 2);把标准输出和标准错误输出设为忽略。如果指定了@@，标准输入也设为忽略。dup2(ctl_pipe[0], FORKSRV_FD)；dup2(st_pipe[1], FORKSRV_FD + 1；用FORKSRV_FD和FORKSRV_FD + 1分别指定ctl_pipe（描述符：fsrv_ctl_fd）和st_pipe（描述符：fsrv_st_fd），关掉用不到的父进程打开的描述符。设置afl的相关环境变量。父进程读取st_pipe的内容，如果不合规就waitpid，合规直接返回。<br>    write_to_testcase() 把内容写到output指定的之前使用符号链接的文件中。<br>    run_target()把prev_timed_out通过fsrv_ctl_fd传给子进程，把child_pid通过fsrv_st_fd读出来。<br>cull_queue()精简队列，</p>
 
 	  <div class="article-footer-copyright">
 
@@ -259,7 +283,7 @@ new Valine(valineConfig);
   <div class="container-narrow">
   <footer> <p>
   
-  &copy; 2021 P1AIN0&#39;S BLOG
+  &copy; 2023 P1AIN0&#39;S BLOG
   
       powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
 </p>

@@ -114,6 +114,436 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/07/05/CPU缓存/" >CPU缓存</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-05  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/07/05/CPU缓存/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="MESI协议"><a href="#MESI协议" class="headerlink" title="MESI协议"></a>MESI协议</h2><p>MESI 协议定义了 4 种基本状态：M、E、S、I，即修改（Modified）、独占（Exclusive）、共享（Shared）和无效（Invalid）。</p>
+<p>1.M 修改（Modified）：当前 Cache 的内容有效，数据已经被修改而且与内存中的数据不一致，数据只在当前 Cache 里存在。</p>
+<p>2.E 独占（Exclusive）：当前 Cache 中的内容有效，数据与内存中的数据一致，数据只在当前 Cache 里存在。</p>
+<p>3.S 共享（Shared）：当前 Cache 中的内容有效，Cache 中的数据与内存中的数据一致，数据在多个 CPU 核心中的 Cache 里面存在。</p>
+<p>4.无效（Invalid）：当前 Cache 无效。</p>
+<p>Cache 硬件，它会监控所有 CPU 上 Cache 的操作，根据相应的操作使得 Cache 里的数据行在上面这些状态之间切换。Cache 硬件通过这些状态的变化，就能安全地控制各 Cache 间、各 Cache 与内存之间的数据一致性了。</p>
+<h2 id="开启-Cache"><a href="#开启-Cache" class="headerlink" title="开启 Cache"></a>开启 Cache</h2><p>在 x86 CPU 上开启 Cache 非常简单，只需要将 CR0 寄存器中 CD、NW 位同时清 0 即可。CD=1 时表示 Cache 关闭，NW=1 时 CPU 不维护内存数据一致性。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov eax, cr0</span><br><span class="line">;开启 CACHE    </span><br><span class="line">btr eax,29 ;CR0.NW=0</span><br><span class="line">btr eax,30  ;CR0.CD=0</span><br><span class="line">mov cr0, eax</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取内存视图"><a href="#获取内存视图" class="headerlink" title="获取内存视图"></a>获取内存视图</h2><p>给出一个物理地址并不能准确地定位到内存空间，内存空间只是映射物理地址空间中的一个子集，物理地址空间中可能有空洞，有 ROM，有内存，有显存，有 I/O 寄存器，所以获取内存有多大没用，关键是要获取哪些物理地址空间是可以读写的内存。</p>
+<p>物理地址空间是由北桥芯片控制管理的，那我们是不是要找北桥要内存的地址空间呢？当然不是，在 x86 平台上还有更方便简单的办法，那就是 BIOS 提供的实模式下中断服务，就是 int 指令后面跟着一个常数的形式。由于 PC 机上电后由 BIOS 执行硬件初始化，中断向量表是 BIOS 设置的，所以执行中断自然执行 BIOS 服务。这个中断服务是 int 15h，但是它需要一些参数，就是在执行 int 15h 之前，对特定寄存器设置一些值，代码如下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">_getmemmap:  </span><br><span class="line">    xor ebx,ebx ;ebx设为0  </span><br><span class="line">    mov edi,E80MAP_ADR ;edi设为存放输出结果的1MB内的物理内存</span><br><span class="line">loop:  </span><br><span class="line">    mov eax,0e820h ;eax必须为0e820h  </span><br><span class="line">    mov ecx,20 ;输出结果数据项的大小为20字节：8字节内存基地址，8字节内存长度，4字节内存类型  </span><br><span class="line">    mov edx,0534d4150h ;edx必须为0534d4150h  </span><br><span class="line">    int 15h ;执行中断  </span><br><span class="line">    jc error ;如果flags寄存器的C位置1，则表示出错  </span><br><span class="line">    add edi,20;更新下一次输出结果的地址  </span><br><span class="line">    cmp ebx,0 ;如ebx为0，则表示循环迭代结束  </span><br><span class="line">    jne loop  ;还有结果项，继续迭代    </span><br><span class="line">    ret</span><br><span class="line">error:;出错处理</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_USABLE 1 <span class="comment">//可用内存</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_RESERV 2 <span class="comment">//保留内存不可使用</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_ACPIREC 3 <span class="comment">//ACPI表相关的</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_ACPINVS 4 <span class="comment">//ACPI NVS空间</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RAM_AREACON 5 <span class="comment">//包含坏内存</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">s_e820</span>&#123;</span>    </span><br><span class="line">    <span class="keyword">u64_t</span> saddr;    <span class="comment">/* 内存开始地址 */</span>    </span><br><span class="line">    <span class="keyword">u64_t</span> lsize;    <span class="comment">/* 内存大小 */</span>    </span><br><span class="line">    <span class="keyword">u32_t</span> type;    <span class="comment">/* 内存类型 */</span></span><br><span class="line">&#125;<span class="keyword">e820map_t</span>;</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/2021/07/05/CPU缓存/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
+			<a href="/2021/07/04/CPU工作模式/" >CPU实模式和保护模式</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-04  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+
+		
+        
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+            
+            
+		
+		
+            
+            <p class="post">&lt;h2 id=&#34;实模式&#34;&gt;&lt;a href=&#34;#实模式&#34; class=&#34;headerlink&#34; title=&#34;实模式&#34;&gt;&lt;/a&gt;实模式&lt;/h2&gt;&lt;p&gt;实模式又称实地址模式，对内存不加以任何的限制。&lt;/p&gt;
+&lt;h3 id=&#34;实模式的寄存器&#34;&gt;&lt;a href=&#34;#实模式的寄存器&#34; class=&#34;headerlink&#34; title=&#34;实模式的寄存器&#34;&gt;&lt;/a&gt;实模式的寄存器&lt;/h3&gt;&lt;p&gt;x86CPU在实模式下的寄存器都是16位的。&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;寄存器&lt;/th&gt;
+&lt;th&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;AX、BX、CX、DX、DI、SI、BP&lt;/td&gt;
+&lt;td&gt;通用寄存器，里面可以存放数据、地址、参与运算&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;IP&lt;/td&gt;
+&lt;td&gt;程序指针寄存器，始终指向下一条指令的地址&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;SP&lt;/td&gt;
+&lt;td&gt;栈指针寄存器，始终指向当前栈顶&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;CS、DS、ES、SS&lt;/td&gt;
+&lt;td&gt;段寄存器，里面存放一个内存段的基地址&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;FLAGS&lt;/td&gt;
+&lt;td&gt;标志寄存器&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;h3 id=&#34;实模式下访问内存&#34;&gt;&lt;a href=&#34;#实模式下访问内存&#34; class=&#34;headerlink&#34; title=&#34;实模式下访问内存&#34;&gt;&lt;/a&gt;实模式下访问内存&lt;/h3&gt;&lt;p&gt;实模式下所有的内存地址都是由段寄存器左移 4 位，再加上一个通用寄存器中的值或者常数形成地址，然后由这个地址去访问内存。&lt;/p&gt;
+&lt;h3 id=&#34;实模式中断&#34;&gt;&lt;a href=&#34;#实模式中断&#34; class=&#34;headerlink&#34; title=&#34;实模式中断&#34;&gt;&lt;/a&gt;实模式中断&lt;/h3&gt;&lt;p&gt;中断即中止执行当前程序，转而跳转到另一个特定的地址上，去运行特定的代码。在实模式下它的实现过程是先保存 CS 和 IP 寄存器，然后装载新的 CS 和 IP 寄存器。&lt;/p&gt;
+&lt;p&gt;通过IDTR查找中断向量表，根据中断号索引中断处理的地址。&lt;/p&gt;
+&lt;h2 id=&#34;保护模式&#34;&gt;&lt;a href=&#34;#保护模式&#34; class=&#34;headerlink&#34; title=&#34;保护模式&#34;&gt;&lt;/a&gt;保护模式&lt;/h2&gt;&lt;h3 id=&#34;保护模式寄存器&#34;&gt;&lt;a href=&#34;#保护模式寄存器&#34; class=&#34;headerlink&#34; title=&#34;保护模式寄存器&#34;&gt;&lt;/a&gt;保护模式寄存器&lt;/h3&gt;&lt;p&gt;保护模式相比于实模式，增加了一些控制寄存器和段寄存器，扩展通用寄存器的位宽，所有的通用寄存器都是 32 位的，还可以单独使用低 16 位，这个低 16 位又可以拆分成两个 8 位寄存器，&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;寄存器&lt;/th&gt;
+&lt;th&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;EAX、EBX、ECX、EDX、EDI、ESI、EBP&lt;/td&gt;
+&lt;td&gt;通用寄存器，里面可以存放数据、地址、参与运算&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;EIP&lt;/td&gt;
+&lt;td&gt;程序指针寄存器，始终指向下一条指令的地址&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+<p>
+		
+
+	
+
+	</div>
+  <a type="button" href="/2021/07/04/CPU工作模式/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="实模式"><a href="#实模式" class="headerlink" title="实模式"></a>实模式</h2><p>实模式又称实地址模式，对内存不加以任何的限制。</p>
+<h3 id="实模式的寄存器"><a href="#实模式的寄存器" class="headerlink" title="实模式的寄存器"></a>实模式的寄存器</h3><p>x86CPU在实模式下的寄存器都是16位的。</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AX、BX、CX、DX、DI、SI、BP</td>
+<td>通用寄存器，里面可以存放数据、地址、参与运算</td>
+</tr>
+<tr>
+<td>IP</td>
+<td>程序指针寄存器，始终指向下一条指令的地址</td>
+</tr>
+<tr>
+<td>SP</td>
+<td>栈指针寄存器，始终指向当前栈顶</td>
+</tr>
+<tr>
+<td>CS、DS、ES、SS</td>
+<td>段寄存器，里面存放一个内存段的基地址</td>
+</tr>
+<tr>
+<td>FLAGS</td>
+<td>标志寄存器</td>
+</tr>
+</tbody></table>
+<h3 id="实模式下访问内存"><a href="#实模式下访问内存" class="headerlink" title="实模式下访问内存"></a>实模式下访问内存</h3><p>实模式下所有的内存地址都是由段寄存器左移 4 位，再加上一个通用寄存器中的值或者常数形成地址，然后由这个地址去访问内存。</p>
+<h3 id="实模式中断"><a href="#实模式中断" class="headerlink" title="实模式中断"></a>实模式中断</h3><p>中断即中止执行当前程序，转而跳转到另一个特定的地址上，去运行特定的代码。在实模式下它的实现过程是先保存 CS 和 IP 寄存器，然后装载新的 CS 和 IP 寄存器。</p>
+<p>通过IDTR查找中断向量表，根据中断号索引中断处理的地址。</p>
+<h2 id="保护模式"><a href="#保护模式" class="headerlink" title="保护模式"></a>保护模式</h2><h3 id="保护模式寄存器"><a href="#保护模式寄存器" class="headerlink" title="保护模式寄存器"></a>保护模式寄存器</h3><p>保护模式相比于实模式，增加了一些控制寄存器和段寄存器，扩展通用寄存器的位宽，所有的通用寄存器都是 32 位的，还可以单独使用低 16 位，这个低 16 位又可以拆分成两个 8 位寄存器，</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EAX、EBX、ECX、EDX、EDI、ESI、EBP</td>
+<td>通用寄存器，里面可以存放数据、地址、参与运算</td>
+</tr>
+<tr>
+<td>EIP</td>
+<td>程序指针寄存器，始终指向下一条指令的地址</td>
+</tr>
+<tr>
+<td>ESP</td>
+<td>栈指针寄存器，始终指向当前栈顶</td>
+</tr>
+<tr>
+<td>CS、DS、ES、SS、FS、GS</td>
+<td>段寄存器，里面存放一个内存段的基地址</td>
+</tr>
+<tr>
+<td>EFLAGS</td>
+<td>标志寄存器</td>
+</tr>
+<tr>
+<td>CRO、CR1、CR2、CR3</td>
+<td>CPU控制寄存器，控制CPU的功能特性</td>
+</tr>
+</tbody></table>
+<h3 id="保护模式特权级"><a href="#保护模式特权级" class="headerlink" title="保护模式特权级"></a>保护模式特权级</h3><p>特权级分为4级R0～R3</p>
+<h3 id="切换到保护模式"><a href="#切换到保护模式" class="headerlink" title="切换到保护模式"></a>切换到保护模式</h3><p>段描述符：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">GDT_START:</span><br><span class="line">knull_dsc: dq 0</span><br><span class="line">;第一个段描述符CPU硬件规定必须为0</span><br><span class="line">kcode_dsc: dq 0x00cf9e000000ffff</span><br><span class="line">;段基地址=0，段长度=0xfffff</span><br><span class="line">;G=1,D/B=1,L=0,AVL=0 </span><br><span class="line">;P=1,DPL=0,S=1</span><br><span class="line">;T=1,C=1,R=1,A=0</span><br><span class="line">kdata_dsc: dq 0x00cf92000000ffff</span><br><span class="line">;段基地址=0，段长度=0xfffff</span><br><span class="line">;G=1,D/B=1,L=0,AVL=0 </span><br><span class="line">;P=1,DPL=0,S=1</span><br><span class="line">;T=0,C=0,R=1,A=0</span><br><span class="line">GDT_END:</span><br><span class="line"></span><br><span class="line">GDT_PTR:</span><br><span class="line">GDTLEN  dw GDT_END-GDT_START-1</span><br><span class="line">GDTBASE  dd GDT_START</span><br></pre></td></tr></table></figure>
+
+<p>1、准备全局段描述符</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GDT_START:knull_dsc: dq 0kcode_dsc: dq 0x00cf9e000000ffffkdata_dsc: dq 0x00cf92000000ffffGDT_END:GDT_PTR:GDTLEN  dw GDT_END-GDT_START-1GDTBASE  dd GDT_START</span><br></pre></td></tr></table></figure>
+
+<p>2、加载gdtr寄存器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lgdt [GDT_PTR]</span><br></pre></td></tr></table></figure>
+
+<p>3、设置 CR0 寄存器，开启保护模式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">;开启 PE</span><br><span class="line">mov eax, cr0</span><br><span class="line">bts eax, 0                      ; CR0.PE =1</span><br><span class="line">mov cr0, eax         </span><br></pre></td></tr></table></figure>
+
+<p>4、进行长跳转，加载 CS 段寄存器，即段选择子。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmp dword 0x8 :_32bits_mode ;_32bits_mode为32位代码标号即段偏移</span><br></pre></td></tr></table></figure>
+
+	
+	</div>
+  <a type="button" href="/2021/07/04/CPU工作模式/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/07/03/Firefox漏洞研究/" >Firefox漏洞研究</a>
 		</h3>
 		</div>
@@ -1586,775 +2016,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2020/04/06/Python核心技术（二）/" >python核心技术（二）</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2020-04-06  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-		
-            
-            <p class="post">&lt;h2 id=&#34;一、Python对象的比较、拷贝&#34;&gt;&lt;a href=&#34;#一、Python对象的比较、拷贝&#34; class=&#34;headerlink&#34; title=&#34;一、Python对象的比较、拷贝&#34;&gt;&lt;/a&gt;一、Python对象的比较、拷贝&lt;/h2&gt;&lt;h3 id=&#34;1-39-39-VS-39-is-39&#34;&gt;&lt;a href=&#34;#1-39-39-VS-39-is-39&#34; class=&#34;headerlink&#34; title=&#34;1.&amp;#39;==&amp;#39; VS &amp;#39;is&amp;#39;&#34;&gt;&lt;/a&gt;1.&lt;code&gt;&amp;#39;==&amp;#39;&lt;/code&gt; VS &lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;&lt;/h3&gt;&lt;p&gt;等于（==）和 is 是 Python 中对象比较常用的两种方式。简单来说，&lt;code&gt;&amp;#39;==&amp;#39;&lt;/code&gt;操作符比较对象之间的值是否相等；而&lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;操作符比较的是对象的身份标识是否相等，即它们是否是同一个对象，是否指向同一个内存地址。&lt;/p&gt;
-&lt;p&gt;在 Python 中，每个对象的身份标识，都能通过函数 id(object) 获得。因此，&lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;操作符，相当于比较对象之间的 ID 是否相等。使用id()函数可以查看对象的id。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;比较操作符&lt;code&gt;&amp;#39;==&amp;#39;&lt;/code&gt;表示比较对象间的值是否相等，而&lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;表示比较对象的标识是否相等，即它们是否指向同一个内存地址。&lt;/li&gt;
-&lt;li&gt;比较操作符&lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;效率优于&lt;code&gt;&amp;#39;==&amp;#39;&lt;/code&gt;，因为&lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;操作符无法被重载，执行&lt;code&gt;&amp;#39;is&amp;#39;&lt;/code&gt;操作只是简单的获取对象的 ID，并进行比较；而&lt;code&gt;&amp;#39;==&amp;#39;&lt;/code&gt;操作符则会递归地遍历对象的所有值，并逐一比较。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;2-浅拷贝和深度拷贝&#34;&gt;&lt;a href=&#34;#2-浅拷贝和深度拷贝&#34; class=&#34;headerlink&#34; title=&#34;2.浅拷贝和深度拷贝&#34;&gt;&lt;/a&gt;2.浅拷贝和深度拷贝&lt;/h3&gt;&lt;p&gt;先来看浅拷贝。常见的浅拷贝的方法，是使用数据类型本身的构造器。&lt;/p&gt;
-&lt;p&gt;所谓深度拷贝，是指重新分配一块内存，创建一个新的对象，并且将原对象中的元素，以递归的方式，通过创建新的子对象拷贝到新对象中。因此，新对象和原对象没有任何关联。&lt;/p&gt;
-&lt;p&gt;Python 中以 copy.deepcopy() 来实现对象的深度拷贝。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;浅拷贝中的元素，是原对象中子对象的引用，因此，如果原对象中的元素是可变的，改变其也会影响拷贝后的对象，存在一定的副作用。&lt;/li&gt;
-&lt;li&gt;深度拷贝则会递归地拷贝原对象中的每一个子对象，因此拷贝后的对象和原对象互不相关。另外，深度拷贝中会维护一个字典，记录已经拷贝的对象及其 ID，来提高效率并防止无限递归的发生。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;二、参数传递&#34;&gt;&lt;a href=&#34;#二、参数传递&#34; class=&#34;headerlink&#34; title=&#34;二、参数传递&#34;&gt;&lt;/a&gt;二、参数传递&lt;/h2&gt;&lt;p&gt;和其他语言不同的是，Python 中参数的传递既不是值传递，也不是引用传递，而是赋值传递，或者是叫对象的引用传递。这里的赋值或对象的引用传递，不是指向一个具体的内存地址，而是指向一个具体的对象。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;如果对象是可变的，当其改变时，所有指向这个对象的变量都会改变。&lt;/li&gt;
-&lt;li&gt;如果对象不可变，简单的赋值只能改变其中一个变量的值，其余变量则不受影响。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;三、装饰器&#34;&gt;&lt;a href=&#34;#三、装饰器&#34; class=&#34;headerlink&#34; title=&#34;三、装饰器&#34;&gt;&lt;/a&gt;三、装饰器&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;所谓的装饰器，其实就是通过装饰器函数，来修改原函数的一些功能，使得原函数不需要修改。&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;引入装饰器之前，我们首先一起来复习一下，必须掌握的函数的几个核心概念。&lt;/p&gt;
-&lt;p&gt;第一点，我们要知道，在 Python 中，函数是一等公民（first-class citizen），函数也是对象。我们可以把函数赋予变量，比如下面这段代码：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def func(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    print(&amp;#x27;Got a message: &amp;#123;&amp;#125;&amp;#x27;.format(message))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;send_message = func&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;send_message(&amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# 输出&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Got a message: hello world&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这个例子中，我们把函数 func() 赋予了变量 send_message，这样之后你调用 send_message，就相当于是调用函数 func()。&lt;/p&gt;
-&lt;p&gt;第二点，我们可以把函数当作参数，传入另一个函数中，比如下面这段代码：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def get_message(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return &amp;#x27;Got a message: &amp;#x27; + message&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;def root_call(func, message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    print(func(message))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;root_call(get_message, &amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# 输出&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Got a message: hello world&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这个例子中，我们就把函数 get_message() 以参数的形式，传入了函数 root_call() 中然后调用它。&lt;/p&gt;
-&lt;p&gt;第三点，我们可以在函数里定义函数，也就是函数的嵌套。这里我同样举了一个例子：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def func(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    def get_message(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        print(&amp;#x27;Got a message: &amp;#123;&amp;#125;&amp;#x27;.format(message))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return get_message(message)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;func(&amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# 输出&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Got a message: hello world&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这段代码中，我们在函数 func() 里又定义了新的函数 get_message()，调用后作为 func() 的返回值返回。&lt;/p&gt;
-&lt;p&gt;第四点，要知道，函数的返回值也可以是函数对象（闭包），比如下面这个例子：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def func_closure():&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    def get_message(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        print(&amp;#x27;Got a message: &amp;#123;&amp;#125;&amp;#x27;.format(message))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return get_message&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;send_message = func_closure()&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;send_message(&amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# 输出&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;Got a message: hello world&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这里，函数 func_closure() 的返回值是函数对象 get_message() 本身，之后，我们将其赋予变量 send_message，再调用 send_message(‘hello world’)，最后输出了&lt;code&gt;&amp;#39;Got a message: hello world&amp;#39;&lt;/code&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;简单的装饰器&#34;&gt;&lt;a href=&#34;#简单的装饰器&#34; class=&#34;headerlink&#34; title=&#34;简单的装饰器&#34;&gt;&lt;/a&gt;简单的装饰器&lt;/h3&gt;&lt;p&gt;简单的复习之后，我们接下来学习今天的新知识——装饰器。按照习惯，我们可以先来看一个装饰器的简单例子：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def my_decorator(func):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    def wrapper():&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        print(&amp;#x27;wrapper of decorator&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        func()&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return wrapper&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;def greet():&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    print(&amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;greet = my_decorator(greet)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;greet()&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# 输出&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;wrapper of decorator&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;hello world&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这段代码中，变量 greet 指向了内部函数 wrapper()，而内部函数 wrapper() 中又会调用原函数 greet()，因此，最后调用 greet() 时，就会先打印&lt;code&gt;&amp;#39;wrapper of decorator&amp;#39;&lt;/code&gt;，然后输出&lt;code&gt;&amp;#39;hello world&amp;#39;&lt;/code&gt;。&lt;/p&gt;
-&lt;p&gt;这里的函数 my_decorator() 就是一个装饰器，它把真正需要执行的函数 greet() 包裹在其中，并且改变了它的行为，但是原函数 greet() 不变。&lt;/p&gt;
-&lt;p&gt;事实上，上述代码在 Python 中有更简单、更优雅的表示：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def my_decorator(func):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    def wrapper():&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        print(&amp;#x27;wrapper of decorator&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        func()&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return wrapper&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;@my_decorator&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;def greet():&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    print(&amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;greet()&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这里的&lt;code&gt;@&lt;/code&gt;，我们称之为语法糖，&lt;code&gt;@my_decorator&lt;/code&gt;就相当于前面的&lt;code&gt;greet=my_decorator(greet)&lt;/code&gt;语句，只不过更加简洁。因此，如果你的程序中有其它函数需要做类似的装饰，你只需在它们的上方加上&lt;code&gt;@decorator&lt;/code&gt;就可以了，这样就大大提高了函数的重复利用和程序的可读性。&lt;/p&gt;
-&lt;h3 id=&#34;带有参数的装饰器&#34;&gt;&lt;a href=&#34;#带有参数的装饰器&#34; class=&#34;headerlink&#34; title=&#34;带有参数的装饰器&#34;&gt;&lt;/a&gt;带有参数的装饰器&lt;/h3&gt;&lt;p&gt;你或许会想到，如果原函数 greet() 中，有参数需要传递给装饰器怎么办？&lt;/p&gt;
-&lt;p&gt;一个简单的办法，是可以在对应的装饰器函数 wrapper() 上，加上相应的参数，比如：&lt;/p&gt;
-&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;def my_decorator(func):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    def wrapper(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        print(&amp;#x27;wrapper of decorator&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        func(message)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    return wrapper&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;@my_decorator&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;def greet(message):&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    print(message)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;greet(&amp;#x27;hello world&amp;#x27;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;# 输出&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;wrapper of decorator&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;hello world&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;不过，新的问题来了。如果我另外还有一个函数，也需要使用 my_decorator() 装饰器，但是这个新的函数有两个参数，又该怎么办呢？比如：&lt;/p&gt;
-<p>
-		
-
-	
-
-	</div>
-  <a type="button" href="/2020/04/06/Python核心技术（二）/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h2 id="一、Python对象的比较、拷贝"><a href="#一、Python对象的比较、拷贝" class="headerlink" title="一、Python对象的比较、拷贝"></a>一、Python对象的比较、拷贝</h2><h3 id="1-39-39-VS-39-is-39"><a href="#1-39-39-VS-39-is-39" class="headerlink" title="1.&#39;==&#39; VS &#39;is&#39;"></a>1.<code>&#39;==&#39;</code> VS <code>&#39;is&#39;</code></h3><p>等于（==）和 is 是 Python 中对象比较常用的两种方式。简单来说，<code>&#39;==&#39;</code>操作符比较对象之间的值是否相等；而<code>&#39;is&#39;</code>操作符比较的是对象的身份标识是否相等，即它们是否是同一个对象，是否指向同一个内存地址。</p>
-<p>在 Python 中，每个对象的身份标识，都能通过函数 id(object) 获得。因此，<code>&#39;is&#39;</code>操作符，相当于比较对象之间的 ID 是否相等。使用id()函数可以查看对象的id。</p>
-<ul>
-<li>比较操作符<code>&#39;==&#39;</code>表示比较对象间的值是否相等，而<code>&#39;is&#39;</code>表示比较对象的标识是否相等，即它们是否指向同一个内存地址。</li>
-<li>比较操作符<code>&#39;is&#39;</code>效率优于<code>&#39;==&#39;</code>，因为<code>&#39;is&#39;</code>操作符无法被重载，执行<code>&#39;is&#39;</code>操作只是简单的获取对象的 ID，并进行比较；而<code>&#39;==&#39;</code>操作符则会递归地遍历对象的所有值，并逐一比较。</li>
-</ul>
-<h3 id="2-浅拷贝和深度拷贝"><a href="#2-浅拷贝和深度拷贝" class="headerlink" title="2.浅拷贝和深度拷贝"></a>2.浅拷贝和深度拷贝</h3><p>先来看浅拷贝。常见的浅拷贝的方法，是使用数据类型本身的构造器。</p>
-<p>所谓深度拷贝，是指重新分配一块内存，创建一个新的对象，并且将原对象中的元素，以递归的方式，通过创建新的子对象拷贝到新对象中。因此，新对象和原对象没有任何关联。</p>
-<p>Python 中以 copy.deepcopy() 来实现对象的深度拷贝。</p>
-<ul>
-<li>浅拷贝中的元素，是原对象中子对象的引用，因此，如果原对象中的元素是可变的，改变其也会影响拷贝后的对象，存在一定的副作用。</li>
-<li>深度拷贝则会递归地拷贝原对象中的每一个子对象，因此拷贝后的对象和原对象互不相关。另外，深度拷贝中会维护一个字典，记录已经拷贝的对象及其 ID，来提高效率并防止无限递归的发生。</li>
-</ul>
-<h2 id="二、参数传递"><a href="#二、参数传递" class="headerlink" title="二、参数传递"></a>二、参数传递</h2><p>和其他语言不同的是，Python 中参数的传递既不是值传递，也不是引用传递，而是赋值传递，或者是叫对象的引用传递。这里的赋值或对象的引用传递，不是指向一个具体的内存地址，而是指向一个具体的对象。</p>
-<ul>
-<li>如果对象是可变的，当其改变时，所有指向这个对象的变量都会改变。</li>
-<li>如果对象不可变，简单的赋值只能改变其中一个变量的值，其余变量则不受影响。</li>
-</ul>
-<h2 id="三、装饰器"><a href="#三、装饰器" class="headerlink" title="三、装饰器"></a>三、装饰器</h2><p><strong>所谓的装饰器，其实就是通过装饰器函数，来修改原函数的一些功能，使得原函数不需要修改。</strong></p>
-<p>引入装饰器之前，我们首先一起来复习一下，必须掌握的函数的几个核心概念。</p>
-<p>第一点，我们要知道，在 Python 中，函数是一等公民（first-class citizen），函数也是对象。我们可以把函数赋予变量，比如下面这段代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def func(message):</span><br><span class="line">    print(&#x27;Got a message: &#123;&#125;&#x27;.format(message))</span><br><span class="line">    </span><br><span class="line">send_message = func</span><br><span class="line">send_message(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">Got a message: hello world</span><br></pre></td></tr></table></figure>
-
-<p>这个例子中，我们把函数 func() 赋予了变量 send_message，这样之后你调用 send_message，就相当于是调用函数 func()。</p>
-<p>第二点，我们可以把函数当作参数，传入另一个函数中，比如下面这段代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">def get_message(message):</span><br><span class="line">    return &#x27;Got a message: &#x27; + message</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">def root_call(func, message):</span><br><span class="line">    print(func(message))</span><br><span class="line">    </span><br><span class="line">root_call(get_message, &#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">Got a message: hello world</span><br></pre></td></tr></table></figure>
-
-<p>这个例子中，我们就把函数 get_message() 以参数的形式，传入了函数 root_call() 中然后调用它。</p>
-<p>第三点，我们可以在函数里定义函数，也就是函数的嵌套。这里我同样举了一个例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def func(message):</span><br><span class="line">    def get_message(message):</span><br><span class="line">        print(&#x27;Got a message: &#123;&#125;&#x27;.format(message))</span><br><span class="line">    return get_message(message)</span><br><span class="line"> </span><br><span class="line">func(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">Got a message: hello world</span><br></pre></td></tr></table></figure>
-
-<p>这段代码中，我们在函数 func() 里又定义了新的函数 get_message()，调用后作为 func() 的返回值返回。</p>
-<p>第四点，要知道，函数的返回值也可以是函数对象（闭包），比如下面这个例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">def func_closure():</span><br><span class="line">    def get_message(message):</span><br><span class="line">        print(&#x27;Got a message: &#123;&#125;&#x27;.format(message))</span><br><span class="line">    return get_message</span><br><span class="line"> </span><br><span class="line">send_message = func_closure()</span><br><span class="line">send_message(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">Got a message: hello world</span><br></pre></td></tr></table></figure>
-
-<p>这里，函数 func_closure() 的返回值是函数对象 get_message() 本身，之后，我们将其赋予变量 send_message，再调用 send_message(‘hello world’)，最后输出了<code>&#39;Got a message: hello world&#39;</code>。</p>
-<h3 id="简单的装饰器"><a href="#简单的装饰器" class="headerlink" title="简单的装饰器"></a>简单的装饰器</h3><p>简单的复习之后，我们接下来学习今天的新知识——装饰器。按照习惯，我们可以先来看一个装饰器的简单例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">def my_decorator(func):</span><br><span class="line">    def wrapper():</span><br><span class="line">        print(&#x27;wrapper of decorator&#x27;)</span><br><span class="line">        func()</span><br><span class="line">    return wrapper</span><br><span class="line"> </span><br><span class="line">def greet():</span><br><span class="line">    print(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line">greet = my_decorator(greet)</span><br><span class="line">greet()</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">wrapper of decorator</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
-
-<p>这段代码中，变量 greet 指向了内部函数 wrapper()，而内部函数 wrapper() 中又会调用原函数 greet()，因此，最后调用 greet() 时，就会先打印<code>&#39;wrapper of decorator&#39;</code>，然后输出<code>&#39;hello world&#39;</code>。</p>
-<p>这里的函数 my_decorator() 就是一个装饰器，它把真正需要执行的函数 greet() 包裹在其中，并且改变了它的行为，但是原函数 greet() 不变。</p>
-<p>事实上，上述代码在 Python 中有更简单、更优雅的表示：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">def my_decorator(func):</span><br><span class="line">    def wrapper():</span><br><span class="line">        print(&#x27;wrapper of decorator&#x27;)</span><br><span class="line">        func()</span><br><span class="line">    return wrapper</span><br><span class="line"> </span><br><span class="line">@my_decorator</span><br><span class="line">def greet():</span><br><span class="line">    print(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line">greet()</span><br></pre></td></tr></table></figure>
-
-<p>这里的<code>@</code>，我们称之为语法糖，<code>@my_decorator</code>就相当于前面的<code>greet=my_decorator(greet)</code>语句，只不过更加简洁。因此，如果你的程序中有其它函数需要做类似的装饰，你只需在它们的上方加上<code>@decorator</code>就可以了，这样就大大提高了函数的重复利用和程序的可读性。</p>
-<h3 id="带有参数的装饰器"><a href="#带有参数的装饰器" class="headerlink" title="带有参数的装饰器"></a>带有参数的装饰器</h3><p>你或许会想到，如果原函数 greet() 中，有参数需要传递给装饰器怎么办？</p>
-<p>一个简单的办法，是可以在对应的装饰器函数 wrapper() 上，加上相应的参数，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">def my_decorator(func):</span><br><span class="line">    def wrapper(message):</span><br><span class="line">        print(&#x27;wrapper of decorator&#x27;)</span><br><span class="line">        func(message)</span><br><span class="line">    return wrapper</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">@my_decorator</span><br><span class="line">def greet(message):</span><br><span class="line">    print(message)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">greet(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">wrapper of decorator</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
-
-<p>不过，新的问题来了。如果我另外还有一个函数，也需要使用 my_decorator() 装饰器，但是这个新的函数有两个参数，又该怎么办呢？比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@my_decorator</span><br><span class="line">def celebrate(name, message):</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
-
-<p>事实上，通常情况下，我们会把<code>*args</code>和<code>**kwargs</code>，作为装饰器内部函数 wrapper() 的参数。<code>*args</code>和<code>**kwargs</code>，表示接受任意数量和类型的参数，因此装饰器就可以写成下面的形式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def my_decorator(func):</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        print(&#x27;wrapper of decorator&#x27;)</span><br><span class="line">        func(*args, **kwargs)</span><br><span class="line">    return wrapper</span><br></pre></td></tr></table></figure>
-
-<h3 id="带有自定义参数的装饰器"><a href="#带有自定义参数的装饰器" class="headerlink" title="带有自定义参数的装饰器"></a>带有自定义参数的装饰器</h3><p>其实，装饰器还有更大程度的灵活性。刚刚说了，装饰器可以接受原函数任意类型和数量的参数，除此之外，它还可以接受自己定义的参数。</p>
-<p>举个例子，比如我想要定义一个参数，来表示装饰器内部函数被执行的次数，那么就可以写成下面这种形式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">def repeat(num):</span><br><span class="line">    def my_decorator(func):</span><br><span class="line">        def wrapper(*args, **kwargs):</span><br><span class="line">            for i in range(num):</span><br><span class="line">                print(&#x27;wrapper of decorator&#x27;)</span><br><span class="line">                func(*args, **kwargs)</span><br><span class="line">        return wrapper</span><br><span class="line">    return my_decorator</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">@repeat(4)</span><br><span class="line">def greet(message):</span><br><span class="line">    print(message)</span><br><span class="line"> </span><br><span class="line">greet(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出：</span><br><span class="line">wrapper of decorator</span><br><span class="line">hello world</span><br><span class="line">wrapper of decorator</span><br><span class="line">hello world</span><br><span class="line">wrapper of decorator</span><br><span class="line">hello world</span><br><span class="line">wrapper of decorator</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
-
-<h3 id="原函数还是原函数吗？"><a href="#原函数还是原函数吗？" class="headerlink" title="原函数还是原函数吗？"></a>原函数还是原函数吗？</h3><p>现在，我们再来看个有趣的现象。还是之前的例子，我们试着打印出 greet() 函数的一些元信息：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">greet.__name__</span><br><span class="line">## 输出</span><br><span class="line">&#x27;wrapper&#x27;</span><br><span class="line"> </span><br><span class="line">help(greet)</span><br><span class="line"># 输出</span><br><span class="line">Help on function wrapper in module __main__:</span><br><span class="line"> </span><br><span class="line">wrapper(*args, **kwargs)</span><br></pre></td></tr></table></figure>
-
-<p>你会发现，greet() 函数被装饰以后，它的元信息变了。元信息告诉我们“它不再是以前的那个 greet() 函数，而是被 wrapper() 函数取代了”。</p>
-<p>为了解决这个问题，我们通常使用内置的装饰器<code>@functools.wrap</code>，它会帮助保留原函数的元信息（也就是将原函数的元信息，拷贝到对应的装饰器函数里）。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import functools</span><br><span class="line"> </span><br><span class="line">def my_decorator(func):</span><br><span class="line">    @functools.wraps(func)</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        print(&#x27;wrapper of decorator&#x27;)</span><br><span class="line">        func(*args, **kwargs)</span><br><span class="line">    return wrapper</span><br><span class="line">    </span><br><span class="line">@my_decorator</span><br><span class="line">def greet(message):</span><br><span class="line">    print(message)</span><br><span class="line"> </span><br><span class="line">greet.__name__</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">&#x27;greet&#x27;</span><br></pre></td></tr></table></figure>
-
-<h3 id="类装饰器"><a href="#类装饰器" class="headerlink" title="类装饰器"></a>类装饰器</h3><p>前面我们主要讲了函数作为装饰器的用法，实际上，类也可以作为装饰器。类装饰器主要依赖于函数<code>__call_()</code>，每当你调用一个类的示例时，函数<code>__call__()</code>就会被执行一次。</p>
-<p>我们来看下面这段代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">class Count:</span><br><span class="line">    def __init__(self, func):</span><br><span class="line">        self.func = func</span><br><span class="line">        self.num_calls = 0</span><br><span class="line"> </span><br><span class="line">    def __call__(self, *args, **kwargs):</span><br><span class="line">        self.num_calls += 1</span><br><span class="line">        print(&#x27;num of calls is: &#123;&#125;&#x27;.format(self.num_calls))</span><br><span class="line">        return self.func(*args, **kwargs)</span><br><span class="line"> </span><br><span class="line">@Count</span><br><span class="line">def example():</span><br><span class="line">    print(&quot;hello world&quot;)</span><br><span class="line"> </span><br><span class="line">example()</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">num of calls is: 1</span><br><span class="line">hello world</span><br><span class="line"> </span><br><span class="line">example()</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">num of calls is: 2</span><br><span class="line">hello world</span><br><span class="line"> </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>这里，我们定义了类 Count，初始化时传入原函数 func()，而<code>__call__()</code>函数表示让变量 num_calls 自增 1，然后打印，并且调用原函数。因此，在我们第一次调用函数 example() 时，num_calls 的值是 1，而在第二次调用时，它的值变成了 2。</p>
-<h3 id="装饰器的嵌套"><a href="#装饰器的嵌套" class="headerlink" title="装饰器的嵌套"></a>装饰器的嵌套</h3><p>回顾刚刚讲的例子，基本都是一个装饰器的情况，但实际上，Python 也支持多个装饰器，比如写成下面这样的形式：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@decorator1</span></span><br><span class="line"><span class="meta">@decorator2</span></span><br><span class="line"><span class="meta">@decorator3</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">func</span>():</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
-
-<p>它的执行顺序从里到外，所以上面的语句也等效于下面这行代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">decorator1(decorator2(decorator3(func)))</span><br></pre></td></tr></table></figure>
-
-<p>这样，<code>&#39;hello world&#39;</code>这个例子，就可以改写成下面这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">import functools</span><br><span class="line"> </span><br><span class="line">def my_decorator1(func):</span><br><span class="line">    @functools.wraps(func)</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        print(&#x27;execute decorator1&#x27;)</span><br><span class="line">        func(*args, **kwargs)</span><br><span class="line">    return wrapper</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">def my_decorator2(func):</span><br><span class="line">    @functools.wraps(func)</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        print(&#x27;execute decorator2&#x27;)</span><br><span class="line">        func(*args, **kwargs)</span><br><span class="line">    return wrapper</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">@my_decorator1</span><br><span class="line">@my_decorator2</span><br><span class="line">def greet(message):</span><br><span class="line">    print(message)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">greet(&#x27;hello world&#x27;)</span><br><span class="line"> </span><br><span class="line"># 输出</span><br><span class="line">execute decorator1</span><br><span class="line">execute decorator2</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
-
-<h1 id="四、迭代器、生成器"><a href="#四、迭代器、生成器" class="headerlink" title="四、迭代器、生成器"></a>四、迭代器、生成器</h1><h2 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h2><p>列表（list: [0, 1, 2]），元组（tuple: (0, 1, 2)），字典（dict: {0:0, 1:1, 2:2}），集合（set: set([0, 1, 2])）都是容器。所有的容器都是可迭代的（iterable）。迭代器（iterator）提供了一个 next 的方法。调用这个方法后，你要么得到这个容器的下一个对象，要么得到一个 StopIteration 的错误。你不需要像列表一样指定元素的索引，因为字典和集合这样的容器并没有索引一说。比如，字典采用哈希表实现，那么你就只需要知道，next 函数可以不重复不遗漏地一个一个拿到所有元素即可。</p>
-<p>而可迭代对象，通过 iter() 函数返回一个迭代器，再通过 next() 函数就可以实现遍历。for in 语句将这个过程隐式化。</p>
-<h2 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h2><p><strong>生成器是懒人版本的迭代器</strong>。</p>
-<p>在迭代器中，如果我们想要枚举它的元素，这些元素需要事先生成。</p>
-<p>声明一个迭代器很简单，<code>[i for i in range(100000000)]</code>就可以生成一个包含一亿元素的列表。每个元素在生成后都会保存到内存中，你通过代码可以看到，它们占用了巨量的内存，内存不够的话就会出现 OOM 错误。</p>
-<p>不过，我们并不需要在内存中同时保存这么多东西，比如对元素求和，我们只需要知道每个元素在相加的那一刻是多少就行了，用完就可以扔掉了。</p>
-<p>于是，生成器的概念应运而生，在你调用 next() 函数的时候，才会生成下一个变量。生成器在 Python 的写法是用小括号括起来，<code>(i for i in range(100000000))</code>，即初始化了一个生成器。</p>
-<p>这样一来，你可以清晰地看到，生成器并不会像迭代器一样占用大量内存，只有在被使用的时候才会调用。而且生成器在初始化的时候，并不需要运行一次生成操作。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generator</span>(<span class="params">k</span>):</span></span><br><span class="line">    i = <span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">yield</span> i ** k</span><br><span class="line">        i += <span class="number">1</span></span><br><span class="line"> </span><br><span class="line">gen_1 = generator(<span class="number">1</span>)</span><br><span class="line">gen_3 = generator(<span class="number">3</span>)</span><br><span class="line"><span class="built_in">print</span>(gen_1)</span><br><span class="line"><span class="built_in">print</span>(gen_3)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_sum</span>(<span class="params">n</span>):</span></span><br><span class="line">    sum_1, sum_3 = <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        next_1 = <span class="built_in">next</span>(gen_1)</span><br><span class="line">        next_3 = <span class="built_in">next</span>(gen_3)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;next_1 = &#123;&#125;, next_3 = &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(next_1, next_3))</span><br><span class="line">        sum_1 += next_1</span><br><span class="line">        sum_3 += next_3</span><br><span class="line">    <span class="built_in">print</span>(sum_1 * sum_1, sum_3)</span><br><span class="line"> </span><br><span class="line">get_sum(<span class="number">8</span>)</span><br><span class="line"><span class="comment">########## 输出 ##########</span></span><br><span class="line"> </span><br><span class="line">&lt;generator <span class="built_in">object</span> generator at <span class="number">0x000001E70651C4F8</span>&gt;</span><br><span class="line">&lt;generator <span class="built_in">object</span> generator at <span class="number">0x000001E70651C390</span>&gt;</span><br><span class="line">next_1 = <span class="number">1</span>, next_3 = <span class="number">1</span></span><br><span class="line">next_1 = <span class="number">2</span>, next_3 = <span class="number">8</span></span><br><span class="line">next_1 = <span class="number">3</span>, next_3 = <span class="number">27</span></span><br><span class="line">next_1 = <span class="number">4</span>, next_3 = <span class="number">64</span></span><br><span class="line">next_1 = <span class="number">5</span>, next_3 = <span class="number">125</span></span><br><span class="line">next_1 = <span class="number">6</span>, next_3 = <span class="number">216</span></span><br><span class="line">next_1 = <span class="number">7</span>, next_3 = <span class="number">343</span></span><br><span class="line">next_1 = <span class="number">8</span>, next_3 = <span class="number">512</span></span><br><span class="line"><span class="number">1296</span> <span class="number">1296</span></span><br></pre></td></tr></table></figure>
-
-
-
-<p>这段代码中，你首先注意一下 generator() 这个函数，它返回了一个生成器。</p>
-<p>接下来的 yield 是魔术的关键。对于初学者来说，你可以理解为，函数运行到这一行的时候，程序会从这里暂停，然后跳出，不过跳到哪里呢？答案是 next() 函数。那么 <code>i ** k</code> 是干什么的呢？它其实成了 next() 函数的返回值。</p>
-<p>这样，每次 next(gen) 函数被调用的时候，暂停的程序就又复活了，从 yield 这里向下继续执行；同时注意，局部变量 i 并没有被清除掉，而是会继续累加。我们可以看到 next_1 从 1 变到 8，next_3 从 1 变到 512。</p>
-<p>迭代器是一个有限集合，生成器则可以成为一个无限集。我只管调用 next()，生成器根据运算会自动生成新的元素，然后返回给你，非常便捷。</p>
-<p>再例如：给定一个 list 和一个指定数字，求这个数字在 list 中的位置。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index_generator</span>(<span class="params">L, target</span>):</span></span><br><span class="line">    <span class="keyword">for</span> i, num <span class="keyword">in</span> <span class="built_in">enumerate</span>(L):</span><br><span class="line">        <span class="keyword">if</span> num == target:</span><br><span class="line">            <span class="keyword">yield</span> i</span><br><span class="line"> </span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">list</span>(index_generator([<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">6</span>, <span class="number">3</span>, <span class="number">2</span>], <span class="number">2</span>)))</span><br><span class="line"> </span><br><span class="line"><span class="comment">########## 输出 ##########</span></span><br><span class="line"> </span><br><span class="line">[<span class="number">2</span>, <span class="number">5</span>, <span class="number">9</span>]</span><br></pre></td></tr></table></figure>
-
-
-	
-	</div>
-  <a type="button" href="/2020/04/06/Python核心技术（二）/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2020/03/30/Windows内核对象/" >Windows内核对象</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2020-03-30  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-
-		
-        
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-            
-            
-		
-		
-            
-            <p class="post">&lt;h2 id=&#34;Windows内核对象管理&#34;&gt;&lt;a href=&#34;#Windows内核对象管理&#34; class=&#34;headerlink&#34; title=&#34;Windows内核对象管理&#34;&gt;&lt;/a&gt;Windows内核对象管理&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Windows对象管理器的基本设计意图是：&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;-​ 为执行体的数据结构提供一种统一而又可扩展的定义和控制机制。&lt;/p&gt;
-&lt;p&gt;​- 提供统一的安全访问机制。&lt;/p&gt;
-&lt;p&gt;​- 在无须修改已有系统代码的情况下，加入新的对象类型。&lt;/p&gt;
-&lt;p&gt;​- 提供一组标准的API来对对象执行各种操作。&lt;/p&gt;
-&lt;p&gt;​- 提供一种命名机制，与文件系统的命名机制集成在一起。&lt;/p&gt;
-&lt;p&gt;每一个对象由两部分构成：对象头和对象体。所有对象的对象头都具有统一的格式，其定义如下：&lt;/p&gt;
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; &lt;span class=&#34;class&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;struct&lt;/span&gt; _&lt;span class=&#34;title&#34;&gt;OBJECT_CREATE_INFORMATION&lt;/span&gt; *&lt;span class=&#34;title&#34;&gt;POBJECT_CREATE_INFORMATION&lt;/span&gt;;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; &lt;span class=&#34;class&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;struct&lt;/span&gt; _&lt;span class=&#34;title&#34;&gt;OBJECT_HEADER&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    LONG_PTR PointerCount;                        &lt;span class=&#34;comment&#34;&gt;//引用计数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;class&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;union&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        LONG_PTR HandleCount;                    &lt;span class=&#34;comment&#34;&gt;//指向该对象的句柄数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        PVOID NextToFree;                        &lt;span class=&#34;comment&#34;&gt;//对象被延迟删除时加入到一条链中&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    POBJECT_TYPE Type;                            &lt;span class=&#34;comment&#34;&gt;//指向对象的类型对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    UCHAR NameInfoOffset;                        &lt;span class=&#34;comment&#34;&gt;//名称信息的内存偏移&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    UCHAR HandleInfoOffset;                        &lt;span class=&#34;comment&#34;&gt;//句柄信息的内存偏移&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    UCHAR QuotaInfoOffset;                        &lt;span class=&#34;comment&#34;&gt;//配额信息的内存偏移&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    UCHAR Flags;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;class&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;union&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        POBJECT_CREATE_INFORMATION ObjectCreateInfo;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        PVOID QuotaBlockCharged;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    PSECURITY_DESCRIPTOR SecurityDescriptor;    &lt;span class=&#34;comment&#34;&gt;//安全描述符&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    QUAD Body;                                    &lt;span class=&#34;comment&#34;&gt;//对象体开始&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125; OBJECT_HEADER, *POBJECT_HEADER;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;kd&amp;gt; dt _OBJECT_HEADER&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;nt!_OBJECT_HEADER&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; PointerCount     : Int4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x004&lt;/span&gt; HandleCount      : Int4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x004&lt;/span&gt; NextToFree       : Ptr32 Void&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x008&lt;/span&gt; Type             : Ptr32 _OBJECT_TYPE&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x00c&lt;/span&gt; NameInfoOffset   : UChar&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x00d&lt;/span&gt; HandleInfoOffset : UChar&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x00e&lt;/span&gt; QuotaInfoOffset  : UChar&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x00f&lt;/span&gt; Flags            : UChar&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x010&lt;/span&gt; ObjectCreateInfo : Ptr32 _OBJECT_CREATE_INFORMATION&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x010&lt;/span&gt; QuotaBlockCharged : Ptr32 Void&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x014&lt;/span&gt; SecurityDescriptor : Ptr32 Void&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x018&lt;/span&gt; Body             : _QUAD&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;&lt;strong&gt;对象头包含了对象管理所需的基本信息，在Windows中，每一种对象都需要有一个对应的类型对象（OBJECT_TYPE对象），其定义为：&lt;/strong&gt;&lt;/p&gt;
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;define&lt;/span&gt; OBJECT_LOCK_COUNT 4&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; &lt;span class=&#34;class&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;struct&lt;/span&gt; _&lt;span class=&#34;title&#34;&gt;OBJECT_TYPE&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ERESOURCE Mutex;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    LIST_ENTRY TypeList;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    UNICODE_STRING Name;            &lt;span class=&#34;comment&#34;&gt;// Copy from object header for convenience&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    PVOID DefaultObject;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ULONG Index;                    &lt;span class=&#34;comment&#34;&gt;// 此类型对象在全局数组中的索引&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ULONG TotalNumberOfObjects;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ULONG TotalNumberOfHandles;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ULONG HighWaterNumberOfObjects;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ULONG HighWaterNumberOfHandles;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    OBJECT_TYPE_INITIALIZER TypeInfo;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;ifdef&lt;/span&gt; POOL_TAGGING&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ULONG Key;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;meta&#34;&gt;#&lt;span class=&#34;meta-keyword&#34;&gt;endif&lt;/span&gt;                                 &lt;span class=&#34;comment&#34;&gt;//POOL_TAGGING&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ERESOURCE ObjectLocks[ OBJECT_LOCK_COUNT ];&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125; OBJECT_TYPE, *POBJECT_TYPE;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;figure class=&#34;highlight c&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;kd&amp;gt; dt _OBJECT_TYPE&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ntdll!_OBJECT_TYPE&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x000&lt;/span&gt; Mutex            : _ERESOURCE&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x038&lt;/span&gt; TypeList         : _LIST_ENTRY&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x040&lt;/span&gt; Name             : _UNICODE_STRING&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x048&lt;/span&gt; DefaultObject    : Ptr32 Void&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x04c&lt;/span&gt; Index            : Uint4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x050&lt;/span&gt; TotalNumberOfObjects : Uint4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x054&lt;/span&gt; TotalNumberOfHandles : Uint4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x058&lt;/span&gt; HighWaterNumberOfObjects : Uint4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x05c&lt;/span&gt; HighWaterNumberOfHandles : Uint4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x060&lt;/span&gt; TypeInfo         : _OBJECT_TYPE_INITIALIZER&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x0ac&lt;/span&gt; Key              : Uint4B&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;   +&lt;span class=&#34;number&#34;&gt;0x0b0&lt;/span&gt; ObjectLocks      : [&lt;span class=&#34;number&#34;&gt;4&lt;/span&gt;] _ERESOURCE&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;&lt;strong&gt;系统定义的对象种类有限，WRK支持的31种对象，各有哟个全局的POBJECT_TYPE变量指向其类型对象：&lt;/strong&gt;&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;ObjectType:&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td&gt;CmpKeyObjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;DbgkDebugObjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExCallbackobjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExDesktopObjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExEventobjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExEventPairObjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExMutantObjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExpKeyedEventObjectType&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ExProfileObjectType&lt;/td&gt;
-&lt;/tr&gt;
-<p>
-		
-
-	
-
-	</div>
-  <a type="button" href="/2020/03/30/Windows内核对象/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h2 id="Windows内核对象管理"><a href="#Windows内核对象管理" class="headerlink" title="Windows内核对象管理"></a>Windows内核对象管理</h2><p><strong>Windows对象管理器的基本设计意图是：</strong></p>
-<p>-​ 为执行体的数据结构提供一种统一而又可扩展的定义和控制机制。</p>
-<p>​- 提供统一的安全访问机制。</p>
-<p>​- 在无须修改已有系统代码的情况下，加入新的对象类型。</p>
-<p>​- 提供一组标准的API来对对象执行各种操作。</p>
-<p>​- 提供一种命名机制，与文件系统的命名机制集成在一起。</p>
-<p>每一个对象由两部分构成：对象头和对象体。所有对象的对象头都具有统一的格式，其定义如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_CREATE_INFORMATION</span> *<span class="title">POBJECT_CREATE_INFORMATION</span>;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_HEADER</span> &#123;</span></span><br><span class="line">    LONG_PTR PointerCount;                        <span class="comment">//引用计数</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        LONG_PTR HandleCount;                    <span class="comment">//指向该对象的句柄数</span></span><br><span class="line">        PVOID NextToFree;                        <span class="comment">//对象被延迟删除时加入到一条链中</span></span><br><span class="line">    &#125;;</span><br><span class="line">    POBJECT_TYPE Type;                            <span class="comment">//指向对象的类型对象</span></span><br><span class="line">    UCHAR NameInfoOffset;                        <span class="comment">//名称信息的内存偏移</span></span><br><span class="line">    UCHAR HandleInfoOffset;                        <span class="comment">//句柄信息的内存偏移</span></span><br><span class="line">    UCHAR QuotaInfoOffset;                        <span class="comment">//配额信息的内存偏移</span></span><br><span class="line">    UCHAR Flags;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        POBJECT_CREATE_INFORMATION ObjectCreateInfo;</span><br><span class="line">        PVOID QuotaBlockCharged;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    PSECURITY_DESCRIPTOR SecurityDescriptor;    <span class="comment">//安全描述符</span></span><br><span class="line">    QUAD Body;                                    <span class="comment">//对象体开始</span></span><br><span class="line">&#125; OBJECT_HEADER, *POBJECT_HEADER;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dt _OBJECT_HEADER</span><br><span class="line">nt!_OBJECT_HEADER</span><br><span class="line">   +<span class="number">0x000</span> PointerCount     : Int4B</span><br><span class="line">   +<span class="number">0x004</span> HandleCount      : Int4B</span><br><span class="line">   +<span class="number">0x004</span> NextToFree       : Ptr32 Void</span><br><span class="line">   +<span class="number">0x008</span> Type             : Ptr32 _OBJECT_TYPE</span><br><span class="line">   +<span class="number">0x00c</span> NameInfoOffset   : UChar</span><br><span class="line">   +<span class="number">0x00d</span> HandleInfoOffset : UChar</span><br><span class="line">   +<span class="number">0x00e</span> QuotaInfoOffset  : UChar</span><br><span class="line">   +<span class="number">0x00f</span> Flags            : UChar</span><br><span class="line">   +<span class="number">0x010</span> ObjectCreateInfo : Ptr32 _OBJECT_CREATE_INFORMATION</span><br><span class="line">   +<span class="number">0x010</span> QuotaBlockCharged : Ptr32 Void</span><br><span class="line">   +<span class="number">0x014</span> SecurityDescriptor : Ptr32 Void</span><br><span class="line">   +<span class="number">0x018</span> Body             : _QUAD</span><br></pre></td></tr></table></figure>
-
-<p><strong>对象头包含了对象管理所需的基本信息，在Windows中，每一种对象都需要有一个对应的类型对象（OBJECT_TYPE对象），其定义为：</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJECT_LOCK_COUNT 4</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_TYPE</span> &#123;</span></span><br><span class="line">    ERESOURCE Mutex;</span><br><span class="line">    LIST_ENTRY TypeList;</span><br><span class="line">    UNICODE_STRING Name;            <span class="comment">// Copy from object header for convenience</span></span><br><span class="line">    PVOID DefaultObject;</span><br><span class="line">    ULONG Index;                    <span class="comment">// 此类型对象在全局数组中的索引</span></span><br><span class="line">    ULONG TotalNumberOfObjects;</span><br><span class="line">    ULONG TotalNumberOfHandles;</span><br><span class="line">    ULONG HighWaterNumberOfObjects;</span><br><span class="line">    ULONG HighWaterNumberOfHandles;</span><br><span class="line">    OBJECT_TYPE_INITIALIZER TypeInfo;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> POOL_TAGGING</span></span><br><span class="line">    ULONG Key;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span>                                 <span class="comment">//POOL_TAGGING</span></span></span><br><span class="line">    ERESOURCE ObjectLocks[ OBJECT_LOCK_COUNT ];</span><br><span class="line">&#125; OBJECT_TYPE, *POBJECT_TYPE;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dt _OBJECT_TYPE</span><br><span class="line">ntdll!_OBJECT_TYPE</span><br><span class="line">   +<span class="number">0x000</span> Mutex            : _ERESOURCE</span><br><span class="line">   +<span class="number">0x038</span> TypeList         : _LIST_ENTRY</span><br><span class="line">   +<span class="number">0x040</span> Name             : _UNICODE_STRING</span><br><span class="line">   +<span class="number">0x048</span> DefaultObject    : Ptr32 Void</span><br><span class="line">   +<span class="number">0x04c</span> Index            : Uint4B</span><br><span class="line">   +<span class="number">0x050</span> TotalNumberOfObjects : Uint4B</span><br><span class="line">   +<span class="number">0x054</span> TotalNumberOfHandles : Uint4B</span><br><span class="line">   +<span class="number">0x058</span> HighWaterNumberOfObjects : Uint4B</span><br><span class="line">   +<span class="number">0x05c</span> HighWaterNumberOfHandles : Uint4B</span><br><span class="line">   +<span class="number">0x060</span> TypeInfo         : _OBJECT_TYPE_INITIALIZER</span><br><span class="line">   +<span class="number">0x0ac</span> Key              : Uint4B</span><br><span class="line">   +<span class="number">0x0b0</span> ObjectLocks      : [<span class="number">4</span>] _ERESOURCE</span><br></pre></td></tr></table></figure>
-
-<p><strong>系统定义的对象种类有限，WRK支持的31种对象，各有哟个全局的POBJECT_TYPE变量指向其类型对象：</strong></p>
-<table>
-<thead>
-<tr>
-<th>ObjectType:</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>CmpKeyObjectType</td>
-</tr>
-<tr>
-<td>DbgkDebugObjectType</td>
-</tr>
-<tr>
-<td>ExCallbackobjectType</td>
-</tr>
-<tr>
-<td>ExDesktopObjectType</td>
-</tr>
-<tr>
-<td>ExEventobjectType</td>
-</tr>
-<tr>
-<td>ExEventPairObjectType</td>
-</tr>
-<tr>
-<td>ExMutantObjectType</td>
-</tr>
-<tr>
-<td>ExpKeyedEventObjectType</td>
-</tr>
-<tr>
-<td>ExProfileObjectType</td>
-</tr>
-<tr>
-<td>ExSemaphoreObjectType</td>
-</tr>
-<tr>
-<td>ExTimerObjectType</td>
-</tr>
-<tr>
-<td>ExWindowStationObjecType</td>
-</tr>
-<tr>
-<td>IoAdapterObjectType</td>
-</tr>
-<tr>
-<td>IoCompletionObjectType</td>
-</tr>
-<tr>
-<td>IoControllerObjectType</td>
-</tr>
-<tr>
-<td>IoDeviceHandlerObjectType</td>
-</tr>
-<tr>
-<td>IoDeviveObjectType</td>
-</tr>
-<tr>
-<td>IoDriverObjectType</td>
-</tr>
-<tr>
-<td>LpcPortObjectType</td>
-</tr>
-<tr>
-<td>LpcWaitablePortObjectType</td>
-</tr>
-<tr>
-<td>MmSectionObjectType</td>
-</tr>
-<tr>
-<td>ObpDeviceMapObjectType</td>
-</tr>
-<tr>
-<td>ObpDirectoryObjectType</td>
-</tr>
-<tr>
-<td>ObpSymbolicLinkObjectType</td>
-</tr>
-<tr>
-<td>ObpTypeobjectType</td>
-</tr>
-<tr>
-<td>PsJobType</td>
-</tr>
-<tr>
-<td>PsProcessType</td>
-</tr>
-<tr>
-<td>PsThreadType</td>
-</tr>
-<tr>
-<td>SeTokenObjectType</td>
-</tr>
-<tr>
-<td>WmipGuidObjectType</td>
-</tr>
-</tbody></table>
-<p><strong>系统在初始化过程中会调用ObCreateObjectType()函数构建起这种对象类型，以完成相应全局变量的初始化。</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NTSTATS</span></span><br><span class="line"><span class="function"><span class="title">ObCreateObjectType</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    __in PUNICODE_STRING Typename,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in POBJECT_TYPE_INITIALIZER ObjectTypeInitializer,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt PSECURITY_DESRIPTOR SecurityDescriptor,</span></span></span><br><span class="line"><span class="params"><span class="function">    __out POBJECT_TYPE *ObjectType</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">OBJECT_TYPE_INITIALIZER</span> &#123;</span></span><br><span class="line">    USHORT Length;</span><br><span class="line">    BOOLEAN UseDefaultObject;</span><br><span class="line">    BOOLEAN CaseInsensitive;</span><br><span class="line">    ULONG InvalidAttributes;</span><br><span class="line">    GENERIC_MAPPING GenericMapping;</span><br><span class="line">    ULONG ValidAccessMask;</span><br><span class="line">    BOOLEAN SecurityRequired;</span><br><span class="line">    BOOLEAN MaintainHandleCount;</span><br><span class="line">    BOOLEAN MaintainTypeList;</span><br><span class="line">    POOL_TYPE PoolType;</span><br><span class="line">    ULONG DefaultPagedPoolCharge;</span><br><span class="line">    ULONG DefaultNonPagedPoolCharge;</span><br><span class="line">    OB_DUMP_METHOD DumpProcedure;</span><br><span class="line">    OB_OPEN_METHOD OpenProcedure;</span><br><span class="line">    OB_CLOSE_METHOD CloseProcedure;</span><br><span class="line">    OB_DELETE_METHOD DeleteProcedure;</span><br><span class="line">    OB_PARSE_METHOD ParseProcedure;</span><br><span class="line">    OB_SECURITY_METHOD SecurityProcedure;</span><br><span class="line">    OB_QUERYNAME_METHOD QueryNameProcedure;</span><br><span class="line">    OB_OKAYTOCLOSE_METHOD OkayToCloseProcedure;</span><br><span class="line">&#125; OBJECT_TYPE_INITIALIZER, *POBJECT_TYPE_INITIALIZER;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dt _OBJECT_TYPE_INITIALIZER</span><br><span class="line">ntdll!_OBJECT_TYPE_INITIALIZER</span><br><span class="line">   +<span class="number">0x000</span> Length           : Uint2B</span><br><span class="line">   +<span class="number">0x002</span> UseDefaultObject : UChar</span><br><span class="line">   +<span class="number">0x003</span> CaseInsensitive  : UChar</span><br><span class="line">   +<span class="number">0x004</span> InvalidAttributes : Uint4B</span><br><span class="line">   +<span class="number">0x008</span> GenericMapping   : _GENERIC_MAPPING</span><br><span class="line">   +<span class="number">0x018</span> ValidAccessMask  : Uint4B</span><br><span class="line">   +<span class="number">0x01c</span> SecurityRequired : UChar</span><br><span class="line">   +<span class="number">0x01d</span> MaintainHandleCount : UChar</span><br><span class="line">   +<span class="number">0x01e</span> MaintainTypeList : UChar</span><br><span class="line">   +<span class="number">0x020</span> PoolType         : _POOL_TYPE</span><br><span class="line">   +<span class="number">0x024</span> DefaultPagedPoolCharge : Uint4B</span><br><span class="line">   +<span class="number">0x028</span> DefaultNonPagedPoolCharge : Uint4B</span><br><span class="line">   +<span class="number">0x02c</span> DumpProcedure    : Ptr32     <span class="keyword">void</span> </span><br><span class="line">   +<span class="number">0x030</span> OpenProcedure    : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x034</span> CloseProcedure   : Ptr32     <span class="keyword">void</span> </span><br><span class="line">   +<span class="number">0x038</span> DeleteProcedure  : Ptr32     <span class="keyword">void</span> </span><br><span class="line">   +<span class="number">0x03c</span> ParseProcedure   : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x040</span> SecurityProcedure : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x044</span> QueryNameProcedure : Ptr32     <span class="keyword">long</span> </span><br><span class="line">   +<span class="number">0x048</span> OkayToCloseProcedure : Ptr32     <span class="keyword">unsigned</span> <span class="keyword">char</span> </span><br></pre></td></tr></table></figure>
-
-<p>调用ObCreateObjectType函数来构建一种新的对象类型时，调用者除了可以指定此种类型对象的一些数据特性外，还可以指定该类型对象的一些基本操作方法。</p>
-<p>​系统有一个全局变量ObpObjectTypes数组记录所有已创建的类型，这是个静态数组。一旦对象类型被创建，以后内核代码就可以调用ObCreateObject来创建此种类型的对象了。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NTSTATUS</span></span><br><span class="line"><span class="function"><span class="title">ObCreateObject</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    __in KPROCESSOR_MODE ProbeMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in POBJECT_TYPE ObjectType,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in KPROCESSOR_MODE OwnershipMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    __inout_opt PVOID ParseContext,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG ObjectBodySize,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG PagedPoolCharge,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG NonPagedPoolCharge,</span></span></span><br><span class="line"><span class="params"><span class="function">    __out PVOID *Object</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>该函数返回时，Object输出参数指向对象体起始位置。对象体的格式是特定于某种对象类型的，由相应类型对象的诸多过程来维护。</p>
-<p>​对象管理器使用对象头中包含的信息来管理这些对象，在对象头中，除了对象名称和对象类型，另有两个重要的信息：指针计数，它记录了内核引用该对象的次数；句柄计数，它记录了有多少个句柄引用此对象，这些句柄可能出现在不同进程中。</p>
-<p>​类型对象并不需要为此种的对象提供所有在OBJECT_TYPE_INITIALIZER定义中出现的方法。对象管理器提供了一些通用的服务，这些通用服务可以应用在任何类型的对象上。</p>
-<p>​对象的构造是由两部分来完成的：1.调用ObCreateObject，根据指定的类型对象来完成对象头的初始化，并且按照指定的大小分配对象体的内存；2.完成对象体的初始化。前者可以统一完成，后者不可以，因为各种类型的对象体有自己不同的初始化逻辑。</p>
-<p>​    Windows也允许使用名称的方式来管理对象。为了做到这一点，Windows必须维护一套全局的名称查询机制。ObpDirectoryObjectType  类型对像是实现这一机制的关键。</p>
-<p>​    Windwos内部维护了一个对象层级目录（即系统全局名字空间），其根目录对象是由全局变量ObpRootDirectoryObject来定义的。在根目录之下，系统内置了一些子目录。在WRK中，通过查询NtCreateDirectoryObject函数被调用的情况，可以看到Callback、ArcName、Device、Driver、FileSystem、KernelObjects、ObjectTypes、GLOBAL??和Security子目录的创建过程。</p>
-<p>​    对象管理器提供了一些基本的操作用于在名字空间中插入、查询和删除目录或目录项。例如，</p>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>操作（以下三个函数都直接在一个子目录中进行操作）</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ObpLookupDirectoryEntry</td>
-<td>在一个指定的目录中查找一个名称</td>
-</tr>
-<tr>
-<td>ObpInsertDirectoryEntry</td>
-<td>把一个对象插入到一个目录中</td>
-</tr>
-<tr>
-<td>ObpDeleteDirectoryEntry</td>
-<td>删除刚刚找到的那一项</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>操作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ObpLookupObjectName</td>
-<td>可以从指定的目录或根目录，递归地根据名称来找到一个对象。</td>
-</tr>
-</tbody></table>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NTSTATUS</span></span><br><span class="line"><span class="function"><span class="title">ObpLookupObjectName</span> <span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    IN HANDLE RootDirectoryHandle,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PUNICODE_STRING ObjectName,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN ULONG Attributes,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN POBJECT_TYPE ObjectType,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN KPROCESSOR_MODE AccessMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PVOID ParseContext OPTIONAL,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PSECURITY_QUALITY_OF_SERVICE SecurityQos OPTIONAL,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN PVOID InsertObject OPTIONAL,</span></span></span><br><span class="line"><span class="params"><span class="function">    IN OUT PACCESS_STATE AccessState,</span></span></span><br><span class="line"><span class="params"><span class="function">    OUT POBP_LOOKUP_CONTEXT LookupContext,</span></span></span><br><span class="line"><span class="params"><span class="function">    OUT PVOID *FoundObject</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p><strong>其基本的执行逻辑：</strong></p>
-<p>​    参数检查。</p>
-<p>​    如果调用者指定了RootDirectoryHandle参数，则利用此RootDirectory的Parse方法来解析对象名称，直到解析成功或者不成功，或者指示从头解析</p>
-<p>​    如果调用者没有指定RootDirectoryHandle参数，则系统从全局的根目录ObpRootDirectoryObject开始解析。在这种情况下，传递进来的对象名称必须以“\”开始。如果待查找的名称仅仅是“\”，则执行特殊处理。否则，执行：    </p>
-<p>​        1.首先判断名称是否以“??\”打头，如果是的话，就需要拿到当前进程的DeviceMap（设备表），以进一步查询。</p>
-<p>​        2.如果名称正好是”??”，则直接返回当前进程的DeviceMap作为结果。（DeviceMap定义了一个DOS设备的名字空间，比如驱动器字母C: D:）和一些外设（如COM1）。当对象管理器看到一个以“??\”打头的名称或者像“??”这样的名称，它会利用进程的DeviceMap来获得相应的对象目录，然后进一步解析剩余的名称字符串。）</p>
-<p>​        3.调用ObpLookupDirectoryEntry函数，层层递进，或者碰到具有Parse方法的对象，由它来解析余下的名称字符串，或者碰到子目录对象，从而可以在子目录对象中进一步查询下一级名称。</p>
-<p>​    对象管理器的两个接口函数：ObOpenObjectByName和ObReferenceObjectByName，正是通过ObpLookupObjectName来完成其打开对象或引用对象的功能的。ObInsertObject，它的作用是把一个对象插入到一个进程的句柄表中，也通过ObpLookupObjectName函数来验证待插入的对象是否在全局名字空间中</p>
-<p>​    对象管理器中的对象是执行体对象，他们位于系统地址空间中，因而所有的进程都可以访问这些对象。但是用户模式的代码只能通过系统调用和句柄表来引用执行体对象。内核中将一个句柄转化为相应的对象，可以通过ObReferenceObjectByHandle函数来完成。该函数负责从当前进程环境或内核环境的句柄表中获得指定的对象引用。</p>
-<p>​    对象是通过引用计数来管理其生命周期的，一旦引用计数为0，则对象生命周期结束，它所占用的内存也可以被回收。</p>
-
-	
-	</div>
-  <a type="button" href="/2020/03/30/Windows内核对象/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -2404,35 +2065,35 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
-		
-			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
-		
-			<li><a href="/tags/CPU/">CPU<span>3</span></a></li>
-		
 			<li><a href="/tags/符号执行/">符号执行<span>1</span></a></li>
-		
-			<li><a href="/tags/python/">python<span>2</span></a></li>
 		
 			<li><a href="/tags/漏洞分析/">漏洞分析<span>5</span></a></li>
 		
-			<li><a href="/tags/ARM/">ARM<span>2</span></a></li>
+			<li><a href="/tags/windows内核/">windows内核<span>5</span></a></li>
 		
-			<li><a href="/tags/恶意代码分析/">恶意代码分析<span>1</span></a></li>
+			<li><a href="/tags/python/">python<span>2</span></a></li>
+		
+			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+		
+			<li><a href="/tags/正则表达式/">正则表达式<span>1</span></a></li>
 		
 			<li><a href="/tags/Android/">Android<span>1</span></a></li>
 		
+			<li><a href="/tags/软件调试/">软件调试<span>2</span></a></li>
+		
 			<li><a href="/tags/fuzzing/">fuzzing<span>1</span></a></li>
 		
-			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
+			<li><a href="/tags/ARM/">ARM<span>2</span></a></li>
 		
 			<li><a href="/tags/CTF/">CTF<span>1</span></a></li>
 		
 			<li><a href="/tags/unix/">unix<span>2</span></a></li>
 		
-			<li><a href="/tags/软件调试/">软件调试<span>2</span></a></li>
+			<li><a href="/tags/CPU/">CPU<span>4</span></a></li>
 		
-			<li><a href="/tags/CTF-Writeup/">CTF,Writeup<span>2</span></a></li>
+			<li><a href="/tags/恶意代码分析/">恶意代码分析<span>1</span></a></li>
+		
+			<li><a href="/tags/算法与数据结构/">算法与数据结构<span>3</span></a></li>
 		
 		 
 		</ul>
@@ -2446,6 +2107,14 @@
   <ul class="entry list-unstyled">
     
       <li>
+        <a href="/2023/02/14/CPU乱序执行/" ><i class="fa fa-file-o"></i>CPU乱序执行</a>
+      </li>
+    
+      <li>
+        <a href="/2021/11/13/unicorn分析/" ><i class="fa fa-file-o"></i>unicorn分析</a>
+      </li>
+    
+      <li>
         <a href="/2021/09/30/一个加密木马的分析/" ><i class="fa fa-file-o"></i>一个加密木马的分析</a>
       </li>
     
@@ -2455,14 +2124,6 @@
     
       <li>
         <a href="/2021/09/17/Windbg用法/" ><i class="fa fa-file-o"></i>Windbg用法</a>
-      </li>
-    
-      <li>
-        <a href="/2021/09/09/遇到hexo莫名其妙的bug/" ><i class="fa fa-file-o"></i>遇到hexo莫名其妙的bug</a>
-      </li>
-    
-      <li>
-        <a href="/2021/09/07/CVE-2021-3156分析/" ><i class="fa fa-file-o"></i>CVE-2021-3156分析</a>
       </li>
     
   </ul>
@@ -2492,7 +2153,7 @@
   <div class="container-narrow">
   <footer> <p>
   
-  &copy; 2021 P1AIN0&#39;S BLOG
+  &copy; 2023 P1AIN0&#39;S BLOG
   
       powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
 </p>
